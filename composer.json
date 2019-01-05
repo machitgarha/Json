@@ -1,0 +1,24 @@
+{
+    "name": "machitgarha/json",
+    "description": "",
+    "authors": [
+        {
+            "name": "Mohammad Amin Chitgarha",
+            "email": "machitgarha@outlook.com",
+            "homepage": "https://github.com/machitgarha",
+            "role": "Creator"
+        }
+    ],
+    "homepage": "https://github.com/machitgarha/json",
+    "keywords": ["json"],
+    "license": "MIT",
+    "readme": "README.md",
+    "require": {
+        "php": "^7.0",
+        "ext-json": "*"
+    },
+    "suggest": {
+
+    },
+    "type": "library"
+}
