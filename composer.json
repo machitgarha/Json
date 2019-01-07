@@ -20,5 +20,10 @@
     "suggest": {
 
     },
+    "autoload": {
+        "psr-4": {
+            "MAChitgarha\\": "src"
+        }
+    },
     "type": "library"
 }
