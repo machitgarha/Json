@@ -6,9 +6,6 @@
  */
 namespace MAChitgarha\Component;
 
-use Zend\Json\Exception\InvalidArgumentException;
-
-
 /**
  * Handles JSON data type.
  * 
@@ -19,7 +16,7 @@ use Zend\Json\Exception\InvalidArgumentException;
  */
 class JSON
 {
-    /** @var string Holds JSON data as a native PHP data (either object or array) */
+    /** @var array|object Holds JSON data as a native PHP data (either object or array) */
     protected $data;
 
     // Data types
@@ -225,7 +222,7 @@ class JSON
         // At the last index, so, setting the value
         if (count($indexes) === 0) {
             $this->setIndex($currentIndex, $data, $value);
-            return;
+            return $this;
         // Recurse on remained indexes
         } else {
             /*
@@ -250,8 +247,6 @@ class JSON
             $data = &$this->getIndexByReference($currentIndex, $data);
             $this->setIndexesRecursive($indexes, $value, $data, $indexingType);
         }
-
-        return $this;
     }
 
     /**
