@@ -208,8 +208,8 @@ class JSON
      * @param integer $indexingType The type of the value to create an undefined index.
      * Possible values are: TYPE_ARRAY, TYPE_OBJECT, STRICT_INDEXING
      * @return self
-     * @throws \InvalidArgumentException If the generation type is wrong
-     * @throws \Exception I
+     * @throws \InvalidArgumentException If the $indexingType is wrong.
+     * @throws \Exception If any of the index parts is not existed, when $indexingType is STRICT_INDEXING.
      */
     protected function setIndexesRecursive(
         array $indexes,
@@ -217,6 +217,14 @@ class JSON
         &$data,
         int $indexingType = self::TYPE_ARRAY
     ) {
+        // Validate indexing type
+        if (!in_array($indexingType, [
+            self::TYPE_ARRAY,
+            self::TYPE_OBJECT,
+            self::STRICT_INDEXING
+        ]))
+            throw new \InvalidArgumentException("Wrong indexing type");
+
         // Get the current index, and remove it from indexes
         $currentIndex = array_shift($indexes);
         // At the last index, so, setting the value
@@ -227,7 +235,7 @@ class JSON
         } else {
             /*
              * If the current index does not exist, set it to an empty array or an object based on
-             * generation type. After making sure that the index exists, change the reference of the
+             * indexing type. After making sure that the index exists, change the reference of the
              * data to the data index, for recursion.
              */
             if ($this->getIndex($currentIndex, $data) === null)
@@ -240,8 +248,7 @@ class JSON
                         break;
                     case self::STRICT_INDEXING:
                         throw new \Exception("Index '$currentIndex' is not defined");
-                    default:
-                        throw new \InvalidArgumentException("Wrong generation type");
+                    // Default case is checked at first
                 }
 
             $data = &$this->getIndexByReference($currentIndex, $data);
@@ -281,13 +288,13 @@ class JSON
      *
      * @param string $index The index. It may contain dots for crawling deep indexes (like JavaScript).
      * @param mixed $value The value to be set.
-     * @param integer $newIndexType The type of the value to create an undefined index part. It can be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to get exceptions when reaching an undefined index, i.e. all indexes, except the last one, must exist.
+     * @param integer $indexingType The type of the value to create an undefined index part. It can be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to get exceptions when reaching an undefined index, i.e. all indexes, except the last one, must exist.
      * @return self
      */
-    public function set(string $index, $value, int $newIndexType = self::TYPE_ARRAY)
+    public function set(string $index, $value, int $indexingType = self::TYPE_ARRAY)
     {
         $delimitedIndex = $this->extractIndexParts($index);
-        $this->setIndexesRecursive($delimitedIndex, $value, $this->data, $newIndexType);
+        $this->setIndexesRecursive($delimitedIndex, $value, $this->data, $indexingType);
         return $this;
     }
 

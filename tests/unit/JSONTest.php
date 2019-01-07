@@ -19,9 +19,15 @@ use MAChitgarha\Component\JSON;
  */
 class InvalidArgumentExceptionTest extends TestCase
 {
+    /** @var JSON */
+    protected $json;
+
     protected function setUp()
     {
         $this->expectException(\InvalidArgumentException::class);
+
+        // Set up fixtures
+        $this->json = new JSON([]);
     }
 
     public function testBooleanAsData()
@@ -67,5 +73,20 @@ class InvalidArgumentExceptionTest extends TestCase
     public function testInvalidJsonAsData5()
     {
         new JSON("[0: 2]");
+    }
+
+    public function testInvalidTypeRequest()
+    {
+        $this->json->getData(JSON::STRICT_INDEXING);
+    }
+
+    public function testWrongIndexingType()
+    {
+        $this->json->set("key", "val", JSON::TYPE_DEFAULT);
+    }
+
+    public function testWrongIndexingType2()
+    {
+        $this->json->set("key", "val", JSON::TYPE_JSON);
     }
 }
