@@ -25,5 +25,8 @@
             "MAChitgarha\\": "src"
         }
     },
-    "type": "library"
+    "type": "library",
+    "require-dev": {
+        "phpunit/phpunit": "^7.4"
+    }
 }
