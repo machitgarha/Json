@@ -75,4 +75,23 @@ class PublicMethodsTest extends TestCase
             ["", "An empty key (index)"]
         ];
     }
+
+    /**
+     * Tests JSON::iterate() method.
+     */
+    public function testIterateMethod()
+    {
+        $json = new JSON(new \stdClass());
+        $json->set("apps.browsers", [
+            "Firefox",
+            "Chrome",
+            "Safari",
+            "Opera",
+            "Edge"
+        ]);
+        
+        // Check for equality
+        foreach ($json->iterate("apps.browsers") as $i => $browserName);
+            $this->assertEquals($browserName, $json->get("apps.browsers.$i"));
+    }
 }
