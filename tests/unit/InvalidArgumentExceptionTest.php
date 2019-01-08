@@ -68,6 +68,7 @@ class InvalidArgumentExceptionTest extends TestCase
 
     /**
      * Calling a method with bad arguments.
+     * @todo Create a test for each method call, statically.
      * @dataProvider badMethodCallProvider
      */
     public function testMethodCall(string $methodName, array $arguments)
