@@ -19,8 +19,29 @@ use MAChitgarha\Component\JSON;
  */
 class PublicMethodsTest extends TestCase
 {
-    /** Test JSON::getData() and JSON::getDataAs*() methods. */
-    public function testGetData()
+    /** @var JSON[] */
+    protected $jsons = [];
+
+    protected function setUp()
+    {
+        $this->jsons = [
+            new JSON([new \stdClass()])
+        ];
+    }
+
+    /**
+     * Test for equality, using providers.
+     * @dataProvider getDataMethodsProvider
+     */
+    public function testAssertEquals($expected, $actual)
+    {
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Provider for JSON::getData() and JSON::getData*() methods.
+     */
+    public function getDataMethodsProvider()
     {
         $data = [new \stdClass()];
         $json = new JSON($data);
@@ -30,15 +51,17 @@ class PublicMethodsTest extends TestCase
         $asObject = (object)[(object)[]];
         $asArray = [[]];
 
-        // JSON::getData() assertions
-        $this->assertEquals($data, $json->getData(JSON::TYPE_DEFAULT));
-        $this->assertEquals($asJson, $json->getData(JSON::TYPE_JSON));
-        $this->assertEquals($asObject, $json->getData(JSON::TYPE_OBJECT));        
-        $this->assertEquals($asArray, $json->getData(JSON::TYPE_ARRAY));
-
-        // JSON::getDataAs*() assertions
-        $this->assertEquals($asJson, $json->getDataAsJson());
-        $this->assertEquals($asArray, $json->getDataAsArray());
-        $this->assertEquals($asObject, $json->getDataAsObject());
+        return [
+            // JSON::getData() assertions
+            [$data, $json->getData(JSON::TYPE_DEFAULT)],
+            [$asJson, $json->getData(JSON::TYPE_JSON)],
+            [$asObject, $json->getData(JSON::TYPE_OBJECT)],        
+            [$asArray, $json->getData(JSON::TYPE_ARRAY)],
+    
+            // JSON::getDataAs*() assertions
+            [$asJson, $json->getDataAsJson()],
+            [$asArray, $json->getDataAsArray()],
+            [$asObject, $json->getDataAsObject()],    
+        ];
     }
 }
