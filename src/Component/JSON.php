@@ -28,7 +28,7 @@ class JSON
     const TYPE_OBJECT = 2;
     /** @var int The data as an array */
     const TYPE_ARRAY = 3;
-    /** @var int In crawling indexes, an index must be existed, otherwise, an exception will be thrown. */
+    /** @var int In crawling keys, a key must be existed, otherwise, an exception will be thrown. */
     const STRICT_INDEXING = 4;
 
     /**
@@ -120,99 +120,99 @@ class JSON
     }
 
     /**
-     * Gets an index from a data based on the data type.
+     * Gets a key from a data based on the data type.
      *
-     * @param string $index The index.
+     * @param string $key The key.
      * @param array|object $data The data to search in.
-     * @return mixed Return the value, and if the data is not an array or object or the index does not exists, return null.
+     * @return mixed Return the value of the key in data, and if the data is not an array or object or the key does not exists, return null.
      */
-    protected function getIndex(string $index, $data)
+    protected function getKey(string $key, $data)
     {
         if (is_array($data))
-            return $data[$index] ?? null;
+            return $data[$key] ?? null;
         if (is_object($data))
-            return $data->$index ?? null;
+            return $data->$key ?? null;
         // If data is neither array nor object
         return null;
     }
 
     /**
-     * Sets an index to a value in a data. 
+     * Sets a key to a value in a data. 
      *
-     * @param string $index The index.
+     * @param string $key The key.
      * @param array|object $data The data to be modified.
      * @param mixed $value The value to be set.
      * @return void
      * @throws \InvalidArgumentException If $data is neither an array nor an object.
      */
-    protected function setIndex(string $index, &$data, $value)
+    protected function setKey(string $key, &$data, $value)
     {
         if (is_array($data))
-            $data[$index] = $value;
+            $data[$key] = $value;
         elseif (is_object($data))
-            $data->$index = $value;
+            $data->$key = $value;
         else
             throw new \InvalidArgumentException("Data must be either an array or an object");
     }
 
     /**
-     * Returns value of an index in a data by reference.
-     * Returns value of an index in a data by reference. If the index is does not exist, sets it to null before returning.
+     * Returns a key by reference.
+     * Returns the value of a key in a data by reference. If the key does not exist, sets it to null before returning.
      *
-     * @param string $index The index.
+     * @param string $key The key.
      * @param array|object $data The data to search in.
-     * @return mixed The value of the data index by reference.
+     * @return mixed The value of the key in the data by reference.
      * @throws \InvalidArgumentException When data is neither an array nor an object.
      */
-    protected function &getIndexByReference(string $index, &$data)
+    protected function &getKeyByReference(string $key, &$data)
     {
         if (is_array($data)) {
-            if (!isset($data[$index]))
-                $data[$index] = null;
-            return $data[$index];
+            if (!isset($data[$key]))
+                $data[$key] = null;
+            return $data[$key];
         } elseif (is_object($data)) {
-            if (!isset($data->$index))
-                $data->$index = null;
-            return $data->$index;
+            if (!isset($data->$key))
+                $data->$key = null;
+            return $data->$key;
         } else
             throw new \InvalidArgumentException("Wrong data type");
     }
 
     /**
-     * Gets the value of indexes in a data recursively.
+     * Gets the value of keys in a data recursively.
      * 
-     * @param array $indexes The indexes.
-     * @param mixed $data The data to crawl indexes in it.
-     * @return mixed The found value of indexes. Returns null if one of indexes cannot be found.
+     * @param array $keys The keys.
+     * @param mixed $data The data to crawl keys in it.
+     * @return mixed The found value of keys. Returns null if one of keys cannot be found.
      */
-    protected function getIndexesRecursive(array $indexes, $data)
+    protected function getKeysRecursive(array $keys, $data)
     {
-        $indexesCount = count($indexes);
-        // The end of recursion, crawling indexes has finished
-        if ($indexesCount === 0)
+        $keysCount = count($keys);
+        // The end of the recursion, crawling keys has finished
+        if ($keysCount === 0)
             return $data;
-        // Get indexes recursively
+        // Crawl keys recursively
         else {
-            // Get the current index, and remove it from indexes
-            $currentIndex = array_shift($indexes);
-            return $this->getIndexesRecursive($indexes, $this->getIndex($currentIndex, $data));
+            // Get the current key, and remove it from keys array
+            $currentKey = array_shift($keys);
+            return $this->getKeysRecursive($keys, $this->getKey($currentKey, $data));
         }
     }
 
      /**
-     * Sets the value of indexes in a data recursively.
+     * Sets the value of keys in a data recursively.
      *
-     * @param array $indexes The indexes.
+     * @param array $keys The keys.
      * @param mixed $value The value to set.
-     * @param mixed $data The data to crawl indexes in it.
-     * @param integer $indexingType The type of the value to create an undefined index.
+     * @param mixed $data The data to crawl keys in it.
+     * @param integer $indexingType The type of the value to set when reaching an undefined key.
      * Possible values are: TYPE_ARRAY, TYPE_OBJECT, STRICT_INDEXING
      * @return self
      * @throws \InvalidArgumentException If the $indexingType is wrong.
-     * @throws \Exception If any of the index parts is not existed, when $indexingType is STRICT_INDEXING.
+     * @throws \Exception If any of the keys is not existed, when $indexingType is STRICT_INDEXING.
      */
-    protected function setIndexesRecursive(
-        array $indexes,
+    protected function setKeysRecursive(
+        array $keys,
         $value,
         &$data,
         int $indexingType = self::TYPE_ARRAY
@@ -225,48 +225,48 @@ class JSON
         ]))
             throw new \InvalidArgumentException("Wrong indexing type");
 
-        // Get the current index, and remove it from indexes
-        $currentIndex = array_shift($indexes);
-        // At the last index, so, setting the value
-        if (count($indexes) === 0) {
-            $this->setIndex($currentIndex, $data, $value);
+        // Get the current key, and remove it from keys array
+        $currentKey = array_shift($keys);
+        // Reached the last key, so, setting the value
+        if (count($keys) === 0) {
+            $this->setKey($currentKey, $data, $value);
             return $this;
-        // Recurse on remained indexes
+        // Recurse on remained keys
         } else {
             /*
-             * If the current index does not exist, set it to an empty array or an object based on
-             * indexing type. After making sure that the index exists, change the reference of the
-             * data to the data index, for recursion.
+             * If the current key does not exist, set it to an empty array or an object based on
+             * indexing type. After making sure that the key exists, change the reference of the
+             * data to the data key, for next recursion.
              */
-            if ($this->getIndex($currentIndex, $data) === null)
+            if ($this->getKey($currentKey, $data) === null)
                 switch ($indexingType) {
                     case self::TYPE_ARRAY:
-                        $this->setIndex($currentIndex, $data, array());
+                        $this->setKey($currentKey, $data, array());
                         break;
                     case self::TYPE_OBJECT:
-                        $this->setIndex($currentIndex, $data, new \stdClass());
+                        $this->setKey($currentKey, $data, new \stdClass());
                         break;
                     case self::STRICT_INDEXING:
-                        throw new \Exception("Index '$currentIndex' is not defined");
+                        throw new \Exception("Key '$currentKey' is not defined");
                     // Default case is checked at first
                 }
 
-            $data = &$this->getIndexByReference($currentIndex, $data);
-            $this->setIndexesRecursive($indexes, $value, $data, $indexingType);
+            $data = &$this->getKeyByReference($currentKey, $data);
+            $this->setKeysRecursive($keys, $value, $data, $indexingType);
         }
     }
 
     /**
-     * Extract parts of an index into an array divided by the delimiter.
+     * Extract keys from an index into an array by the delimiter.
      *
      * @param string $index The index.
      * @param string $delimiter The delimiter.
-     * @return array The extracted parts of the index, and an empty array if the index is an empty string.
+     * @return array The extracted keys.
      */
-    protected function extractIndexParts(string $index, string $delimiter = "."): array
+    protected function extractKeysFromIndex(string $index, string $delimiter = "."): array
     {
-        if (empty($index))
-            return [];
+        if ($index === "")
+            return [""];
 
         // Explode index parts by $delmiter
         return explode($delimiter, $index);
@@ -275,33 +275,33 @@ class JSON
     /**
      * Gets the value of an index in the data.
      *
-     * @param string $index The index. It may contain dots for crawling deep indexes (like JavaScript).
+     * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
      * @return mixed The value of the index. Returns null if the index not found.
      */
     public function get(string $index)
     {
-        return $this->getIndexesRecursive($this->extractIndexParts($index), $this->data);
+        return $this->getKeysRecursive($this->extractKeysFromIndex($index), $this->data);
     }
 
     /**
      * Sets the value to an index in the data.
      *
-     * @param string $index The index. It may contain dots for crawling deep indexes (like JavaScript).
+     * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
      * @param mixed $value The value to be set.
-     * @param integer $indexingType The type of the value to create an undefined index part. It can be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to get exceptions when reaching an undefined index, i.e. all indexes, except the last one, must exist.
+     * @param integer $indexingType The type of the value to set when reaching an undefined key. It can be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to get exceptions when reaching an undefined key; i.e. all keys, except the last one, must exist.
      * @return self
      */
     public function set(string $index, $value, int $indexingType = self::TYPE_ARRAY)
     {
-        $delimitedIndex = $this->extractIndexParts($index);
-        $this->setIndexesRecursive($delimitedIndex, $value, $this->data, $indexingType);
+        $delimitedIndex = $this->extractKeysFromIndex($index);
+        $this->setKeysRecursive($delimitedIndex, $value, $this->data, $indexingType);
         return $this;
     }
 
     /**
      * Determines if an index exists or not.
      *
-     * @param string $index
+     * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
      * @return boolean
      */
     public function isSet(string $index)
@@ -312,7 +312,7 @@ class JSON
     /**
      * Iterates over a data index.
      *
-     * @param string $index The index.
+     * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
      * @return iterable
      * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor an object).
      */

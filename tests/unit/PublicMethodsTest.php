@@ -19,28 +19,16 @@ use MAChitgarha\Component\JSON;
  */
 class PublicMethodsTest extends TestCase
 {
-    /** @var JSON[] */
-    protected $jsons = [];
-
-    protected function setUp()
-    {
-        $this->jsons = [
-            new JSON([new \stdClass()])
-        ];
-    }
-
     /**
-     * Test for equality, using providers.
+     * Tests JSON::getData*() methods.
      * @dataProvider getDataMethodsProvider
      */
-    public function testAssertEquals($expected, $actual)
+    public function testGetData($expected, $actual)
     {
         $this->assertEquals($expected, $actual);
     }
 
-    /**
-     * Provider for JSON::getData() and JSON::getData*() methods.
-     */
+    /** Provider for JSON::getData() and JSON::getData*() methods. */
     public function getDataMethodsProvider()
     {
         $data = [new \stdClass()];
@@ -62,6 +50,29 @@ class PublicMethodsTest extends TestCase
             [$asJson, $json->getDataAsJson()],
             [$asArray, $json->getDataAsArray()],
             [$asObject, $json->getDataAsObject()],    
+        ];
+    }
+
+    /**
+     * Tests JSON set and get methods.
+     * @dataProvider setAndGetMethodsProvider
+     */
+    public function testSetAndGetMethods(string $index, $value, $indexingType = JSON::TYPE_ARRAY)
+    {
+        $json = new JSON();
+
+        $json->set($index, $value, $indexingType);
+        $this->assertEquals($value, $json->get($index));
+    }
+
+    /** Provider for JSON::get() and JSON::set() methods. */
+    public function setAndGetMethodsProvider()
+    {
+        return [
+            [0, []],
+            ["id", 14],
+            ["error.type", "Exception"],
+            ["", "An empty key (index)"]
         ];
     }
 }
