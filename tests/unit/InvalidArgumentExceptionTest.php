@@ -16,7 +16,6 @@ use MAChitgarha\Component\JSON;
 
 /**
  * Expect \InvalidArgumentException in all of these tests.
- * @todo Use providers.
  */
 class InvalidArgumentExceptionTest extends TestCase
 {
@@ -31,63 +30,57 @@ class InvalidArgumentExceptionTest extends TestCase
         $this->json = new JSON([]);
     }
 
-    public function testBooleanAsData()
+    /**
+     * Tests invalid data.
+     * Tests invalid data types and some invalid JSON strings.
+     * @todo Import JSON schema.
+     * @dataProvider dataTypeProvider
+     * @dataProvider invalidJsonProvider
+     */
+    public function testInvalidData($data)
     {
-        new JSON(true);
+        new JSON($data);
     }
 
-    public function testIntegerAsData()
+    public function dataTypeProvider()
     {
-        new JSON(2);
+        return [
+            [null],
+            [true],
+            [1234],
+            [M_PI],
+            ["no"],
+            // Resources are not valid
+            [fopen(__FILE__, "r")]
+        ];
     }
 
-    public function testFloatAsData()
+    public function invalidJsonProvider()
     {
-        new JSON(M_PI);
+        return [
+            ["[] // Commenting"],
+            ["{'user_id':1234}"],
+            ["[function () {}]"],
+            ["{color: \"red\"}"],
+            ["[0,1,2,3,4,5,6,]"],
+        ];
     }
 
-    public function testSimpleStringAsData()
+    /**
+     * Calling a method with bad arguments.
+     * @dataProvider badMethodCallProvider
+     */
+    public function testMethodCall(string $methodName, array $arguments)
     {
-        new JSON("String");
+        $this->json->$methodName(...$arguments);
     }
 
-    public function testInvalidJsonAsData()
+    public function badMethodCallProvider()
     {
-        new JSON("[] // Comment");
-    }
-
-    public function testInvalidJsonAsData2()
-    {
-        new JSON("{'id': 0}");
-    }
-
-    public function testInvalidJsonAsData3()
-    {
-        new JSON("[function () {}]");
-    }
-
-    public function testInvalidJsonAsData4()
-    {
-        new JSON("{color: \"red\"}");
-    }
-
-    public function testInvalidJsonAsData5()
-    {
-        new JSON("[0: 2]");
-    }
-
-    public function testInvalidTypeRequest()
-    {
-        $this->json->getData(JSON::STRICT_INDEXING);
-    }
-
-    public function testWrongIndexingType()
-    {
-        $this->json->set("key", "val", JSON::TYPE_DEFAULT);
-    }
-
-    public function testWrongIndexingType2()
-    {
-        $this->json->set("key", "val", JSON::TYPE_JSON);
+        return [
+            ["getData", [JSON::STRICT_INDEXING]],
+            ["set", ["key", "val", JSON::TYPE_DEFAULT]],
+            ["set", ["key", "val", JSON::TYPE_JSON]],
+        ];
     }
 }
