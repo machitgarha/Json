@@ -5,7 +5,7 @@
  *
  * Go to the project's root and run the tests in this way:
  * phpunit --bootstrap vendor/autoload.php tests/unit
- * Recommended: Use the --repeat option (with the value of 10) to run all possible cases.
+ * Using the --repeat option is recommended.
  * 
  * @see MAChitgarha\Component\JSON
  */
