@@ -13,6 +13,7 @@ namespace MAChitgarha\Component;
  * 
  * @see https://github.com/MAChitgarha/JSON
  * @todo Extend from \ArrayObject.
+ * @todo Add a count() method to count number of values in a countable index.
  */
 class JSON
 {
