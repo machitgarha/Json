@@ -15,9 +15,8 @@ namespace MAChitgarha\Component;
  * Gets a JSON string or a PHP native array or object and handles it as a JSON data.
  * 
  * @see https://github.com/MAChitgarha/JSON/wiki
+ * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
  * @todo Import all methods from \ArrayObject.
- * @todo Create a glossary defining all definitions.
- * @todo Implement ArrayAccess.
  */
 class JSON implements \ArrayAccess
 {
@@ -86,7 +85,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns data as JSON.
+     * Returns data as a JSON string.
      *
      * @param int $options The options, like JSON_PRETTY_PRINT. {@link http://php.net/json.constants}
      * @return string
@@ -129,7 +128,7 @@ class JSON implements \ArrayAccess
      *
      * @param string $key The key.
      * @param array|object $data The data to search in.
-     * @return mixed Return the value of the key in data, and if the data is not an array or object or the key does not exists, return null.
+     * @return mixed Return the value of the key in data, and if the data is not countable or the key does not exists, return null.
      */
     protected function getKey(string $key, $data)
     {
@@ -148,7 +147,7 @@ class JSON implements \ArrayAccess
      * @param array|object $data The data to be modified.
      * @param mixed $value The value to be set.
      * @return void
-     * @throws \InvalidArgumentException If $data is neither an array nor an object.
+     * @throws \InvalidArgumentException If $data is not countable.
      */
     protected function setKey(string $key, &$data, $value)
     {
@@ -157,7 +156,7 @@ class JSON implements \ArrayAccess
         elseif (is_object($data))
             $data->$key = $value;
         else
-            throw new \InvalidArgumentException("Data must be either an array or an object");
+            throw new \InvalidArgumentException("Data must be countable");
     }
 
     /**
@@ -167,7 +166,7 @@ class JSON implements \ArrayAccess
      * @param string $key The key.
      * @param array|object $data The data to search in.
      * @return mixed The value of the key in the data by reference.
-     * @throws \InvalidArgumentException When data is neither an array nor an object.
+     * @throws \InvalidArgumentException When data is not countable.
      */
     protected function &getKeyByReference(string $key, &$data)
     {
@@ -239,7 +238,7 @@ class JSON implements \ArrayAccess
         // Recurs on remained keys
         } else {
             /*
-             * If the current key does not exist, set it to an empty array or an object based on
+             * If the current key does not exist, set it to an empty countable element based on
              * indexing type. After making sure that the key exists, change the reference of the
              * data to the data key, for next recursion.
              */
@@ -315,7 +314,7 @@ class JSON implements \ArrayAccess
     }
     
     /**
-     * Iterates over a data index.
+     * Iterates over an element.
      *
      * @param ?string $index The index.
      * @return iterable
@@ -371,7 +370,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Counts all elements in an index.
+     * Counts all elements in a countable element.
      *
      * @param ?string $index The index. Pass null if you want to get number of elements in the data.
      * @return int The elements number of the index.
