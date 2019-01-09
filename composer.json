@@ -1,6 +1,6 @@
 {
     "name": "machitgarha/json",
-    "description": "",
+    "description": "Manages your JSON data easily",
     "authors": [
         {
             "name": "Mohammad Amin Chitgarha",
@@ -10,7 +10,12 @@
         }
     ],
     "homepage": "https://github.com/machitgarha/json",
-    "keywords": ["json"],
+    "keywords": [
+        "json",
+        "php7",
+        "array",
+        "object"
+    ],
     "license": "MIT",
     "readme": "README.md",
     "require": {
