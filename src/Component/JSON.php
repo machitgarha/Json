@@ -1,7 +1,10 @@
 <?php
 /**
- * The summary of the file
+ * JSON class file.
  * 
+ * @author Mohammad Amin Chitgarha <machitgarha@outlook.com>
+ * @see https://github.com/MAChitgarha/JSON
+ * @see https://packagist.org/packages/machitgarha/json
  */
 
 namespace MAChitgarha\Component;
@@ -11,7 +14,7 @@ namespace MAChitgarha\Component;
  * 
  * Gets a JSON string or a PHP native array or object and handles it as a JSON data.
  * 
- * @see https://github.com/MAChitgarha/JSON
+ * @see https://github.com/MAChitgarha/JSON/wiki
  * @todo Extend from \ArrayObject.
  * @todo Add a count() method to count number of values in a countable index.
  */
