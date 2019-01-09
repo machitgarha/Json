@@ -16,11 +16,12 @@ namespace MAChitgarha\Component;
  * 
  * @see https://github.com/MAChitgarha/JSON/wiki
  * @todo Extend from \ArrayObject.
- * @todo Add a count() method to count number of values in a countable index.
+ * @todo Add a count() method to count number of values in a countable element.
+ * @todo Create a glossary defining all definitions.
  */
 class JSON
 {
-    /** @var array|object Holds JSON data as a native PHP data (either object or array) */
+    /** @var array|object Holds JSON data as a native PHP data (either object or array). */
     protected $data;
 
     // Data types
@@ -279,7 +280,7 @@ class JSON
     /**
      * Gets the value of an index in the data.
      *
-     * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
+     * @param string $index The index.
      * @return mixed The value of the index. Returns null if the index not found.
      */
     public function get(string $index)
@@ -290,7 +291,7 @@ class JSON
     /**
      * Sets the value to an index in the data.
      *
-     * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
+     * @param string $index The index.
      * @param mixed $value The value to be set.
      * @param integer $indexingType The type of the value to set when reaching an undefined key. It can be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to get exceptions when reaching an undefined key; i.e. all keys, except the last one, must exist.
      * @return self
@@ -305,7 +306,7 @@ class JSON
     /**
      * Determines if an index exists or not.
      *
-     * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
+     * @param string $index The index.
      * @return boolean Whether the index is set or not. A null value will be considered as not set.
      */
     public function isSet(string $index)
@@ -316,7 +317,7 @@ class JSON
     /**
      * Iterates over a data index.
      *
-     * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
+     * @param string $index The index.
      * @return iterable
      * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor an object).
      */
@@ -340,5 +341,50 @@ class JSON
     public function __toString()
     {
         return $this->getDataAsJson();
+    }
+
+    /**
+     * Gets an element value, if it is countable.
+     * 
+     * @param string $index The index.
+     * @return mixed If the index is countable, returns it; otherwise, returns null.
+     */
+    protected function getCountable(string $index)
+    {
+        $value = $this->get($index);
+        if (is_object($value) || is_array($value))
+            return $value;
+        return null;
+    }
+
+    /**
+     * Determines whether an element is countable or not.
+     *
+     * @param string $index The index.
+     * @return boolean Is the index countable or not
+     */
+    public function isCountable(string $index)
+    {
+        return $this->getCountable($index) === null;
+    }
+
+    /**
+     * Counts all elements in an index.
+     *
+     * @param string $index The index. Pass null if you want to get number of elements in data.
+     * @return int The elements number of the index.
+     * @throws \Exception If the element is not countable.
+     */
+    public function count(string $index = null)
+    {
+        // Get the number of keys in data
+        if ($index === null)
+            return count($this->getDataAsArray());
+
+        // Get the number of keys in the specified index
+        $countableValue = $this->getCountable($index);
+        if ($countableValue === null)
+            throw new \Exception("The index is not countable");
+        return count((array)($countableValue));
     }
 }
