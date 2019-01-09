@@ -1,9 +1,9 @@
 <?php
-
 /**
- * @author Mohammad Amin Chitgarha <machitgarha@outlook.com>
- * @see https://github.com/MAChitgarha
+ * The summary of the file
+ * 
  */
+
 namespace MAChitgarha\Component;
 
 /**
@@ -13,6 +13,7 @@ namespace MAChitgarha\Component;
  * 
  * @see https://github.com/MAChitgarha/JSON
  * @todo Extend from \ArrayObject.
+ * @todo Add a count() method to count number of values in a countable index.
  */
 class JSON
 {
@@ -83,7 +84,7 @@ class JSON
     /**
      * Returns data as JSON.
      *
-     * @param int $options The options, like JSON_PRETTY_PRINT. {@see http://php.net/json.constants}
+     * @param int $options The options, like JSON_PRETTY_PRINT. {@link http://php.net/json.constants}
      * @return string
      */
     public function getDataAsJson(int $options = 0)
@@ -231,7 +232,7 @@ class JSON
         if (count($keys) === 0) {
             $this->setKey($currentKey, $data, $value);
             return $this;
-        // Recurse on remained keys
+        // Recurs on remained keys
         } else {
             /*
              * If the current key does not exist, set it to an empty array or an object based on
@@ -268,7 +269,7 @@ class JSON
         if ($index === "")
             return [""];
 
-        // Explode index parts by $delmiter
+        // Explode index parts by $delimiter
         return explode($delimiter, $index);
     }
 
@@ -302,7 +303,7 @@ class JSON
      * Determines if an index exists or not.
      *
      * @param string $index The index. It can contain several nested keys separated by dots (like JavaScript).
-     * @return boolean
+     * @return boolean Whether the index is set or not. A null value will be considered as not set.
      */
     public function isSet(string $index)
     {
