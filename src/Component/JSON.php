@@ -15,9 +15,9 @@ namespace MAChitgarha\Component;
  * Gets a JSON string or a PHP native array or object and handles it as a JSON data.
  * 
  * @see https://github.com/MAChitgarha/JSON/wiki
- * @todo Extend from \ArrayObject.
- * @todo Add a count() method to count number of values in a countable element.
+ * @todo Import all methods from \ArrayObject.
  * @todo Create a glossary defining all definitions.
+ * @todo Implement ArrayAccess.
  */
 class JSON
 {
