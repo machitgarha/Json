@@ -95,4 +95,22 @@ class PublicMethodsTest extends TestCase
         foreach ($json->iterate("apps.browsers") as $i => $browserName);
             $this->assertEquals($browserName, $json->get("apps.browsers.$i"));
     }
+
+    /**
+     * Tests JSON::isCountable() and JSON::count() methods.
+     */
+    public function testCountableMethods()
+    {
+        $json = new JSON();
+        $json->set("apps.browsers", [
+            "Firefox",
+            "Chrome",
+            "Safari",
+            "Opera",
+            "Edge"
+        ]);
+
+        $this->assertTrue($json->isCountable("apps.browsers"));
+        $this->assertEquals(5, $json->count("apps.browsers"));
+    }
 }

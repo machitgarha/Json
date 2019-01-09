@@ -365,7 +365,7 @@ class JSON
      */
     public function isCountable(string $index)
     {
-        return $this->getCountable($index) === null;
+        return $this->getCountable($index) !== null;
     }
 
     /**
