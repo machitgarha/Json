@@ -321,12 +321,10 @@ class JSON
      * @return iterable
      * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor an object).
      */
-    public function iterate(string $index = ""): iterable
+    public function iterate(string $index = null): iterable
     {
         // Get the value of the index in data
-        $data = $this->get($index);   
-
-        if (!(is_array($data) || is_object($data)))
+        if (($data = $this->getCountable($index)) === null)
             throw new \Exception("The index is not iterable");
 
         foreach ((array)$data as $key => $val)
@@ -346,11 +344,15 @@ class JSON
     /**
      * Gets an element value, if it is countable.
      * 
-     * @param string $index The index.
+     * @param string $index The index. Pass null if you want to get number of elements in the data.
      * @return mixed If the index is countable, returns it; otherwise, returns null.
      */
-    protected function getCountable(string $index)
+    protected function getCountable(string $index = null)
     {
+        // Get the data
+        if ($index === null)
+            return $this->data;
+
         $value = $this->get($index);
         if (is_object($value) || is_array($value))
             return $value;
@@ -371,16 +373,12 @@ class JSON
     /**
      * Counts all elements in an index.
      *
-     * @param ?string $index The index. Pass null if you want to get number of elements in data.
+     * @param ?string $index The index. Pass null if you want to get number of elements in the data.
      * @return int The elements number of the index.
      * @throws \Exception If the element is not countable.
      */
     public function count(string $index = null)
     {
-        // Get the number of keys in data
-        if ($index === null)
-            return count($this->getDataAsArray());
-
         // Get the number of keys in the specified index
         $countableValue = $this->getCountable($index);
         if ($countableValue === null)
