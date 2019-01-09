@@ -317,7 +317,7 @@ class JSON
     /**
      * Iterates over a data index.
      *
-     * @param string $index The index.
+     * @param ?string $index The index.
      * @return iterable
      * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor an object).
      */
@@ -344,7 +344,7 @@ class JSON
     /**
      * Gets an element value, if it is countable.
      * 
-     * @param string $index The index. Pass null if you want to get number of elements in the data.
+     * @param ?string $index The index. Pass null if you want to get number of elements in the data.
      * @return mixed If the index is countable, returns it; otherwise, returns null.
      */
     protected function getCountable(string $index = null)
