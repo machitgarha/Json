@@ -19,7 +19,7 @@ namespace MAChitgarha\Component;
  * @todo Create a glossary defining all definitions.
  * @todo Implement ArrayAccess.
  */
-class JSON
+class JSON implements \ArrayAccess
 {
     /** @var array|object Holds JSON data as a native PHP data (either object or array). */
     protected $data;
@@ -406,5 +406,37 @@ class JSON
     public function clone()
     {
         return new self($this->data);
+    }
+
+    /** 
+     * {@inheritDoc}
+     */
+    public function offsetExists($index): bool
+    {
+        return $this->isSet($index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function offsetGet($index)
+    {
+        return $this->get($index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function offsetSet($index, $value)
+    {
+        $this->set($index, $value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function offsetUnset($index)
+    {
+        $this->set($index, null);
     }
 }
