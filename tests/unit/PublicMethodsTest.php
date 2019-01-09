@@ -66,6 +66,19 @@ class PublicMethodsTest extends TestCase
         $this->assertEquals($value, $json->get($index));
     }
 
+    /**
+     * Tests JSON offset*() methods (i.e. implementing ArrayAccess).
+     * @dataProvider setAndGetMethodsProvider
+     */
+    public function testArrayAccessMethods(string $index, $value)
+    {
+        $json = new JSON();
+
+        $json[$index] = $value;
+        $this->assertTrue(isset($json[$index]));
+        $this->assertEquals($value, $json[$index]);
+    }
+
     /** Provider for JSON::get() and JSON::set() methods. */
     public function setAndGetMethodsProvider()
     {
