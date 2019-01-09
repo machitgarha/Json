@@ -62,6 +62,7 @@ class PublicMethodsTest extends TestCase
         $json = new JSON();
 
         $json->set($index, $value, $indexingType);
+        $this->assertTrue($json->isSet($index));
         $this->assertEquals($value, $json->get($index));
     }
 
