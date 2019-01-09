@@ -371,7 +371,7 @@ class JSON
     /**
      * Counts all elements in an index.
      *
-     * @param string $index The index. Pass null if you want to get number of elements in data.
+     * @param ?string $index The index. Pass null if you want to get number of elements in data.
      * @return int The elements number of the index.
      * @throws \Exception If the element is not countable.
      */
