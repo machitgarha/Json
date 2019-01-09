@@ -131,4 +131,19 @@ class PublicMethodsTest extends TestCase
         
         $this->assertEquals($data, $json->getData());
     }
+
+    /**
+     * Tests JSON::clone().
+     */
+    public function testCloneMethod()
+    {
+        $json = new JSON([
+            "time" => 20
+        ]);
+        $equaledJson = $json;
+        $clonedJson = $json->clone();
+        
+        $this->assertEquals($equaledJson->set("time", 30)->get("time"), $json->get("time"));
+        $this->assertNotEquals($clonedJson->set("time", 10)->get("time"), $json->get("time"));
+    }
 }

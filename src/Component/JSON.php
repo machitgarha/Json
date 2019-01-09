@@ -399,4 +399,14 @@ class JSON
         $this->data = (new JSON($data))->getData();
         return $this;
     }
+
+    /**
+     * Clones the current data into a new JSON and returns it.
+     *
+     * @return self
+     */
+    public function clone()
+    {
+        return new self($this->data);
+    }
 }
