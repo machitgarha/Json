@@ -392,10 +392,11 @@ class JSON
      * Replaces data with a new data.
      *
      * @param array|object|string $data The new data to be replaced.
-     * @return void
+     * @return self
      */
     public function exchange($data)
     {
-        return new self($data);
+        $this->data = new self($data);
+        return $this;
     }
 }
