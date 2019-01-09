@@ -387,4 +387,15 @@ class JSON
             throw new \Exception("The index is not countable");
         return count((array)($countableValue));
     }
+
+    /**
+     * Replaces data with a new data.
+     *
+     * @param array|object|string $data The new data to be replaced.
+     * @return void
+     */
+    public function exchange($data)
+    {
+        return new self($data);
+    }
 }
