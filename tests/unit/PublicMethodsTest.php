@@ -113,4 +113,22 @@ class PublicMethodsTest extends TestCase
         $this->assertTrue($json->isCountable("apps.browsers"));
         $this->assertEquals(5, $json->count("apps.browsers"));
     }
+
+    /**
+     * Tests JSON::exchange() method.
+     */
+    public function testExchangeMethod()
+    {
+        $json = new JSON();
+        $json->exchange($data = [
+            "apps" => [
+                "PhpStorm",
+                "WebStorm",
+                "Chromium",
+                "WireShark"
+            ]
+        ]);
+        
+        $this->assertEquals($data, $json->getData());
+    }
 }

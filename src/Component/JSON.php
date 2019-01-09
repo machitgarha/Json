@@ -396,7 +396,7 @@ class JSON
      */
     public function exchange($data)
     {
-        $this->data = new self($data);
+        $this->data = (new JSON($data))->getData();
         return $this;
     }
 }
