@@ -68,7 +68,7 @@ class JSON implements \ArrayAccess
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
      */
-    public function getData(int $type = self::TYPE_DEFAULT, bool $recursive = true)
+    public function getData(int $type = JSON::TYPE_DEFAULT, bool $recursive = true)
     {
         switch ($type) {
             case self::TYPE_DEFAULT:
@@ -219,7 +219,7 @@ class JSON implements \ArrayAccess
         array $keys,
         $value,
         &$data,
-        int $indexingType = self::TYPE_ARRAY
+        int $indexingType = JSON::TYPE_ARRAY
     ) {
         // Validate indexing type
         if (!in_array($indexingType, [
@@ -295,7 +295,7 @@ class JSON implements \ArrayAccess
      * @param integer $indexingType The type of the value to set when reaching an undefined key. It can be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to get exceptions when reaching an undefined key; i.e. all keys, except the last one, must exist.
      * @return self
      */
-    public function set(string $index, $value, int $indexingType = self::TYPE_ARRAY)
+    public function set(string $index, $value, int $indexingType = JSON::TYPE_ARRAY)
     {
         $delimitedIndex = $this->extractKeysFromIndex($index);
         $this->setKeysRecursive($delimitedIndex, $value, $this->data, $indexingType);
