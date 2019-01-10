@@ -1,12 +1,12 @@
 <?php
 
-/** 
+/**
  * Unit tests for MAChitgarha\Component\JSON class.
  *
  * Go to the project's root and run the tests in this way:
  * phpunit --bootstrap vendor/autoload.php tests/unit
  * Using the --repeat option is recommended.
- * 
+ *
  * @see MAChitgarha\Component\JSON
  */
 namespace MAChitgarha\UnitTest\JSON;

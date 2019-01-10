@@ -1,3 +1,4 @@
 vendor/
 .phan/
 tests/files
+.php_cs.cache
