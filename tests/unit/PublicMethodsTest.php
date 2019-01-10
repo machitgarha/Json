@@ -31,26 +31,47 @@ class PublicMethodsTest extends TestCase
     /** Provider for JSON::getData() and JSON::getData*() methods. */
     public function getDataMethodsProvider()
     {
-        $data = [new \stdClass()];
-        $json = new JSON($data);
-
-        // Expected outputs
-        $asJson = "[{}]";
-        $asObject = (object)[(object)[]];
-        $asArray = [[]];
-
-        return [
-            // JSON::getData() assertions
-            [$data, $json->getData(JSON::TYPE_DEFAULT)],
-            [$asJson, $json->getData(JSON::TYPE_JSON)],
-            [$asObject, $json->getData(JSON::TYPE_OBJECT)],        
-            [$asArray, $json->getData(JSON::TYPE_ARRAY)],
-    
-            // JSON::getDataAs*() assertions
-            [$asJson, $json->getDataAsJson()],
-            [$asArray, $json->getDataAsArray()],
-            [$asObject, $json->getDataAsObject()],    
+        // JSON data that we expect
+        $jsonData = [
+            [
+                "data" => [new \stdClass()],
+                "asJson" => "[{}]",
+                "asArray" => [[]],
+                "asObject" => (object)[(object)[]]
+            ],
+            [
+                "data" => '{"instance":"JSON"}',
+                "asJson" => '{"instance":"JSON"}',
+                "asArray" => ["instance" => "JSON"],
+                "asObject" => (object)["instance" => "JSON"]
+            ]
         ];
+
+        $jsonValidationProviderData = [];
+        foreach ($jsonData as $jsonDatum) {
+            $data = $jsonDatum["data"];
+            $json = new JSON($data);
+
+            $asJson = $jsonDatum["asJson"];
+            $asArray = $jsonDatum["asArray"];
+            $asObject = $jsonDatum["asObject"];
+            
+            // Add each of the JSON data as a provider template
+            $jsonValidationProviderData = array_merge($jsonValidationProviderData, [
+                // JSON::getData() assertions
+                [$data, $json->getData(JSON::TYPE_DEFAULT)],
+                [$asJson, $json->getData(JSON::TYPE_JSON)],
+                [$asArray, $json->getData(JSON::TYPE_ARRAY)],
+                [$asObject, $json->getData(JSON::TYPE_OBJECT)],
+
+                // JSON::getDataAs*() assertions
+                [$asJson, $json->getDataAsJson()],
+                [$asArray, $json->getDataAsArray()],
+                [$asObject, $json->getDataAsObject()]
+            ]);
+        }
+
+        return $jsonValidationProviderData;
     }
 
     /**

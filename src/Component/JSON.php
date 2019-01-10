@@ -23,6 +23,9 @@ class JSON implements \ArrayAccess
     /** @var array|object Holds JSON data as a native PHP data (either object or array). */
     protected $data;
 
+    /** @var bool Is the data passed to the constructor a JSON string? */
+    protected $isDefaultDataJson = false;
+
     // Data types
     /** @var int The data without any type changes */
     const TYPE_DEFAULT = 0;
@@ -55,15 +58,17 @@ class JSON implements \ArrayAccess
             throw new \InvalidArgumentException("Wrong data type");
 
         // Convert data to an array
-        if ($isString)
+        if ($isString) {
+            $this->isDefaultDataJson = true;
             $data = json_decode($data);
+        }
         $this->data = $data;
     }
 
     /**
      * Returns data as the determined type.
      *
-     * @param integer $type The type to return.
+     * @param integer $type The type to return. Can be any of the JSON::TYPE_* constants.
      * @param boolean $recursive Force $type as the type for all sub-values. No effects when the $type is TYPE_DEFAULT or TYPE_JSON.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
@@ -72,6 +77,8 @@ class JSON implements \ArrayAccess
     {
         switch ($type) {
             case self::TYPE_DEFAULT:
+                if ($this->isDefaultDataJson)
+                    return $this->getDataAsJson();
                 return $this->data;
             case self::TYPE_JSON:
                 return $this->getDataAsJson();
