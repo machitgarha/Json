@@ -68,7 +68,7 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as the determined type.
      *
-     * @param integer $type The type to return.
+     * @param integer $type The type to return. Can be any of the JSON::TYPE_* constants.
      * @param boolean $recursive Force $type as the type for all sub-values. No effects when the $type is TYPE_DEFAULT or TYPE_JSON.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
@@ -77,6 +77,8 @@ class JSON implements \ArrayAccess
     {
         switch ($type) {
             case self::TYPE_DEFAULT:
+                if ($this->isDefaultDataJson)
+                    return $this->getDataAsJson();
                 return $this->data;
             case self::TYPE_JSON:
                 return $this->getDataAsJson();
