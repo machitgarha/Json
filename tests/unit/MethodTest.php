@@ -17,7 +17,7 @@ use MAChitgarha\Component\JSON;
 /**
  * Test all public methods.
  */
-class PublicMethodsTest extends TestCase
+class MethodTest extends TestCase
 {
     /**
      * Tests JSON::getData*() methods.
