@@ -98,6 +98,34 @@ class MethodTest extends TestCase
         $this->assertEquals($value, $json[$index]);
     }
 
+    /**
+     * Tests JSON::isSet() and JSON::offsetExists() methods (i.e. implementing ArrayAccess).
+     * @dataProvider indexValuePairsProvider
+     */
+    public function testIsSet(string $index, $value)
+    {
+        $json = new JSON();
+
+        $json->set($index, $value);
+
+        $this->assertTrue($json->isSet($index));
+        $this->assertTrue(isset($json[$index]));
+    }
+
+    /**
+     * Tests JSON::offsetUnset() (i.e. implementing ArrayAccess).
+     * @dataProvider indexValuePairsProvider
+     */
+    public function testUnset(string $index, $value)
+    {
+        $json = new JSON();
+
+        $json->set($index, $value);
+        unset($json[$index]);
+
+        $this->assertFalse(isset($json[$index]));
+    }
+
     /** Provides index and values pairs. */
     public function indexValuePairsProvider()
     {
