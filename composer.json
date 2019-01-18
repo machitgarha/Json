@@ -23,7 +23,7 @@
         "ext-json": "*"
     },
     "suggest": {
-
+        "machitgarha/json-file": "Handles your JSON files"
     },
     "autoload": {
         "psr-4": {
