@@ -76,6 +76,8 @@ class JSON implements \ArrayAccess
      * @param boolean $recursive Force $type as the type for all sub-values. No effects when the $type is TYPE_DEFAULT or TYPE_JSON.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
+     * 
+     * @since 0.3.1 Returns JSON if the passed data in constructor was a JSON string.
      */
     public function getData(int $type = JSON::TYPE_DEFAULT, bool $recursive = true)
     {
