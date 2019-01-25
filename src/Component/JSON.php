@@ -308,8 +308,9 @@ class JSON implements \ArrayAccess
         $keys = explode($delimiter, $index);
 
         // Set the escaped delimiters
-        foreach ($keys as &$key)
+        foreach ($keys as &$key) {
             $key = str_replace($replacement, $delimiter, $key);
+        }
 
         return $keys;
     }
