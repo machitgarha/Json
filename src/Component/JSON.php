@@ -289,6 +289,8 @@ class JSON implements \ArrayAccess
      * @param string $index The index.
      * @param string $delimiter The delimiter.
      * @return array The extracted keys.
+     *
+     * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping them using a backslash.
      */
     protected function extractKeysFromIndex(string $index, string $delimiter = "."): array
     {
@@ -296,8 +298,21 @@ class JSON implements \ArrayAccess
             return [""];
         }
 
+        $replacement = "¬";
+        $escapedDelimiter = "\\$delimiter";
+
+        // Replace the escaped delimiter with a less-using character
+        $index = str_replace($escapedDelimiter, $replacement, $index);
+
         // Explode index parts by $delimiter
-        return explode($delimiter, $index);
+        $keys = explode($delimiter, $index);
+
+        // Set the escaped delimiters
+        foreach ($keys as &$key) {
+            $key = str_replace($replacement, $delimiter, $key);
+        }
+
+        return $keys;
     }
 
     /**
