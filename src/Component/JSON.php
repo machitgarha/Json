@@ -289,7 +289,8 @@ class JSON implements \ArrayAccess
      * @param string $index The index.
      * @param string $delimiter The delimiter.
      * @return array The extracted keys.
-     * @todo Add a since.
+     *
+     * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping them using a backslash.
      */
     protected function extractKeysFromIndex(string $index, string $delimiter = "."): array
     {
