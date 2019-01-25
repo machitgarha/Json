@@ -18,6 +18,7 @@ namespace MAChitgarha\Component;
  * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
  * @todo Import all methods from \ArrayObject.
  * @todo Add a new static JSON::convertToJson() method.
+ * @todo {@see https://stackoverflow.com/questions/29308898/how-do-i-extract-data-from-json-with-php}
  */
 class JSON implements \ArrayAccess
 {
