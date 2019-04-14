@@ -465,21 +465,16 @@ class JSON implements \ArrayAccess
 
     public function offsetGet($index)
     {
-        return $this->get($index);
+        return $this->get((string)($index));
     }
 
     public function offsetSet($index, $value)
     {
-        $this->set($index, $value);
+        $this->set((string)($index), $value);
     }
 
     public function offsetUnset($index)
     {
-        $this->set($index, null);
-    }
-
-    public function push($value)
-    {
-        
+        $this->set((string)($index), null);
     }
 }
