@@ -108,7 +108,7 @@ class JSON implements \ArrayAccess
      * http://php.net/json.constants}
      * @return string
      */
-    public function getDataAsJson(int $options = 0)
+    public function getDataAsJson(int $options = 0): string
     {
         return json_encode($this->data, $options);
     }
@@ -169,7 +169,7 @@ class JSON implements \ArrayAccess
      * @param string $key The key.
      * @param array|object $data The data to be modified.
      * @param mixed $value The value to be set.
-     * @return void
+     * @return self
      * @throws \InvalidArgumentException If $data is not countable.
      */
     protected function setKey(string $key, &$data, $value)
@@ -181,6 +181,8 @@ class JSON implements \ArrayAccess
         } else {
             throw new \InvalidArgumentException("Data must be countable");
         }
+
+        return $this;
     }
 
     /**
@@ -249,7 +251,7 @@ class JSON implements \ArrayAccess
         $value,
         &$data,
         int $indexingType = JSON::TYPE_ARRAY
-    ) {
+    ): self {
         // Validate indexing type
         if (!in_array($indexingType, [
             self::TYPE_ARRAY,
@@ -289,6 +291,8 @@ class JSON implements \ArrayAccess
             $data = &$this->getKeyByReference($currentKey, $data);
             $this->setKeysRecursive($keys, $value, $data, $indexingType);
         }
+
+        return $this;
     }
 
     /**
@@ -346,7 +350,7 @@ class JSON implements \ArrayAccess
      * exist.
      * @return self
      */
-    public function set(string $index, $value, int $indexingType = JSON::TYPE_ARRAY)
+    public function set(string $index, $value, int $indexingType = JSON::TYPE_ARRAY): self
     {
         $delimitedIndex = $this->extractKeysFromIndex($index);
         $this->setKeysRecursive($delimitedIndex, $value, $this->data, $indexingType);
@@ -359,7 +363,7 @@ class JSON implements \ArrayAccess
      * @param string $index The index.
      * @return bool Whether the index is set or not. A null value will be considered as not set.
      */
-    public function isSet(string $index)
+    public function isSet(string $index): bool
     {
         return $this->get($index) !== null;
     }
@@ -389,7 +393,7 @@ class JSON implements \ArrayAccess
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getDataAsJson();
     }
@@ -420,7 +424,7 @@ class JSON implements \ArrayAccess
      * @param string $index The index.
      * @return bool Is the index countable or not.
      */
-    public function isCountable(string $index)
+    public function isCountable(string $index): bool
     {
         return $this->getCountable($index) !== null;
     }
@@ -432,7 +436,7 @@ class JSON implements \ArrayAccess
      * @return int The elements number of the index.
      * @throws \Exception If the element is not countable.
      */
-    public function count(string $index = null)
+    public function count(string $index = null): int
     {
         // Get the number of keys in the specified index
         $countableValue = $this->getCountable($index);
@@ -472,5 +476,10 @@ class JSON implements \ArrayAccess
     public function offsetUnset($index)
     {
         $this->set($index, null);
+    }
+
+    public function push($value)
+    {
+        
     }
 }
