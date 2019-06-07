@@ -477,4 +477,21 @@ class JSON implements \ArrayAccess
     {
         $this->set((string)($index), null);
     }
+
+    /**
+     * Pushes a value to the end of the data.
+     *
+     * @param mixed $value The value to be inserted.
+     * @return self
+     */
+    public function push($value): self
+    {
+        $data = $this->getDataAsArray();
+        array_push($data, $value);
+
+        settype($data, gettype($this->data));
+        $this->data = $data;
+
+        return $this;
+    }
 }
