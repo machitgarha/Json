@@ -44,39 +44,36 @@ class JSON implements \ArrayAccess
      * Prepares JSON data.
      *
      * @param string|array|object $data The data; can be either a JSON string, array or object.
-     * A JSON string must be a valid JSON object or array, and must not be a boolean, for example. It should not contain any closures, otherwise, they will be considered as empty objects.
-     * @throws \InvalidArgumentException When data is not a valid JSON (as described), an array or an object.
+     * A JSON string must be a valid JSON object or array, and must not be a boolean, for example.
+     * It should not contain any closures, otherwise, they will be considered as empty objects.
+     * @throws \InvalidArgumentException When data is not a valid JSON (as described), an array or
+     * an object.
      */
     public function __construct($data = [])
     {
-        $isString = is_string($data);
-        $isArray = is_array($data);
-        $isObject = is_object($data);
-        /** @var bool $isGoodJson Check if JSON data is object or array */
-        $isGoodJson = $isString ? in_array(gettype(json_decode($data)), ["array", "object"]) :
-            false;
-        
-        // Force data to be an array or object, either native or JSON.
-        if (!($isGoodJson || $isArray || $isObject)) {
-            throw new \InvalidArgumentException("Wrong data type");
-        }
-
         // Convert data to an array
-        if ($isString) {
+        if (is_string($data)) {
             $this->isDefaultDataJson = true;
             $data = json_decode($data);
         }
+
+        // Force data to be either an array or an object
+        if (!(is_array($data) || is_object($data))) {
+            throw new \InvalidArgumentException("Wrong data type");
+        }
+
         $this->data = $data;
     }
 
     /**
      * Returns data as the determined type.
      *
-     * @param integer $type The type to return. Can be any of the JSON::TYPE_* constants.
-     * @param boolean $recursive Force $type as the type for all sub-values. No effects when the $type is TYPE_DEFAULT or TYPE_JSON.
+     * @param int $type The type to return. Can be any of the JSON::TYPE_* constants.
+     * @param bool $recursive Force $type as the type for all sub-values. No effects when the $type
+     * is TYPE_DEFAULT or TYPE_JSON.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
-     * 
+     *
      * @since 0.3.1 Returns JSON if the passed data in constructor was a JSON string.
      */
     public function getData(int $type = JSON::TYPE_DEFAULT, bool $recursive = true)
@@ -101,10 +98,11 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as a JSON string.
      *
-     * @param int $options The options, like JSON_PRETTY_PRINT. {@link http://php.net/json.constants}
+     * @param int $options The options, like JSON_PRETTY_PRINT. {@link
+     * http://php.net/json.constants}
      * @return string
      */
-    public function getDataAsJson(int $options = 0)
+    public function getDataAsJson(int $options = 0): string
     {
         return json_encode($this->data, $options);
     }
@@ -112,7 +110,7 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as an array.
      *
-     * @param boolean $recursive Force array as the type for all sub-values.
+     * @param bool $recursive Force array as the type for all sub-values.
      * @return array The data as an array.
      */
     public function getDataAsArray(bool $recursive = true): array
@@ -127,7 +125,7 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as an object.
      *
-     * @param boolean $recursive Force object as the type for all sub-values.
+     * @param bool $recursive Force object as the type for all sub-values.
      * @return object The data as an object.
      */
     public function getDataAsObject(bool $recursive = true): object
@@ -144,7 +142,8 @@ class JSON implements \ArrayAccess
      *
      * @param string $key The key.
      * @param array|object $data The data to search in.
-     * @return mixed Return the value of the key in data, and if the data is not countable or the key does not exists, return null.
+     * @return mixed Return the value of the key in data, and if the data is not countable or the
+     * key does not exists, return null.
      */
     protected function getKey(string $key, $data)
     {
@@ -164,7 +163,7 @@ class JSON implements \ArrayAccess
      * @param string $key The key.
      * @param array|object $data The data to be modified.
      * @param mixed $value The value to be set.
-     * @return void
+     * @return self
      * @throws \InvalidArgumentException If $data is not countable.
      */
     protected function setKey(string $key, &$data, $value)
@@ -176,11 +175,14 @@ class JSON implements \ArrayAccess
         } else {
             throw new \InvalidArgumentException("Data must be countable");
         }
+
+        return $this;
     }
 
     /**
      * Returns a key by reference.
-     * Returns the value of a key in a data by reference. If the key does not exist, sets it to null before returning.
+     * Returns the value of a key in a data by reference. If the key does not exist, sets it to
+     * null before returning.
      *
      * @param string $key The key.
      * @param array|object $data The data to search in.
@@ -232,7 +234,7 @@ class JSON implements \ArrayAccess
      * @param array $keys The keys.
      * @param mixed $value The value to set.
      * @param mixed $data The data to crawl keys in it.
-     * @param integer $indexingType The type of the value to set when reaching an undefined key.
+     * @param int $indexingType The type of the value to set when reaching an undefined key.
      * Possible values are: TYPE_ARRAY, TYPE_OBJECT, STRICT_INDEXING
      * @return self
      * @throws \InvalidArgumentException If the $indexingType is wrong.
@@ -243,7 +245,7 @@ class JSON implements \ArrayAccess
         $value,
         &$data,
         int $indexingType = JSON::TYPE_ARRAY
-    ) {
+    ): self {
         // Validate indexing type
         if (!in_array($indexingType, [
             self::TYPE_ARRAY,
@@ -283,6 +285,8 @@ class JSON implements \ArrayAccess
             $data = &$this->getKeyByReference($currentKey, $data);
             $this->setKeysRecursive($keys, $value, $data, $indexingType);
         }
+
+        return $this;
     }
 
     /**
@@ -292,7 +296,8 @@ class JSON implements \ArrayAccess
      * @param string $delimiter The delimiter.
      * @return array The extracted keys.
      *
-     * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping them using a backslash.
+     * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping
+     * them using a backslash.
      */
     protected function extractKeysFromIndex(string $index, string $delimiter = "."): array
     {
@@ -333,10 +338,13 @@ class JSON implements \ArrayAccess
      *
      * @param string $index The index.
      * @param mixed $value The value to be set.
-     * @param integer $indexingType The type of the value to set when reaching an undefined key. It can be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to get exceptions when reaching an undefined key; i.e. all keys, except the last one, must exist.
+     * @param int $indexingType The type of the value to set when reaching an undefined key. It can
+     * be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to
+     * get exceptions when reaching an undefined key; i.e. all keys, except the last one, must
+     * exist.
      * @return self
      */
-    public function set(string $index, $value, int $indexingType = JSON::TYPE_ARRAY)
+    public function set(string $index, $value, int $indexingType = JSON::TYPE_ARRAY): self
     {
         $delimitedIndex = $this->extractKeysFromIndex($index);
         $this->setKeysRecursive($delimitedIndex, $value, $this->data, $indexingType);
@@ -347,9 +355,9 @@ class JSON implements \ArrayAccess
      * Determines if an index exists or not.
      *
      * @param string $index The index.
-     * @return boolean Whether the index is set or not. A null value will be considered as not set.
+     * @return bool Whether the index is set or not. A null value will be considered as not set.
      */
-    public function isSet(string $index)
+    public function isSet(string $index): bool
     {
         return $this->get($index) !== null;
     }
@@ -358,10 +366,11 @@ class JSON implements \ArrayAccess
      * Iterates over an element.
      *
      * @param ?string $index The index.
-     * @return iterable
-     * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor an object).
+     * @return \Generator
+     * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor
+     * an object).
      */
-    public function iterate(string $index = null): iterable
+    public function iterate(string $index = null): \Generator
     {
         // Get the value of the index in data
         if (($data = $this->getCountable($index)) === null) {
@@ -378,7 +387,7 @@ class JSON implements \ArrayAccess
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getDataAsJson();
     }
@@ -407,9 +416,9 @@ class JSON implements \ArrayAccess
      * Determines whether an element is countable or not.
      *
      * @param string $index The index.
-     * @return boolean Is the index countable or not
+     * @return bool Is the index countable or not.
      */
-    public function isCountable(string $index)
+    public function isCountable(string $index): bool
     {
         return $this->getCountable($index) !== null;
     }
@@ -421,7 +430,7 @@ class JSON implements \ArrayAccess
      * @return int The elements number of the index.
      * @throws \Exception If the element is not countable.
      */
-    public function count(string $index = null)
+    public function count(string $index = null): int
     {
         // Get the number of keys in the specified index
         $countableValue = $this->getCountable($index);
@@ -443,35 +452,56 @@ class JSON implements \ArrayAccess
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function offsetExists($index): bool
     {
         return $this->isSet($index);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function offsetGet($index)
     {
-        return $this->get($index);
+        return $this->get((string)($index));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function offsetSet($index, $value)
     {
-        $this->set($index, $value);
+        $this->set((string)($index), $value);
+    }
+
+    public function offsetUnset($index)
+    {
+        $this->set((string)($index), null);
     }
 
     /**
-     * {@inheritDoc}
+     * Pushes a value to the end of the data.
+     *
+     * @param mixed $value The value to be inserted.
+     * @return self
      */
-    public function offsetUnset($index)
+    public function push($value): self
     {
-        $this->set($index, null);
+        $data = $this->getDataAsArray();
+        array_push($data, $value);
+
+        settype($data, gettype($this->data));
+        $this->data = $data;
+
+        return $this;
+    }
+
+    /**
+     * Pops the last value of the array.
+     *
+     * @return self
+     */
+    public function pop(): self
+    {
+        $data = $this->getDataAsArray();
+        array_pop($data);
+
+        settype($data, gettype($this->data));
+        $this->data = $data;
+
+        return $this;
     }
 }

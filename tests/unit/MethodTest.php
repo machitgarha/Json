@@ -193,4 +193,24 @@ class MethodTest extends TestCase
         
         $this->assertEquals($data, $json->getData());
     }
+
+    /**
+     * Tests JSON::push() and JSON::pop() methods.
+     */
+    public function testPushPop()
+    {
+        $json = new JSON([
+            "test" => "pass"
+        ]);
+
+        $var = ["!"];
+        $json->push($var);
+        $this->assertEquals($var, $json->get("0"));
+
+        $json->pop();
+        $this->assertFalse($json->isSet("0"));
+
+        $json->pop();
+        $this->assertFalse($json->isset("test"));
+    }
 }
