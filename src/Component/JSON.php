@@ -79,7 +79,7 @@ class JSON implements \ArrayAccess
      * is TYPE_DEFAULT or TYPE_JSON.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
-     * 
+     *
      * @since 0.3.1 Returns JSON if the passed data in constructor was a JSON string.
      */
     public function getData(int $type = JSON::TYPE_DEFAULT, bool $recursive = true)
@@ -488,6 +488,22 @@ class JSON implements \ArrayAccess
     {
         $data = $this->getDataAsArray();
         array_push($data, $value);
+
+        settype($data, gettype($this->data));
+        $this->data = $data;
+
+        return $this;
+    }
+
+    /**
+     * Pops the last value of the array.
+     *
+     * @return self
+     */
+    public function pop(): self
+    {
+        $data = $this->getDataAsArray();
+        array_pop($data);
 
         settype($data, gettype($this->data));
         $this->data = $data;
