@@ -446,9 +446,9 @@ class JSON implements \ArrayAccess
      * @param array|object|string $data The new data to be replaced.
      * @return self
      */
-    public function exchange($data)
+    public function exchange($data): self
     {
-        $this->data = (new JSON($data))->getData();
+        $this->__construct($data);
         return $this;
     }
 
