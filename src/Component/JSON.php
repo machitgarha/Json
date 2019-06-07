@@ -51,23 +51,17 @@ class JSON implements \ArrayAccess
      */
     public function __construct($data = [])
     {
-        $isString = is_string($data);
-        $isArray = is_array($data);
-        $isObject = is_object($data);
-        /** @var bool $isGoodJson Check if JSON data is object or array */
-        $isGoodJson = $isString ? in_array(gettype(json_decode($data)), ["array", "object"]) :
-            false;
-        
-        // Force data to be an array or object, either native or JSON.
-        if (!($isGoodJson || $isArray || $isObject)) {
-            throw new \InvalidArgumentException("Wrong data type");
-        }
-
         // Convert data to an array
-        if ($isString) {
+        if (is_string($data)) {
             $this->isDefaultDataJson = true;
             $data = json_decode($data);
         }
+
+        // Force data to be either an array or an object
+        if (!(is_array($data) || is_object($data))) {
+            throw new \InvalidArgumentException("Wrong data type");
+        }
+
         $this->data = $data;
     }
 
