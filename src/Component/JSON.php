@@ -51,23 +51,17 @@ class JSON implements \ArrayAccess
      */
     public function __construct($data = [])
     {
-        $isString = is_string($data);
-        $isArray = is_array($data);
-        $isObject = is_object($data);
-        /** @var bool $isGoodJson Check if JSON data is object or array */
-        $isGoodJson = $isString ? in_array(gettype(json_decode($data)), ["array", "object"]) :
-            false;
-        
-        // Force data to be an array or object, either native or JSON.
-        if (!($isGoodJson || $isArray || $isObject)) {
-            throw new \InvalidArgumentException("Wrong data type");
-        }
-
         // Convert data to an array
-        if ($isString) {
+        if (is_string($data)) {
             $this->isDefaultDataJson = true;
             $data = json_decode($data);
         }
+
+        // Force data to be either an array or an object
+        if (!(is_array($data) || is_object($data))) {
+            throw new \InvalidArgumentException("Wrong data type");
+        }
+
         $this->data = $data;
     }
 
@@ -79,7 +73,7 @@ class JSON implements \ArrayAccess
      * is TYPE_DEFAULT or TYPE_JSON.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
-     * 
+     *
      * @since 0.3.1 Returns JSON if the passed data in constructor was a JSON string.
      */
     public function getData(int $type = JSON::TYPE_DEFAULT, bool $recursive = true)
@@ -476,5 +470,38 @@ class JSON implements \ArrayAccess
     public function offsetUnset($index)
     {
         $this->set((string)($index), null);
+    }
+
+    /**
+     * Pushes a value to the end of the data.
+     *
+     * @param mixed $value The value to be inserted.
+     * @return self
+     */
+    public function push($value): self
+    {
+        $data = $this->getDataAsArray();
+        array_push($data, $value);
+
+        settype($data, gettype($this->data));
+        $this->data = $data;
+
+        return $this;
+    }
+
+    /**
+     * Pops the last value of the array.
+     *
+     * @return self
+     */
+    public function pop(): self
+    {
+        $data = $this->getDataAsArray();
+        array_pop($data);
+
+        settype($data, gettype($this->data));
+        $this->data = $data;
+
+        return $this;
     }
 }
