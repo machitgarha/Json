@@ -120,6 +120,11 @@ class MethodTest extends TestCase
         $json = new JSON();
 
         $json->set($index, $value);
+        $json->unset($index);
+
+        $this->assertFalse(isset($json[$index]));
+
+        $json->set($index, $value);
         unset($json[$index]);
 
         $this->assertFalse(isset($json[$index]));
