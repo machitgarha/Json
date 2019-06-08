@@ -352,6 +352,24 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Unset an index in the data.
+     *
+     * @param string $index The index
+     * @return self
+     */
+    public function unset(string $index): self
+    {
+        $this->set($index, null);
+
+        // Remove null value from the data
+        $this->data = array_filter($this->data, function ($val) {
+            return $val !== null;
+        });
+
+        return $this;
+    }
+
+    /**
      * Determines if an index exists or not.
      *
      * @param string $index The index.
