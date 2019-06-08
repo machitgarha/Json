@@ -487,7 +487,7 @@ class JSON implements \ArrayAccess
 
     public function offsetUnset($index)
     {
-        $this->set((string)($index), null);
+        $this->unset((string)($index));
     }
 
     /**
