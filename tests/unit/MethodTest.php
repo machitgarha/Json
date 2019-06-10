@@ -12,13 +12,30 @@ namespace MAChitgarha\UnitTest\JSON;
 
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\JSON;
-use PHPUnit\Framework\MockObject\Generator;
 
 /**
  * Tests all public methods.
  */
 class MethodTest extends TestCase
 {
+    /** @var array A simple sample data to be used as JSON data. */
+    public static $sampleData = [
+        "apps" => [
+            "ides" => [
+                "PhpStorm",
+                "WebStorm",
+                "Visual Studio Code"
+            ],
+            "browsers" => [
+                "Firefox",
+                "Chrome",
+                "Safari",
+                "Opera",
+                "Edge"
+            ]
+        ]
+    ];
+
     /**
      * Tests JSON::getData*() methods.
      * @dataProvider expectedGetDataReturnValuesProvider
@@ -131,7 +148,9 @@ class MethodTest extends TestCase
         $this->assertFalse(isset($json[$index]));
     }
 
-    /** Provides index and values pairs. */
+    /**
+     * Provides index and values pairs.
+     */
     public function indexValuePairsProvider()
     {
         return [
@@ -144,18 +163,11 @@ class MethodTest extends TestCase
 
     /**
      * Tests JSON::iterate() method.
+     * @dataProvider dataProvider
      */
-    public function testIterate()
+    public function testIterate($data)
     {
-        $json = new JSON(new \stdClass());
-
-        $json->set("apps.browsers", [
-            "Firefox",
-            "Chrome",
-            "Safari",
-            "Opera",
-            "Edge"
-        ]);
+        $json = new JSON($data);
 
         foreach ($json->iterate("apps.browsers") as $i => $browserName) {
             $this->assertEquals($browserName, $json->get("apps.browsers.$i"));
@@ -172,35 +184,24 @@ class MethodTest extends TestCase
      */
     public function testCountableElements()
     {
-        $json = new JSON();
-
-        $json->set("apps.browsers", [
-            "Firefox",
-            "Chrome",
-            "Safari",
-            "Opera",
-            "Edge"
-        ]);
+        $json = new JSON(self::$sampleData);
 
         $this->assertTrue($json->isCountable("apps.browsers"));
-        $this->assertEquals(5, $json->count("apps.browsers"));
+        $this->assertEquals(
+            count(self::$sampleData["apps"]["browsers"]),
+            $json->count("apps.browsers")
+        );
     }
 
     /**
      * Tests JSON::exchange() method.
+     * @dataProvider dataProvider
      */
-    public function testExchange()
+    public function testExchange($data)
     {
         $json = new JSON();
 
-        $json->exchange($data = [
-            "apps" => [
-                "PhpStorm",
-                "WebStorm",
-                "Chromium",
-                "WireShark"
-            ]
-        ]);
+        $json->exchange($data);
         
         $this->assertEquals($data, $json->getData());
     }
@@ -223,5 +224,33 @@ class MethodTest extends TestCase
 
         $json->pop();
         $this->assertFalse($json->isset("test"));
+    }
+
+    /**
+     * Tests JSON::toFullObject() method.
+     * @dataProvider dataProvider
+     */
+    public function testToFullObject($data)
+    {
+        $json = new JSON($data);
+        
+        $this->assertIsObject($json->toFullObject()->getData());
+
+        // When data is fully converted to object, then it should not contain any arrays inside
+        foreach ($json->iterate() as $item) {
+            $this->assertIsNotArray($item);
+        }
+    }
+
+    /**
+     * Provides prepared data to be used in JSON class.
+     */
+    public function dataProvider()
+    {
+        return [
+            [
+                self::$sampleData
+            ]
+        ];
     }
 }
