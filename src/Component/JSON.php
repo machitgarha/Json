@@ -119,16 +119,11 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as an array.
      *
-     * @param bool $recursive Force array as the type for all sub-values.
      * @return array The data as an array.
      */
-    public function getDataAsArray(bool $recursive = true): array
+    public function getDataAsArray(): array
     {
-        if ($recursive) {
-            return json_decode(json_encode($this->data), true);
-        } else {
-            return (array)($this->data);
-        }
+        return $this->data;
     }
 
     /**
