@@ -558,4 +558,18 @@ class JSON implements \ArrayAccess
 
         return $this;
     }
+
+    /**
+     * Converts data to a complete object.
+     * 
+     * Instead of having arrays in data, use objects. This affect on data and values that might be
+     * returned.
+     *
+     * @return self
+     */
+    public function toFullObject(): self
+    {
+        $this->data = $this->getDataAsObject(true);
+        return $this;
+    }
 }
