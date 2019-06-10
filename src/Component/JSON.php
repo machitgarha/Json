@@ -352,6 +352,24 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Unset an index in the data.
+     *
+     * @param string $index The index
+     * @return self
+     */
+    public function unset(string $index): self
+    {
+        $this->set($index, null);
+
+        // Remove null value from the data
+        $this->data = array_filter($this->data, function ($val) {
+            return $val !== null;
+        });
+
+        return $this;
+    }
+
+    /**
      * Determines if an index exists or not.
      *
      * @param string $index The index.
@@ -366,19 +384,56 @@ class JSON implements \ArrayAccess
      * Iterates over an element.
      *
      * @param ?string $index The index.
+     * @param integer $returnType Specifies the value type in each iteration if the value is
+     * countable. This can be of the JSON::TYPE_* constants. This way, you will ensure
      * @return \Generator
      * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor
      * an object).
      */
-    public function iterate(string $index = null): \Generator
+    public function iterate(string $index = null, int $returnType = self::TYPE_DEFAULT): \Generator
     {
         // Get the value of the index in data
         if (($data = $this->getCountable($index)) === null) {
             throw new \Exception("The index is not iterable");
         }
 
-        foreach ((array)$data as $key => $val) {
-            yield $key => $val;
+        // Define getValue function based on return type
+        switch ($returnType) {
+            case self::TYPE_DEFAULT:
+                $getValue = function ($val) {
+                    return $val;
+                };
+                break;
+            
+            case self::TYPE_ARRAY:
+                $getValue = function ($val) {
+                    return (array)($val);
+                };
+                break;
+
+            case self::TYPE_OBJECT:
+                $getValue = function ($val) {
+                    return (object)($val);
+                };
+                break;
+            
+            case self::TYPE_JSON:
+                $getValue = function ($val) {
+                    return new self($val);
+                };
+                break;
+            
+            default:
+                throw new \Exception("Unknown return type");
+        }
+
+        foreach ((array)($data) as $key => $val) {
+            // Check if it is countable
+            if (is_array($val) || is_object($val)) {
+                yield $key => $getValue($val);
+            } else {
+                yield $key => $val;
+            }
         }
     }
 
@@ -446,9 +501,9 @@ class JSON implements \ArrayAccess
      * @param array|object|string $data The new data to be replaced.
      * @return self
      */
-    public function exchange($data)
+    public function exchange($data): self
     {
-        $this->data = (new JSON($data))->getData();
+        $this->__construct($data);
         return $this;
     }
 
@@ -469,7 +524,7 @@ class JSON implements \ArrayAccess
 
     public function offsetUnset($index)
     {
-        $this->set((string)($index), null);
+        $this->unset((string)($index));
     }
 
     /**
@@ -502,6 +557,20 @@ class JSON implements \ArrayAccess
         settype($data, gettype($this->data));
         $this->data = $data;
 
+        return $this;
+    }
+
+    /**
+     * Converts data to a complete object.
+     *
+     * Instead of having arrays in data, use objects. This affect on data and values that might be
+     * returned.
+     *
+     * @return self
+     */
+    public function toFullObject(): self
+    {
+        $this->data = $this->getDataAsObject(true);
         return $this;
     }
 }
