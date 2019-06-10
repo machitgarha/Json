@@ -86,14 +86,13 @@ class JSON implements \ArrayAccess
      *
      * @since 0.3.1 Returns JSON if the passed data in constructor was a JSON string.
      */
-    public function getData(int $type = JSON::TYPE_DEFAULT, bool $recursive = true)
+    public function getData(int $type = self::TYPE_DEFAULT, bool $recursive = true)
     {
+        defaultTypeSet:
         switch ($type) {
             case self::TYPE_DEFAULT:
-                if ($this->isDefaultDataJson) {
-                    return $this->getDataAsJson();
-                }
-                return $this->data;
+                $type = $this->defaultDataType;
+                goto defaultTypeSet;
             case self::TYPE_JSON:
                 return $this->getDataAsJson();
             case self::TYPE_ARRAY:
