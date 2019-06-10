@@ -40,6 +40,13 @@ class JSON implements \ArrayAccess
     /** @var int In crawling keys, a key must be existed, otherwise, an exception will be thrown. */
     const STRICT_INDEXING = 4;
 
+    /** @var int Convert all sub-elements to objects. */
+    const CONVERT_ALL = 5;
+    /** @var int Only convert the root of data to object. */
+    const CONVERT_ROOT = 6;
+    /** @var int Convert all sub-elements with non-indexed-keys to objects. */
+    const CONVERT_ASSOC = 7;
+
     /**
      * Prepares JSON data.
      *
@@ -129,15 +136,19 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as an object.
      *
-     * @param bool $recursive Force object as the type for all sub-values.
+     * @param bool $conversionType How to convert data to object; can be one of the CONVERT_*
+     * constants.
      * @return object The data as an object.
      */
-    public function getDataAsObject(bool $recursive = true): object
+    public function getDataAsObject(int $conversionType = self::CONVERT_ALL): object
     {
-        if ($recursive) {
-            return json_decode(json_encode($this->data, JSON_FORCE_OBJECT));
-        } else {
-            return (object)($this->data);
+        switch ($conversionType) {
+            case self::CONVERT_ALL:
+                return json_decode(json_encode($this->data, JSON_FORCE_OBJECT));
+            case self::CONVERT_ROOT:
+                return (object)($this->data);
+            case self::CONVERT_ASSOC:
+                return json_decode(json_encode($this->data));
         }
     }
 
