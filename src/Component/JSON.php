@@ -22,11 +22,11 @@ namespace MAChitgarha\Component;
  */
 class JSON implements \ArrayAccess
 {
-    /** @var array|object Holds JSON data as a native PHP data (either object or array). */
+    /** @var array Holds JSON data as a native PHP array (to be handled more easily). */
     protected $data;
 
-    /** @var bool Is the data passed to the constructor a JSON string? */
-    protected $isDefaultDataJson = false;
+    /** @var integer Default data type. */
+    protected $defaultDataType = null;
 
     // Data types
     /** @var int The data without any type changes */
@@ -51,14 +51,24 @@ class JSON implements \ArrayAccess
      */
     public function __construct($data = [])
     {
-        // Convert data to an array
-        if (is_string($data)) {
-            $this->isDefaultDataJson = true;
-            $data = json_decode($data);
+        /*
+         * Convert arrays and objects to JSON strings. Before using arrays, they must be converted
+         * to a complete array, and all of its in-depth elements must be an array, not an object.
+         * So, we use json_* functions to convert all elements to arrays completely. This makes life
+         * a lot easier!
+         */
+        if (($isObject = is_object($data)) || is_array($data)) {
+            $this->defaultDataType = $isObject ? self::TYPE_OBJECT : self::TYPE_ARRAY;
+            $data = json_encode($data);
         }
 
-        // Force data to be either an array or an object
-        if (!(is_array($data) || is_object($data))) {
+        // Decode JSON strings to arrays
+        if (is_string($data)) {
+            $this->defaultDataType = $this->defaultDataType ?? self::TYPE_JSON;
+            $data = json_decode($data, true);
+        } 
+
+        if (!is_array($data)) {
             throw new \InvalidArgumentException("Wrong data type");
         }
 
@@ -362,7 +372,7 @@ class JSON implements \ArrayAccess
         $this->set($index, null);
 
         // Remove null value from the data
-        $this->data = array_filter($this->data, function ($val) {
+        $this->data = array_filter((array)($this->data), function ($val) {
             return $val !== null;
         });
 
