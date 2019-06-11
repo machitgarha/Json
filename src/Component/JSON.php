@@ -423,7 +423,7 @@ class JSON implements \ArrayAccess
      * Gets an element value, if it is countable.
      *
      * @param ?string $index The index. Pass null if you want to get number of elements in the data.
-     * @return mixed If the index is countable, returns it; otherwise, returns null.
+     * @return array|null If the index is countable, returns it; otherwise, returns null.
      */
     protected function getCountable(string $index = null)
     {
@@ -464,7 +464,7 @@ class JSON implements \ArrayAccess
         if ($countableValue === null) {
             throw new \Exception("The index is not countable");
         }
-        return count((array)($countableValue));
+        return count($countableValue);
     }
 
     /**
