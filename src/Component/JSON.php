@@ -481,7 +481,7 @@ class JSON implements \ArrayAccess
 
     public function offsetExists($index): bool
     {
-        return $this->isSet($index);
+        return $this->isSet((string)($index));
     }
 
     public function offsetGet($index)
