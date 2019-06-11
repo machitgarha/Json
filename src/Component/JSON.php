@@ -507,11 +507,7 @@ class JSON implements \ArrayAccess
      */
     public function push($value): self
     {
-        $data = $this->getDataAsArray();
-        array_push($data, $value);
-
-        settype($data, gettype($this->data));
-        $this->data = $data;
+        array_push($this->data, $value);
 
         return $this;
     }
@@ -523,11 +519,7 @@ class JSON implements \ArrayAccess
      */
     public function pop(): self
     {
-        $data = $this->getDataAsArray();
-        array_pop($data);
-
-        settype($data, gettype($this->data));
-        $this->data = $data;
+        array_pop($this->data);
 
         return $this;
     }
