@@ -359,7 +359,7 @@ class JSON implements \ArrayAccess
      * Iterates over an element.
      *
      * @param ?string $index The index.
-     * @param integer $returnType Specifies the value type in each iteration if the value is
+     * @param int $returnType Specifies the value type in each iteration if the value is
      * countable. This can be of the JSON::TYPE_* constants. This way, you will ensure
      * @return \Generator
      * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor
@@ -372,14 +372,12 @@ class JSON implements \ArrayAccess
             throw new \Exception("The index is not iterable");
         }
 
+        if ($returnType === self::TYPE_DEFAULT) {
+            $returnType = $this->defaultDataType;
+        }
+
         // Define getValue function based on return type
         switch ($returnType) {
-            case self::TYPE_DEFAULT:
-                $getValue = function ($val) {
-                    return $val;
-                };
-                break;
-            
             case self::TYPE_ARRAY:
                 $getValue = function ($val) {
                     return (array)($val);
@@ -403,8 +401,7 @@ class JSON implements \ArrayAccess
         }
 
         foreach ((array)($data) as $key => $val) {
-            // Check if it is countable
-            if (is_array($val) || is_object($val)) {
+            if (is_array($val)) {
                 yield $key => $getValue($val);
             } else {
                 yield $key => $val;
@@ -436,7 +433,7 @@ class JSON implements \ArrayAccess
         }
 
         $value = $this->get($index);
-        if (is_object($value) || is_array($value)) {
+        if (is_array($value)) {
             return $value;
         }
         return null;
