@@ -240,9 +240,12 @@ class JSON implements \ArrayAccess
         }
         // Crawl keys recursively
         else {
+            if (!is_array($data))
+                return null;
+
             // Get the current key, and remove it from keys array
             $currentKey = array_shift($keys);
-            return $this->getKeysRecursive($keys, $this->getKey($currentKey, $data));
+            return $this->getKeysRecursive($keys, $this->data[$currentKey] ?? null);
         }
     }
 
