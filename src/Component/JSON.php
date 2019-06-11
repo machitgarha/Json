@@ -136,9 +136,10 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as an object.
      *
-     * @param bool $conversionType How to convert data to object; can be one of the CONVERT_*
-     * constants.
+     * @param bool $conversionType How data have to be converted to object(s); can be one of the
+     * CONVERT_* constants.
      * @return object The data as an object.
+     * @throws \InvalidArgumentException Passing a wrong conversion type.
      */
     public function getDataAsObject(int $conversionType = self::CONVERT_ALL): object
     {
@@ -149,6 +150,8 @@ class JSON implements \ArrayAccess
                 return (object)($this->data);
             case self::CONVERT_ASSOC:
                 return json_decode(json_encode($this->data));
+            default:
+                throw new \InvalidArgumentException("Unknown conversion type.");
         }
     }
 
