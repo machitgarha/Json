@@ -176,52 +176,21 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Sets a key to a value in a data.
-     *
-     * @param string $key The key.
-     * @param array|object $data The data to be modified.
-     * @param mixed $value The value to be set.
-     * @return self
-     * @throws \InvalidArgumentException If $data is not countable.
-     */
-    protected function setKey(string $key, &$data, $value)
-    {
-        if (is_array($data)) {
-            $data[$key] = $value;
-        } elseif (is_object($data)) {
-            $data->$key = $value;
-        } else {
-            throw new \InvalidArgumentException("Data must be countable");
-        }
-
-        return $this;
-    }
-
-    /**
      * Returns a key by reference.
      * Returns the value of a key in a data by reference. If the key does not exist, sets it to
      * null before returning.
      *
      * @param string $key The key.
-     * @param array|object $data The data to search in.
+     * @param array $data The data to search in.
      * @return mixed The value of the key in the data by reference.
      * @throws \InvalidArgumentException When data is not countable.
      */
-    protected function &getKeyByReference(string $key, &$data)
+    protected function &getKeyByReference(string $key, array &$data)
     {
-        if (is_array($data)) {
-            if (!isset($data[$key])) {
-                $data[$key] = null;
-            }
-            return $data[$key];
-        } elseif (is_object($data)) {
-            if (!isset($data->$key)) {
-                $data->$key = null;
-            }
-            return $data->$key;
-        } else {
-            throw new \InvalidArgumentException("Wrong data type");
+        if (!isset($data[$key])) {
+            $data[$key] = null;
         }
+        return $data[$key];
     }
 
     /**
@@ -265,17 +234,8 @@ class JSON implements \ArrayAccess
         array $keys,
         $value,
         &$data,
-        int $indexingType = JSON::TYPE_ARRAY
+        bool $strictIndexing = false
     ): self {
-        // Validate indexing type
-        if (!in_array($indexingType, [
-            self::TYPE_ARRAY,
-            self::TYPE_OBJECT,
-            self::STRICT_INDEXING
-        ])) {
-            throw new \InvalidArgumentException("Wrong indexing type");
-        }
-
         // Get the current key, and remove it from keys array
         $currentKey = array_shift($keys);
         // Reached the last key, so, setting the value
@@ -290,21 +250,15 @@ class JSON implements \ArrayAccess
              * data to the data key, for next recursion.
              */
             if ($this->getKey($currentKey, $data) === null) {
-                switch ($indexingType) {
-                    case self::TYPE_ARRAY:
-                        $this->setKey($currentKey, $data, array());
-                        break;
-                    case self::TYPE_OBJECT:
-                        $this->setKey($currentKey, $data, new \stdClass());
-                        break;
-                    case self::STRICT_INDEXING:
-                        throw new \Exception("Key '$currentKey' is not defined");
-                    // Default case is checked at first
+                if ($strictIndexing) {
+                    throw new \Exception("Key '$currentKey' is not defined");
+                } else {
+                    $data[$currentKey] = [];
                 }
             }
 
             $data = &$this->getKeyByReference($currentKey, $data);
-            $this->setKeysRecursive($keys, $value, $data, $indexingType);
+            $this->setKeysRecursive($keys, $value, $data, $strictIndexing);
         }
 
         return $this;
@@ -365,10 +319,10 @@ class JSON implements \ArrayAccess
      * exist.
      * @return self
      */
-    public function set(string $index, $value, int $indexingType = JSON::TYPE_ARRAY): self
+    public function set(string $index, $value, bool $strictIndexing = false): self
     {
         $delimitedIndex = $this->extractKeysFromIndex($index);
-        $this->setKeysRecursive($delimitedIndex, $value, $this->data, $indexingType);
+        $this->setKeysRecursive($delimitedIndex, $value, $this->data, $strictIndexing);
         return $this;
     }
 
@@ -583,7 +537,6 @@ class JSON implements \ArrayAccess
 
     /**
      * Converts data to a complete object.
-     *
      * Instead of having arrays in data, use objects. This affect on data and values that might be
      * returned.
      *
