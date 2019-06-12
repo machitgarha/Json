@@ -24,8 +24,11 @@ class JSON implements \ArrayAccess
     /** @var array Holds JSON data as a complete native PHP array (to be handled more easily). */
     protected $data;
 
-    /** @var integer Default data type. */
+    /** @var int Default data type. */
     protected $defaultDataType = null;
+
+    /** @var bool To decode every valid JSON string when setting values or not. */
+    protected $jsonDecodeAlways = false;
 
     // Data types
     /** @var int The data without any type changes */
@@ -39,6 +42,15 @@ class JSON implements \ArrayAccess
     /** @var int The data as a complete object, without even indexed arrays */
     const TYPE_FULL_OBJECT = 4;
 
+    // Options
+    /**
+     * @var int To decode every valid JSON string when setting values or not. This would be so much
+     * useful if you're working with JSON strings a lot. The first thing that this option does is
+     * that checks if a JSON string is a valid one and contains an object; and if it is, then
+     * extract it to an array and make further operations, like setting the new value.
+     */
+    const JSON_DECODE_ALWAYS = 1;
+
     /**
      * Prepares JSON data.
      *
@@ -48,12 +60,15 @@ class JSON implements \ArrayAccess
      * @throws \InvalidArgumentException When data is not a valid JSON (as described), an array or
      * an object.
      */
-    public function __construct($data = [])
+    public function __construct($data = [], $options = 0)
     {
         /*
          * Everything must be converted to a complete array, even the in-depth sub-elements. This
          * makes life a lot easier!
          */
+
+        // Set options
+        $this->jsonDecodeAlways = $options & self::JSON_DECODE_ALWAYS;
 
         if (($isObject = is_object($data)) || is_array($data)) {
             $this->defaultDataType = $isObject ? self::TYPE_OBJECT : self::TYPE_ARRAY;
@@ -155,15 +170,23 @@ class JSON implements \ArrayAccess
     /**
      * Get the desirable value to be used elsewhere.
      * It will convert all countable values to full-indexed arrays. All other values than countable
-     * values would be returned exactly the same. 
+     * values would be returned exactly the same.
+     * Also, if JSON_DECODE_ALWAYS option is enabled, then it returns all
      *
      * @param mixed $value
      * @return mixed
      */
-    protected function getOptimalValue($value)
+    protected static function getOptimalValue($value)
     {
         if (is_array($value) || is_object($value))
             return self::convertToArray($value);
+
+        // JSON_DECODE_ALWAYS handler
+        if ($this->jsonDecodeAlways && is_string($value))
+            // Validating JSON string
+            try {
+                return self::convertJsonToArray($value);
+            } catch (\Exception $e) {}
         
         return $value;
     }
@@ -393,13 +416,10 @@ class JSON implements \ArrayAccess
      * useful!
      * @return self
      */
-    public function set(string $index, $value, bool $extractJson): self
+    public function set(string $index, $value): self
     {
+        $value = self::getOptimalValue($value);
         $delimitedIndex = $this->extractKeysFromIndex($index);
-
-        if ($extractJson && is_string($value)) {
-            $value = self::convertJsonToArray($value);
-        }
 
         $this->setKeysRecursive($delimitedIndex, $value, $this->data);
         return $this;
@@ -595,6 +615,8 @@ class JSON implements \ArrayAccess
      */
     public function push($value, string $index = null): self
     {
+        $value = self::getOptimalValue($value);
+
         if ($index === null) {
             array_push($this->data, $value);
         } else {
