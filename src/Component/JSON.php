@@ -37,8 +37,6 @@ class JSON implements \ArrayAccess
     const TYPE_OBJECT = 2;
     /** @var int The data as an array */
     const TYPE_ARRAY = 3;
-    /** @var int In crawling keys, a key must be existed, otherwise, an exception will be thrown. */
-    const STRICT_INDEXING = 4;
 
     /** @var int Convert all sub-elements to objects. */
     const CONVERT_ALL = 5;
@@ -60,7 +58,7 @@ class JSON implements \ArrayAccess
     {
         /*
          * Everything must be converted to a complete array, even the in-depth sub-elements. This
-         * makes life a lot easier! (As of 1.0.0)
+         * makes life a lot easier!
          */
 
         if (is_object($data)) {
@@ -318,17 +316,13 @@ class JSON implements \ArrayAccess
      * @param array $keys The keys.
      * @param mixed $value The value to set.
      * @param mixed $data The data to crawl keys in it.
-     * @param int $indexingType The type of the value to set when reaching an undefined key.
-     * Possible values are: TYPE_ARRAY, TYPE_OBJECT, STRICT_INDEXING
+     * @param bool $strictIndexing Whether or not to create indexes when reaching an undefined key.
      * @return self
-     * @throws \InvalidArgumentException If the $indexingType is wrong.
-     * @throws \Exception If any of the keys is not existed, when $indexingType is STRICT_INDEXING.
      */
     protected function setKeysRecursive(
         array $keys,
         $value,
-        &$data,
-        bool $strictIndexing = false
+        &$data
     ): self {
         // Get the current key, and remove it from keys array
         $currentKey = array_shift($keys);
@@ -344,15 +338,11 @@ class JSON implements \ArrayAccess
              * data to the data key, for next recursion.
              */
             if ($this->getKey($currentKey, $data) === null) {
-                if ($strictIndexing) {
-                    throw new \Exception("Key '$currentKey' is not defined");
-                } else {
-                    $data[$currentKey] = [];
-                }
+                $data[$currentKey] = [];
             }
 
             $data = &$this->getKeyByReference($currentKey, $data);
-            $this->setKeysRecursive($keys, $value, $data, $strictIndexing);
+            $this->setKeysRecursive($keys, $value, $data);
         }
 
         return $this;
@@ -407,16 +397,12 @@ class JSON implements \ArrayAccess
      *
      * @param string $index The index.
      * @param mixed $value The value to be set.
-     * @param int $indexingType The type of the value to set when reaching an undefined key. It can
-     * be either an array (TYPE_ARRAY) or an object (TYPE_OBJECT), or TYPE_STRICT if you want to
-     * get exceptions when reaching an undefined key; i.e. all keys, except the last one, must
-     * exist.
      * @return self
      */
-    public function set(string $index, $value, bool $strictIndexing = false): self
+    public function set(string $index, $value): self
     {
         $delimitedIndex = $this->extractKeysFromIndex($index);
-        $this->setKeysRecursive($delimitedIndex, $value, $this->data, $strictIndexing);
+        $this->setKeysRecursive($delimitedIndex, $value, $this->data);
         return $this;
     }
 
