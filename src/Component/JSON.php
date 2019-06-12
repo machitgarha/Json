@@ -153,6 +153,22 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Get the desirable value to be used elsewhere.
+     * It will convert all countable values to full-indexed arrays. All other values than countable
+     * values would be returned exactly the same. 
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function getOptimalValue($value)
+    {
+        if (is_array($value) || is_object($value))
+            return self::convertToArray($value);
+        
+        return $value;
+    }
+
+    /**
      * Returns data as the determined type.
      *
      * @param int $type Return type. Can be any of the JSON::TYPE_* constants.
@@ -259,11 +275,6 @@ class JSON implements \ArrayAccess
             $data[$key] = null;
         }
         return $data[$key];
-    }
-
-    protected function &getIndexByReference()
-    {
-
     }
 
     /**
@@ -382,7 +393,7 @@ class JSON implements \ArrayAccess
      * useful!
      * @return self
      */
-    public function set(string $index, $value, bool $extractJson = false): self
+    public function set(string $index, $value, bool $extractJson): self
     {
         $delimitedIndex = $this->extractKeysFromIndex($index);
 
@@ -584,12 +595,17 @@ class JSON implements \ArrayAccess
      */
     public function push($value, string $index = null): self
     {
-        if (($arrayValue = $this->getCountable($index)) === null)
-            throw new \Exception("The index is not countable");
+        if ($index === null) {
+            array_push($this->data, $value);
+        } else {
+            if (($arrayValue = $this->getCountable($index)) === null) {
+                throw new \Exception("The index is not countable");
+            }
 
-        array_push($arrayValue, $value);
+            array_push($arrayValue, $value);
 
-        $this->set($index, $arrayValue);
+            $this->set($index, $arrayValue);
+        }
 
         return $this;
     }
@@ -604,13 +620,18 @@ class JSON implements \ArrayAccess
      */
     public function pop(string $index = null): self
     {
-        if (($arrayValue = $this->getCountable($index)) === null)
-            throw new \Exception("The index is not countable");
+        if ($index === null) {
+            array_push($this->data);
+        } else {
+            if (($arrayValue = $this->getCountable($index)) === null) {
+                throw new \Exception("The index is not countable");
+            }
 
-        array_pop($arrayValue);
+            array_pop($arrayValue);
 
-        $this->set($index, $arrayValue);
-    
+            $this->set($index, $arrayValue);
+        }
+
         return $this;
     }
 }
