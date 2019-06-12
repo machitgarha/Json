@@ -59,53 +59,92 @@ class JSON implements \ArrayAccess
     public function __construct($data = [])
     {
         /*
-         * Convert arrays and objects to JSON strings. Before using arrays, they must be converted
-         * to a complete array, and all of its in-depth elements must be an array, not an object.
-         * So, we use json_* functions to convert all elements to arrays completely. This makes life
-         * a lot easier!
+         * Everything must be converted to a complete array, even the in-depth sub-elements. This
+         * makes life a lot easier! (As of 1.0.0)
          */
-        if (($isObject = is_object($data)) || is_array($data)) {
-            $this->defaultDataType = $isObject ? self::TYPE_OBJECT : self::TYPE_ARRAY;
-            $data = json_encode($data);
+
+        if (is_object($data)) {
+            $this->defaultDataType = self::TYPE_OBJECT;
+            $this->data = self::convertObjectToArray($data);
+            return;
         }
 
-        // Decode JSON strings to arrays
+        if (is_array($data)) {
+            $this->defaultDataType = self::TYPE_ARRAY;
+            $this->data = self::convertToFullArray($data);
+            return;
+        }
+
         if (is_string($data)) {
-            $this->defaultDataType = $this->defaultDataType ?? self::TYPE_JSON;
-            $data = json_decode($data, true);
-        } 
-
-        if (!is_array($data)) {
-            throw new \InvalidArgumentException("Wrong data type");
+            $this->defaultDataType = self::TYPE_JSON;
+            $this->data = self::convertJsonToArray($data);
+            if ($this->data === null) {
+                throw new \InvalidArgumentException("Invalid JSON string");
+            }
+            return;
         }
 
-        $this->data = $data;
+        // If data is invalid (i.e. is not a countable one)
+        throw new \InvalidArgumentException("Wrong data type");
+    }
+
+    protected static function convertToFullArray(array $data): array
+    {
+        return json_decode(json_encode($data), true);
+    }
+
+    protected static function convertObjectToArray(object $data): array
+    {
+        return json_decode(json_encode($data), true);
+    }
+
+    protected static function convertJsonToArray(string $data): array
+    {
+        return json_decode($data, true);
+    }
+
+    protected static function convertToFullObject(object $data)
+    {
+        return json_decode(json_encode($data, JSON_FORCE_OBJECT));
+    }
+
+    protected static function convertArrayToObject(array $data, bool $forceObject = true): object
+    {
+        return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
+    }
+    
+    protected static function convertJsonToObject(array $data): string
+    {
+        return json_decode($data);
+    }
+
+    protected static function convertToJson($data)
+    {
+        return json_encode($data);
     }
 
     /**
      * Returns data as the determined type.
      *
-     * @param int $type The type to return. Can be any of the JSON::TYPE_* constants.
-     * @param bool $recursive Force $type as the type for all sub-values. No effects when the $type
-     * is TYPE_DEFAULT or TYPE_JSON.
+     * @param int $type Return type. Can be any of the JSON::TYPE_* constants.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
      *
      * @since 0.3.1 Returns JSON if the passed data in constructor was a JSON string.
      */
-    public function getData(int $type = self::TYPE_DEFAULT, bool $recursive = true)
+    public function getData(int $type = self::TYPE_DEFAULT)
     {
-        defaultTypeSet:
+        if ($type === self::TYPE_DEFAULT) {
+            $type = $this->defaultDataType;
+        }
+
         switch ($type) {
-            case self::TYPE_DEFAULT:
-                $type = $this->defaultDataType;
-                goto defaultTypeSet;
             case self::TYPE_JSON:
                 return $this->getDataAsJson();
             case self::TYPE_ARRAY:
-                return $this->getDataAsArray($recursive);
+                return $this->getDataAsArray();
             case self::TYPE_OBJECT:
-                return $this->getDataAsObject($recursive);
+                return $this->getDataAsObject();
             default:
                 throw new \InvalidArgumentException("Unknown data type");
         }
