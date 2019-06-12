@@ -17,7 +17,6 @@ namespace MAChitgarha\Component;
  * @see https://github.com/MAChitgarha/JSON/wiki
  * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
  * @todo Import all methods from \ArrayObject.
- * @todo Add a new static JSON::convertToJson() method.
  * @todo {@see https://stackoverflow.com/questions/29308898/how-do-i-extract-data-from-json-with-php}
  */
 class JSON implements \ArrayAccess
@@ -56,15 +55,9 @@ class JSON implements \ArrayAccess
          * makes life a lot easier!
          */
 
-        if (is_object($data)) {
-            $this->defaultDataType = self::TYPE_OBJECT;
-            $this->data = self::convertObjectToArray($data);
-            return;
-        }
-
-        if (is_array($data)) {
-            $this->defaultDataType = self::TYPE_ARRAY;
-            $this->data = self::convertToFullArray($data);
+        if (($isObject = is_object($data)) || is_array($data)) {
+            $this->defaultDataType = $isObject ? self::TYPE_OBJECT : self::TYPE_ARRAY;
+            $this->data = self::convertToArray($data);
             return;
         }
 
@@ -219,17 +212,17 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsObject(): object
     {
-        return self::convertArrayToObject($this->data, false);
+        return self::convertToObject($this->data);
     }
 
     /**
-     * Returns data as a full-converted object (i.e. even convert indexed arrays to objects)
+     * Returns data as a full-converted object (i.e. even converts indexed arrays to objects).
      *
      * @return object
      */
     public function getDataAsFullObject(): object
     {
-        return self::convertArrayToObject($this->data);
+        return self::convertToObject($this->data, true);
     }
 
     /**
@@ -469,13 +462,13 @@ class JSON implements \ArrayAccess
 
             case self::TYPE_OBJECT:
                 $getValue = function ($val) {
-                    return self::convertArrayToObject($val, false);
+                    return self::convertToObject($val);
                 };
                 break;
 
             case self::TYPE_FULL_OBJECT:
                 $getValue = function ($val) {
-                    return self::convertArrayToObject($val);
+                    return self::convertToObject($val, true);
                 };
                 break;
             
