@@ -82,28 +82,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Converts all of sub-elements of an array to arrays.
-     *
-     * @param array $data Data as array.
-     * @return array
-     */
-    protected static function convertToFullArray(array $data): array
-    {
-        return json_decode(json_encode($data), true);
-    }
-
-    /**
-     * Converts an object to an array completely.
-     *
-     * @param object $data Data as object.
-     * @return array
-     */
-    protected static function convertObjectToArray(object $data): array
-    {
-        return json_decode(json_encode($data), true);
-    }
-
-    /**
      * Converts a JSON string to an array.
      *
      * @param string $data Data as JSON string.
@@ -118,29 +96,6 @@ class JSON implements \ArrayAccess
             throw new \InvalidArgumentException("Invalid JSON string (must contain array-ic data)");
         }
         return $decodedData;
-    }
-
-    /**
-     * Converts all sub-elements of an object to an object.
-     *
-     * @param object $data Data as object.
-     * @return object
-     */
-    protected static function convertToFullObject(object $data): object
-    {
-        return json_decode(json_encode($data, JSON_FORCE_OBJECT));
-    }
-
-    /**
-     * Converts an array to an object.
-     *
-     * @param array $data Data as array.
-     * @param boolean $forceObject Whether to convert indexed arrays to objects or not.
-     * @return object
-     */
-    protected static function convertArrayToObject(array $data, bool $forceObject = true): object
-    {
-        return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
     }
 
     /**
@@ -172,6 +127,38 @@ class JSON implements \ArrayAccess
             throw new \InvalidArgumentException("Data must be countable (i.e. array or object)");
         }
         return json_encode($data);
+    }
+
+    /**
+     * Converts an object to an array completely.
+     * @param array|object $data Data as an array or an object.
+     * @return array
+     * @throws \InvalidArgumentException If data is not countable.
+     */
+    protected static function convertToArray($data): array
+    {
+        if (!(is_object($data) || is_array($data))) {
+            throw new \InvalidArgumentException("Data must be either an array or an object");
+        }
+
+        return json_decode(json_encode($data), true);
+    }
+
+    /**
+     * Converts an array or an object to an object recursively.
+     *
+     * @param array $data Data as array or object.
+     * @param boolean $forceObject Whether to convert indexed arrays to objects or not.
+     * @return object
+     * @throws \InvalidArgumentException If data is not countable.
+     */
+    protected static function convertToObject($data, bool $forceObject = false): object
+    {
+        if (!(is_object($data) || is_array($data))) {
+            throw new \InvalidArgumentException("Data must be either an array or an object");
+        }
+
+        return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
     }
 
     /**
@@ -468,6 +455,12 @@ class JSON implements \ArrayAccess
 
         // Define getValue function based on return type
         switch ($returnType) {
+            case self::TYPE_JSON:
+                $getValue = function ($val) {
+                    return new self($val);
+                };
+                break;
+
             case self::TYPE_ARRAY:
                 $getValue = function ($val) {
                     return $val;
@@ -479,10 +472,10 @@ class JSON implements \ArrayAccess
                     return self::convertArrayToObject($val, false);
                 };
                 break;
-            
-            case self::TYPE_JSON:
+
+            case self::TYPE_FULL_OBJECT:
                 $getValue = function ($val) {
-                    return new self($val);
+                    return self::convertArrayToObject($val);
                 };
                 break;
             
