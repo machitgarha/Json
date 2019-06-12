@@ -111,7 +111,7 @@ class JSON implements \ArrayAccess
     /**
      * Converts a JSON string to an array.
      *
-     * @param string $data Data as JSON string. 
+     * @param string $data Data as JSON string.
      * @return array
      * @throws \InvalidArgumentException If JSON string does not contain a data that could be
      * converted to an array.
@@ -119,8 +119,9 @@ class JSON implements \ArrayAccess
     protected static function convertJsonToArray(string $data): array
     {
         $decodedData = json_decode($data, true);
-        if (!is_array($decodedData))
+        if (!is_array($decodedData)) {
             throw new \InvalidArgumentException("Invalid JSON string (must contain array-ic data)");
+        }
         return $decodedData;
     }
 
@@ -150,15 +151,16 @@ class JSON implements \ArrayAccess
     /**
      * Converts a JSON string to an object.
      *
-     * @param array $data Data as JSON string.
-     * @return string
+     * @param string $data Data as JSON string.
+     * @return object
      * @throws \InvalidArgumentException If the data cannot be converted to an object.
      */
     protected static function convertJsonToObject(string $data): object
     {
         $decodedData = json_decode($data);
-        if (!is_object($decodedData))
+        if (!is_object($decodedData)) {
             throw new \InvalidArgumentException("Non-objective JSON string");
+        }
         return $decodedData;
     }
 
@@ -171,8 +173,9 @@ class JSON implements \ArrayAccess
      */
     protected static function convertToJson($data): string
     {
-        if (!(is_array($data) || is_object($data)))
+        if (!(is_array($data) || is_object($data))) {
             throw new \InvalidArgumentException("Data must be countable (i.e. array or object)");
+        }
         return json_encode($data);
     }
 
@@ -228,7 +231,7 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as an object.
      *
-     * @param bool $conversionType How data have to be converted to object(s); can be one of the
+     * @param int $conversionType How data have to be converted to object(s); can be one of the
      * CONVERT_* constants.
      * @return object The data as an object.
      * @throws \InvalidArgumentException Passing a wrong conversion type.
@@ -237,13 +240,13 @@ class JSON implements \ArrayAccess
     {
         switch ($conversionType) {
             case self::CONVERT_ALL:
-                return json_decode(json_encode($this->data, JSON_FORCE_OBJECT));
+                return self::convertArrayToObject($this->data);
             case self::CONVERT_ROOT:
                 return (object)($this->data);
             case self::CONVERT_ASSOC:
-                return json_decode(json_encode($this->data));
+                return self::convertArrayToObject($this->data, false);
             default:
-                throw new \InvalidArgumentException("Unknown conversion type.");
+                throw new \InvalidArgumentException("Unknown conversion type");
         }
     }
 
@@ -301,8 +304,9 @@ class JSON implements \ArrayAccess
         }
         // Crawl keys recursively
         else {
-            if (!is_array($data))
+            if (!is_array($data)) {
                 return null;
+            }
 
             // Get the current key, and remove it from keys array
             $currentKey = array_shift($keys);
@@ -316,7 +320,6 @@ class JSON implements \ArrayAccess
      * @param array $keys The keys.
      * @param mixed $value The value to set.
      * @param mixed $data The data to crawl keys in it.
-     * @param bool $strictIndexing Whether or not to create indexes when reaching an undefined key.
      * @return self
      */
     protected function setKeysRecursive(
@@ -328,8 +331,7 @@ class JSON implements \ArrayAccess
         $currentKey = array_shift($keys);
         // Reached the last key, so, setting the value
         if (count($keys) === 0) {
-            $this->setKey($currentKey, $data, $value);
-            return $this;
+            $data[$currentKey] = $value;
         // Recurs on remained keys
         } else {
             /*
@@ -425,7 +427,7 @@ class JSON implements \ArrayAccess
         $this->set($index, null);
 
         // Remove null value from the data
-        $this->data = array_filter((array)($this->data), function ($val) {
+        $this->data = array_filter($this->data, function ($val) {
             return $val !== null;
         });
 
