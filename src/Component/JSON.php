@@ -397,11 +397,19 @@ class JSON implements \ArrayAccess
      *
      * @param string $index The index.
      * @param mixed $value The value to be set.
+     * @param bool $extractJson Does value contains a countable JSON string, and you want to
+     * extract it to a regular value (i.e. treat it as an array)? Then using this option will be so
+     * useful!
      * @return self
      */
-    public function set(string $index, $value): self
+    public function set(string $index, $value, bool $extractJson = false): self
     {
         $delimitedIndex = $this->extractKeysFromIndex($index);
+
+        if ($extractJson && is_string($value)) {
+            $value = self::convertJsonToArray($value);
+        }
+
         $this->setKeysRecursive($delimitedIndex, $value, $this->data);
         return $this;
     }
