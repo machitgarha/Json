@@ -22,7 +22,7 @@ namespace MAChitgarha\Component;
  */
 class JSON implements \ArrayAccess
 {
-    /** @var array Holds JSON data as a native PHP array (to be handled more easily). */
+    /** @var array Holds JSON data as a complete native PHP array (to be handled more easily). */
     protected $data;
 
     /** @var integer Default data type. */
@@ -288,6 +288,11 @@ class JSON implements \ArrayAccess
         return $data[$key];
     }
 
+    protected function &getIndexByReference()
+    {
+
+    }
+
     /**
      * Gets the value of keys in a data recursively.
      *
@@ -512,7 +517,7 @@ class JSON implements \ArrayAccess
     /**
      * Gets an element value, if it is countable.
      *
-     * @param ?string $index The index. Pass null if you want to get number of elements in the data.
+     * @param ?string $index The index. Pass null if you want to get the data itself.
      * @return array|null If the index is countable, returns it; otherwise, returns null.
      */
     protected function getCountable(string $index = null)
@@ -590,27 +595,43 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Pushes a value to the end of the data.
+     * Pushes a value to the end of a countable element in data.
      *
      * @param mixed $value The value to be inserted.
+     * @param ?string $index The index of the countable element to be pushed into. Pass null if you
+     * want to push to the data root.
      * @return self
+     * @throws \Exception If the index is not countable (i.e. cannot push into it).
      */
-    public function push($value): self
+    public function push($value, string $index = null): self
     {
-        array_push($this->data, $value);
+        if (($arrayValue = $this->getCountable($index)) === null)
+            throw new \Exception("The index is not countable");
+
+        array_push($arrayValue, $value);
+
+        $this->set($index, $arrayValue);
 
         return $this;
     }
 
     /**
-     * Pops the last value of the array.
+     * Pops the last value of a countable element from data.
      *
+     * @param ?string $index The index of the countable element to be popped from. Pass null if you
+     * want to pop from the data root.
      * @return self
+     * @throws \Exception If the index is not countable (i.e. cannot pop from it).
      */
-    public function pop(): self
+    public function pop(string $index = null): self
     {
-        array_pop($this->data);
+        if (($arrayValue = $this->getCountable($index)) === null)
+            throw new \Exception("The index is not countable");
 
+        array_pop($arrayValue);
+
+        $this->set($index, $arrayValue);
+    
         return $this;
     }
 }
