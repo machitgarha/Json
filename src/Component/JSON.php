@@ -88,38 +88,93 @@ class JSON implements \ArrayAccess
         throw new \InvalidArgumentException("Wrong data type");
     }
 
+    /**
+     * Converts all of sub-elements of an array to arrays.
+     *
+     * @param array $data Data as array.
+     * @return array
+     */
     protected static function convertToFullArray(array $data): array
     {
         return json_decode(json_encode($data), true);
     }
 
+    /**
+     * Converts an object to an array completely.
+     *
+     * @param object $data Data as object.
+     * @return array
+     */
     protected static function convertObjectToArray(object $data): array
     {
         return json_decode(json_encode($data), true);
     }
 
+    /**
+     * Converts a JSON string to an array.
+     *
+     * @param string $data Data as JSON string. 
+     * @return array
+     * @throws \InvalidArgumentException If JSON string does not contain a data that could be
+     * converted to an array.
+     */
     protected static function convertJsonToArray(string $data): array
     {
-        return json_decode($data, true);
+        $decodedData = json_decode($data, true);
+        if (!is_array($decodedData))
+            throw new \InvalidArgumentException("Invalid JSON string (must contain array-ic data)");
+        return $decodedData;
     }
 
-    protected static function convertToFullObject(object $data)
+    /**
+     * Converts all sub-elements of an object to an object.
+     *
+     * @param object $data Data as object.
+     * @return object
+     */
+    protected static function convertToFullObject(object $data): object
     {
         return json_decode(json_encode($data, JSON_FORCE_OBJECT));
     }
 
+    /**
+     * Converts an array to an object.
+     *
+     * @param array $data Data as array.
+     * @param boolean $forceObject Whether to convert indexed arrays to objects or not.
+     * @return object
+     */
     protected static function convertArrayToObject(array $data, bool $forceObject = true): object
     {
         return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
     }
-    
-    protected static function convertJsonToObject(array $data): string
+
+    /**
+     * Converts a JSON string to an object.
+     *
+     * @param array $data Data as JSON string.
+     * @return string
+     * @throws \InvalidArgumentException If the data cannot be converted to an object.
+     */
+    protected static function convertJsonToObject(string $data): object
     {
-        return json_decode($data);
+        $decodedData = json_decode($data);
+        if (!is_object($decodedData))
+            throw new \InvalidArgumentException("Non-objective JSON string");
+        return $decodedData;
     }
 
-    protected static function convertToJson($data)
+    /**
+     * Converts countable data to JSON string.
+     *
+     * @param mixed $data A countable data, either an array or an object.
+     * @return string
+     * @throws \InvalidArgumentException If data is not countable.
+     */
+    protected static function convertToJson($data): string
     {
+        if (!(is_array($data) || is_object($data)))
+            throw new \InvalidArgumentException("Data must be countable (i.e. array or object)");
         return json_encode($data);
     }
 
