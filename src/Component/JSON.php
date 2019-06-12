@@ -63,10 +63,8 @@ class JSON implements \ArrayAccess
 
         if (is_string($data)) {
             $this->defaultDataType = self::TYPE_JSON;
+            // This also checks for any JSON string errors
             $this->data = self::convertJsonToArray($data);
-            if ($this->data === null) {
-                throw new \InvalidArgumentException("Invalid JSON string");
-            }
             return;
         }
 
@@ -86,7 +84,7 @@ class JSON implements \ArrayAccess
     {
         $decodedData = json_decode($data, true);
         if (!is_array($decodedData)) {
-            throw new \InvalidArgumentException("Invalid JSON string (must contain array-ic data)");
+            throw new \InvalidArgumentException("Invalid (non-objective) JSON string");
         }
         return $decodedData;
     }
