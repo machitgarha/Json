@@ -37,13 +37,8 @@ class JSON implements \ArrayAccess
     const TYPE_OBJECT = 2;
     /** @var int The data as an array */
     const TYPE_ARRAY = 3;
-
-    /** @var int Convert all sub-elements to objects. */
-    const CONVERT_ALL = 5;
-    /** @var int Only convert the root of data to object. */
-    const CONVERT_ROOT = 6;
-    /** @var int Convert all sub-elements with non-indexed-keys to objects. */
-    const CONVERT_ASSOC = 7;
+    /** @var int The data as a complete object, without even indexed arrays */
+    const TYPE_FULL_OBJECT = 4;
 
     /**
      * Prepares JSON data.
@@ -201,6 +196,8 @@ class JSON implements \ArrayAccess
                 return $this->getDataAsArray();
             case self::TYPE_OBJECT:
                 return $this->getDataAsObject();
+            case self::TYPE_FULL_OBJECT:
+                return $this->getDataAsFullObject();
             default:
                 throw new \InvalidArgumentException("Unknown data type");
         }
@@ -231,23 +228,21 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as an object.
      *
-     * @param int $conversionType How data have to be converted to object(s); can be one of the
-     * CONVERT_* constants.
      * @return object The data as an object.
-     * @throws \InvalidArgumentException Passing a wrong conversion type.
      */
-    public function getDataAsObject(int $conversionType = self::CONVERT_ALL): object
+    public function getDataAsObject(): object
     {
-        switch ($conversionType) {
-            case self::CONVERT_ALL:
-                return self::convertArrayToObject($this->data);
-            case self::CONVERT_ROOT:
-                return (object)($this->data);
-            case self::CONVERT_ASSOC:
-                return self::convertArrayToObject($this->data, false);
-            default:
-                throw new \InvalidArgumentException("Unknown conversion type");
-        }
+        return self::convertArrayToObject($this->data, false);
+    }
+
+    /**
+     * Returns data as a full-converted object (i.e. even convert indexed arrays to objects)
+     *
+     * @return object
+     */
+    public function getDataAsFullObject(): object
+    {
+        return self::convertArrayToObject($this->data);
     }
 
     /**
@@ -475,13 +470,13 @@ class JSON implements \ArrayAccess
         switch ($returnType) {
             case self::TYPE_ARRAY:
                 $getValue = function ($val) {
-                    return (array)($val);
+                    return $val;
                 };
                 break;
 
             case self::TYPE_OBJECT:
                 $getValue = function ($val) {
-                    return (object)($val);
+                    return self::convertArrayToObject($val, false);
                 };
                 break;
             
