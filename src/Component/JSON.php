@@ -408,15 +408,19 @@ class JSON implements \ArrayAccess
     /**
      * Extract keys from an index into an array by the delimiter.
      *
-     * @param string $index The index.
+     * @param ?string $index The index.
      * @param string $delimiter The delimiter.
      * @return array The extracted keys.
      *
      * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping
      * them using a backslash.
      */
-    protected function extractIndex(string $index, string $delimiter = "."): array
+    protected function extractIndex(string $index = null, string $delimiter = "."): array
     {
+        if ($index === null) {
+            return [];
+        }
+
         if ($index === "") {
             return [""];
         }
@@ -444,8 +448,12 @@ class JSON implements \ArrayAccess
      * @param string $index The index.
      * @return mixed The value of the index. Returns null if the index not found.
      */
-    public function get(string $index)
+    public function get(string $index = null)
     {
+        if ($index === null && $this->isDataScalar()) {
+            return $this->data[0];
+        }
+
         try {
             return $this->crawlKeys($this->extractIndex($index), $this->data, function ($data, $key) {
                 return $data[$key];
