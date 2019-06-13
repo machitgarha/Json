@@ -52,7 +52,7 @@ class JSON implements \ArrayAccess
     /** @var int JSON class data type, i.e. a new instance of the class itself. */
     const TYPE_JSON_CLASS = 5;
     /** @var int Scalar data type, either an integer, string, float or boolean. */
-    const TYPE_SCALAR = 6;
+    const TYPE_SCALAR = 8;
 
     // Options
     /**
@@ -93,8 +93,13 @@ class JSON implements \ArrayAccess
 
         if (!$treatAsString && is_string($data) && self::isValidJson($data)) {
             $this->defaultDataType = self::TYPE_JSON_STRING;
-            // Decode JSON string, in the case of countable data type, save it as an array
-            $this->data = json_decode($data, true);    
+            $data = json_decode($data, true);
+            
+            // Set scalar data type as default
+            if (is_scalar($data) || $data === null)
+                $this->defaultDataType = self::TYPE_SCALAR;
+
+            $this->data = $data;
             return;
         }
 
