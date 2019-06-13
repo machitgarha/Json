@@ -262,11 +262,12 @@ class JSON implements \ArrayAccess
     /**
      * Converts countable data to JSON string.
      *
-     * @param mixed $data A countable data, either an array or an object.
+     * @param array|object $data A countable data, either an array or an object.
      * @return string
      */
     protected static function convertCountableToJson($data): string
     {
+        self::isArrayOrObject($data, true);
         return json_encode($data);
     }
 
@@ -279,7 +280,6 @@ class JSON implements \ArrayAccess
     protected static function convertToArray($data): array
     {
         self::isArrayOrObject($data, true);
-
         return json_decode(json_encode($data), true);
     }
 
@@ -294,7 +294,6 @@ class JSON implements \ArrayAccess
     protected static function convertToObject($data, bool $forceObject = false): object
     {
         self::isArrayOrObject($data, true);
-
         return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
     }
 
