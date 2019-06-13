@@ -394,7 +394,7 @@ class JSON implements \ArrayAccess
      * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping
      * them using a backslash.
      */
-    protected function extractKeysFromIndex(string $index, string $delimiter = "."): array
+    protected function extractKeys(string $index, string $delimiter = "."): array
     {
         if ($index === "") {
             return [""];
@@ -425,7 +425,11 @@ class JSON implements \ArrayAccess
      */
     public function get(string $index)
     {
-        return $this->getKeysByReference($this->extractKeysFromIndex($index), $this->data);
+        try {
+            return $this->getKeysByReference($this->extractKeys($index), $this->data, true);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**
@@ -437,10 +441,8 @@ class JSON implements \ArrayAccess
      */
     public function set(string $index, $value): self
     {
-        $value = $this->getOptimalValue($value);
-        $delimitedIndex = $this->extractKeysFromIndex($index);
-
-        $this->setKeysRecursive($delimitedIndex, $value, $this->data);
+        $element = &$this->getKeysByReference($this->extractKeys($index), $this->data);
+        $element = $this->getOptimalValue($value);
         return $this;
     }
 
