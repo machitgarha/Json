@@ -168,11 +168,11 @@ class JSON implements \ArrayAccess
      */
     protected static function validateStringAsJson(string $data): array
     {
-        json_decode($data);
+        $decodedData = json_decode($data);
         if (json_last_error() === JSON_ERROR_NONE) {
-            return [true, $data];
+            return [true, $decodedData];
         }
-        return [false, $data];
+        return [false, $decodedData];
     }
 
     /**
@@ -287,14 +287,15 @@ class JSON implements \ArrayAccess
      * Converts an array or an object to an object recursively.
      *
      * @param array $data Data as array or object.
-     * @param boolean $forceObject Whether to convert indexed arrays to objects or not.
+     * @param bool $forceObject Whether to convert indexed arrays to objects or not. It may be 
+     * obvious, but data root will always be an object, even with numeric indexes.
      * @return object
      * @throws \InvalidArgumentException If data is not countable.
      */
     protected static function convertToObject($data, bool $forceObject = false): object
     {
         self::isArrayOrObject($data, true);
-        return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
+        return (object)(json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0)));
     }
 
     /**
