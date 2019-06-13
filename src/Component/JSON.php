@@ -326,7 +326,7 @@ class JSON implements \ArrayAccess
         return self::convertToObject($this->data, true);
     }
 
-    protected function &getKeysByReference(array $keys, array &$data, bool $strictIndexing = false)
+    protected function crawlKeys(array $keys, array &$data, callable $lastOperation, bool $strictIndexing = false)
     {
         // End of recursion
         if (count($keys) === 1) {
@@ -338,7 +338,7 @@ class JSON implements \ArrayAccess
                     $data[$lastKey] = null;
                 }
             }
-            return $data[$lastKey];
+            $lastOperation($data, $lastKey);
         }
         // Crawl keys recursively
         else {
@@ -356,7 +356,7 @@ class JSON implements \ArrayAccess
             }
 
             // Recursion
-            return $this->getKeysByReference($keys, $data[$currentKey], $strictIndexing);
+            return $this->crawlKeys($keys, $data[$currentKey], $lastOperation, $strictIndexing);
         }
     }
 
@@ -402,7 +402,9 @@ class JSON implements \ArrayAccess
     public function get(string $index)
     {
         try {
-            return $this->getKeysByReference($this->extractKeys($index), $this->data, true);
+            return $this->crawlKeys($this->extractKeys($index), $this->data, function ($data, $key) {
+                return $data[$key];
+            }, true);
         } catch (\Exception $e) {
             return null;
         }
@@ -417,8 +419,10 @@ class JSON implements \ArrayAccess
      */
     public function set(string $index, $value): self
     {
-        $element = &$this->getKeysByReference($this->extractKeys($index), $this->data);
-        $element = $this->getOptimalValue($value);
+        $value = $this->getOptimalValue($value);
+        $this->crawlKeys($this->extractKeys($index), $this->data, function (&$data, $key) use ($value) {
+            $data[$key] = $value;
+        });
         return $this;
     }
 
@@ -430,8 +434,9 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index): self
     {
-        $element = &$this->getKeysByReference($this->extractKeys($index), $this->data);
-        unset($element);
+        $this->crawlKeys($this->extractKeys($index), $this->data, function (&$data, $key) {
+            unset($data[$key]);
+        }, true);
         return $this;
     }
 
