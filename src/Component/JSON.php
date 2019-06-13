@@ -331,7 +331,7 @@ class JSON implements \ArrayAccess
         // End of recursion
         if (count($keys) === 1) {
             $lastKey = $keys[0];
-            if ($data[$lastKey] === null) {
+            if (!array_key_exists($lastKey, $data)) {
                 if ($strictIndexing) {
                     throw new \Exception("The key '$lastKey' does not exist");
                 } else {
@@ -345,7 +345,7 @@ class JSON implements \ArrayAccess
             // Get the current key, and remove it from keys array
             $currentKey = array_shift($keys);
 
-            if ($data[$currentKey] === null) {
+            if (!array_key_exists($currentKey, $data)) {
                 if ($strictIndexing) {
                     throw new \Exception("The key '$currentKey' does not exist");
                 } else {
@@ -356,7 +356,7 @@ class JSON implements \ArrayAccess
             }
 
             // Recursion
-            return $this->getKeysByReference($keys, $this->data[$currentKey]);
+            return $this->getKeysByReference($keys, $data[$currentKey], $strictIndexing);
         }
     }
 
