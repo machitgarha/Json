@@ -24,23 +24,25 @@ class JSON implements \ArrayAccess
     /** @var array Holds JSON data as a complete native PHP array (to be handled more easily). */
     protected $data;
 
-    /** @var int Default data type. */
+    /** @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT. */
     protected $defaultDataType = null;
 
     /** @var bool To decode every valid JSON string when setting values or not. */
     protected $jsonDecodeAlways = false;
 
     // Data types
-    /** @var int The data without any type changes */
+    /** @var int The data type which you passed at creating new instance (i.e. constructor). */
     const TYPE_DEFAULT = 0;
-    /** @var int The data in the format of JSON string */
-    const TYPE_JSON = 1;
-    /** @var int The data as an object */
+    /** @var int JSON string data type. */
+    const TYPE_JSON_STRING = 1;
+    /** @var int Object data type (recursive), without converting indexed arrays to objects. */
     const TYPE_OBJECT = 2;
-    /** @var int The data as an array */
+    /** @var int Array data type (recursive). */
     const TYPE_ARRAY = 3;
-    /** @var int The data as a complete object, without even indexed arrays */
+    /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
     const TYPE_FULL_OBJECT = 4;
+    /** @var int JSON class data type, i.e. a new instance of the class itself. */
+    const TYPE_JSON_CLASS = 5;
 
     // Options
     /**
@@ -77,7 +79,7 @@ class JSON implements \ArrayAccess
         }
 
         if (is_string($data)) {
-            $this->defaultDataType = self::TYPE_JSON;
+            $this->defaultDataType = self::TYPE_JSON_STRING;
             // This also checks for any JSON string errors
             $this->data = self::convertJsonToArray($data);
             return;
@@ -194,7 +196,8 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as the determined type.
      *
-     * @param int $type Return type. Can be any of the JSON::TYPE_* constants.
+     * @param int $type Return type. Can be any of the JSON::TYPE_* constants, except
+     * JSON::TYPE_JSON_CLASS.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
      *
@@ -207,8 +210,8 @@ class JSON implements \ArrayAccess
         }
 
         switch ($type) {
-            case self::TYPE_JSON:
-                return $this->getDataAsJson();
+            case self::TYPE_JSON_STRING:
+                return $this->getDataAsJsonString();
             case self::TYPE_ARRAY:
                 return $this->getDataAsArray();
             case self::TYPE_OBJECT:
@@ -227,7 +230,7 @@ class JSON implements \ArrayAccess
      * http://php.net/json.constants}
      * @return string
      */
-    public function getDataAsJson(int $options = 0): string
+    public function getDataAsJsonString(int $options = 0): string
     {
         return json_encode($this->data, $options);
     }
@@ -477,7 +480,7 @@ class JSON implements \ArrayAccess
 
         // Define getValue function based on return type
         switch ($returnType) {
-            case self::TYPE_JSON:
+            case self::TYPE_JSON_STRING:
                 $getValue = function ($val) {
                     return new self($val);
                 };
@@ -521,7 +524,7 @@ class JSON implements \ArrayAccess
      */
     public function __toString(): string
     {
-        return $this->getDataAsJson();
+        return $this->getDataAsJsonString();
     }
 
     /**
