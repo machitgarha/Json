@@ -114,8 +114,9 @@ class JSON implements \ArrayAccess
     protected static function validateStringAsJson(string $data): array
     {
         json_decode($data);
-        if (json_last_error() === JSON_ERROR_NONE)
+        if (json_last_error() === JSON_ERROR_NONE) {
             return [true, $data];
+        }
         return [false, $data];
     }
 
@@ -140,8 +141,9 @@ class JSON implements \ArrayAccess
     public static function readValidJson(string $data)
     {
         list($isValidJson, $decodedJson) = self::validateStringAsJson($data);
-        if (!$isValidJson)
+        if (!$isValidJson) {
             throw new \Exception("Invalid JSON string");
+        }
         return $decodedJson;
     }
 
@@ -187,7 +189,6 @@ class JSON implements \ArrayAccess
      */
     protected function convertToJson($data): string
     {
-        
         return json_encode($data);
     }
 
@@ -234,15 +235,18 @@ class JSON implements \ArrayAccess
      */
     protected function getOptimalValue($value)
     {
-        if (is_array($value) || is_object($value))
+        if (is_array($value) || is_object($value)) {
             return self::convertToArray($value);
+        }
 
         // JSON_DECODE_ALWAYS handler
-        if ($this->jsonDecodeAlways && is_string($value))
+        if ($this->jsonDecodeAlways && is_string($value)) {
             // Validating JSON string
             try {
                 return self::convertJsonToArray($value);
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
+        }
         
         return $value;
     }
@@ -286,8 +290,9 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsJsonString(int $options = 0): string
     {
-        if ($this->isDataScalar())
+        if ($this->isDataScalar()) {
             return json_encode($this->data[0], $options);
+        }
         return json_encode($this->data, $options);
     }
 
