@@ -326,7 +326,25 @@ class JSON implements \ArrayAccess
         return self::convertToObject($this->data, true);
     }
 
-    protected function crawlKeys(array $keys, array &$data, callable $lastOperation, bool $strictIndexing = false)
+    /**
+     * Follows keys to do (a) specific operation(s) with the element.
+     * Crawl keys recursively, and find the requested element. Then, by using the closure, do a
+     * specific set of operations with that element.
+     * 
+     * @param array $keys The keys to be crawled recursively.
+     * @param array $data The data. It must be completely array (including its sub-elements), or
+     * you may encounter errors.
+     * @param callable $operation A set of operations to do with the element, as a closure. The
+     * closure will get two arguments:
+     * 1. The parent array of the element,
+     * 2. The key to be accessed to that element using the parent array. 
+     * The value returned by the closure will also be returned by this method.
+     * @param boolean $strictIndexing To create keys as empty arrays and continue recursion if the
+     * key cannot be found. For example, you can turn this on when you want to get an element's
+     * value and you want to ensure that the element exists.
+     * @return void
+     */
+    protected function crawlKeys(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
     {
         // End of recursion
         if (count($keys) === 1) {
@@ -338,7 +356,7 @@ class JSON implements \ArrayAccess
                     $data[$lastKey] = null;
                 }
             }
-            $lastOperation($data, $lastKey);
+            $operation($data, $lastKey);
         }
         // Crawl keys recursively
         else {
@@ -356,7 +374,7 @@ class JSON implements \ArrayAccess
             }
 
             // Recursion
-            return $this->crawlKeys($keys, $data[$currentKey], $lastOperation, $strictIndexing);
+            return $this->crawlKeys($keys, $data[$currentKey], $operation, $strictIndexing);
         }
     }
 
