@@ -68,8 +68,8 @@ class JSON implements \ArrayAccess
      * Prepares JSON data.
      *
      * @param mixed $data The data; can be either a countable value (i.e. a valid JSON string, array
-     * or object) or a scalar type. Data should not contain any closures; otherwise, they will be
-     * considered as empty objects.
+     * or object), a scalar type or NULL. Data should not contain any closures; otherwise, they
+     * will be considered as empty objects.
      * @param int $options The additional options. Possible values: JSON::JSON_DECODE_ALWAYS,
      * JSON::TREAT_AS_STRING.
      * @throws \InvalidArgumentException If data is not either countable or scalar.
@@ -93,7 +93,7 @@ class JSON implements \ArrayAccess
             return;
         }
 
-        if (is_scalar($data)) {
+        if (is_scalar($data) || $data === null) {
             $this->defaultDataType = self::TYPE_SCALAR;
             $this->data = [$data];
             return;
