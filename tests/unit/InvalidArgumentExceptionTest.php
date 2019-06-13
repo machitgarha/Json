@@ -36,9 +36,9 @@ class InvalidArgumentExceptionTest extends TestCase
      * @dataProvider resourceDataProvider
      * @dataProvider invalidJsonDataProvider
      */
-    public function testInvalidData($data, $jsonOptions = 0)
+    public function testInvalidData($data, $options = 0)
     {
-        new JSON($data);
+        new JSON($data, $options);
     }
 
     public function resourceDataProvider()
@@ -58,10 +58,13 @@ class InvalidArgumentExceptionTest extends TestCase
             "[0,1,2,3,4,5,6,]",
         ];
 
+        // Pass the option force JSON class to treat string as a JSON data
         $returnValue = [];
         foreach ($invalidJson as $json) {
-            $returnValue[] = [$json, JSON::JSON_DECODE_ALWAYS];
+            $returnValue[] = [$json, JSON::OPT_TREAT_AS_JSON_STRING];
         }
+
+        return $returnValue;
     }
 
     /**
