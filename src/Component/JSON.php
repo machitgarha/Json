@@ -354,32 +354,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Gets the value of keys in a data recursively.
-     *
-     * @param array $keys The keys.
-     * @param mixed $data The data to crawl keys in it.
-     * @return mixed The found value of keys. Returns null if one of keys cannot be found.
-     */
-    protected function getKeysRecursive(array $keys, $data)
-    {
-        $keysCount = count($keys);
-        // The end of the recursion, crawling keys has finished
-        if ($keysCount === 0) {
-            return $data;
-        }
-        // Crawl keys recursively
-        else {
-            if (!is_array($data)) {
-                return null;
-            }
-
-            // Get the current key, and remove it from keys array
-            $currentKey = array_shift($keys);
-            return $this->getKeysRecursive($keys, $this->data[$currentKey] ?? null);
-        }
-    }
-
-    /**
      * Sets the value of keys in a data recursively.
      *
      * @param array $keys The keys.
@@ -451,7 +425,7 @@ class JSON implements \ArrayAccess
      */
     public function get(string $index)
     {
-        return $this->getKeysRecursive($this->extractKeysFromIndex($index), $this->data);
+        return $this->getKeysByReference($this->extractKeysFromIndex($index), $this->data);
     }
 
     /**
