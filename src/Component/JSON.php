@@ -286,6 +286,8 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsJsonString(int $options = 0): string
     {
+        if ($this->isDataScalar())
+            return json_encode($this->data[0], $options);
         return json_encode($this->data, $options);
     }
 
