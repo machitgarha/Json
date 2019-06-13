@@ -45,15 +45,13 @@ class MethodTest extends TestCase
         $json = new JSON($data);
 
         // JSON::getData() assertions
-        $this->assertEquals($data, $json->getData(JSON::TYPE_DEFAULT));
+        $this->assertEquals(gettype($data), gettype($json->getData(JSON::TYPE_DEFAULT)));
         $this->assertEquals($asJson, $json->getData(JSON::TYPE_JSON_STRING));
         $this->assertEquals($asArray, $json->getData(JSON::TYPE_ARRAY));
-        $this->assertEquals($asObject, $json->getData(JSON::TYPE_OBJECT));
 
         // JSON::getDataAs*() assertions
         $this->assertEquals($asJson, $json->getDataAsJsonString());
         $this->assertEquals($asArray, $json->getDataAsArray());
-        $this->assertEquals($asObject, $json->getDataAsObject());
     }
 
     /** Provider for JSON::getData*() methods. */
@@ -63,7 +61,7 @@ class MethodTest extends TestCase
         return [
             [
                 [new \stdClass()],
-                "[{}]",
+                "[[]]",
                 [[]],
                 (object)[(object)[]]
             ],
