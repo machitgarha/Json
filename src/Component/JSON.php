@@ -359,7 +359,7 @@ class JSON implements \ArrayAccess
                     $data[$lastKey] = null;
                 }
             }
-            $operation($data, $lastKey);
+            return $operation($data, $lastKey);
         }
         // Crawl keys recursively
         else {
