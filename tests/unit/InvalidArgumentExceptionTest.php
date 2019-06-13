@@ -47,10 +47,6 @@ class InvalidArgumentExceptionTest extends TestCase
 
     public function badMethodCallProvider()
     {
-        return [
-            ["getData", [JSON::STRICT_INDEXING]],
-            ["set", ["key", "val", JSON::TYPE_DEFAULT]],
-            ["set", ["key", "val", JSON::TYPE_JSON]],
-        ];
+        return [];
     }
 }
