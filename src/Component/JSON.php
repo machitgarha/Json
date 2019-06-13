@@ -85,6 +85,22 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Checks a string data to be a valid JSON string.
+     *
+     * @param string $data Data to be validated.
+     * @return array An array of two values:
+     * [0]: Is the string a valid JSON or not,
+     * [1]: The decoded JSON string, and it will be null if the string is not a valid JSON.
+     */
+    protected static function validateStringAsJson(string $data): array
+    {
+        json_decode($data);
+        if (json_last_error() === JSON_ERROR_NONE)
+            return [true, $data];
+        return [false, $data];
+    }
+
+    /**
      * Checks if a string is a valid JSON or not.
      *
      * @param string $data Data to be checked.
@@ -92,10 +108,22 @@ class JSON implements \ArrayAccess
      */
     public static function isValidJson(string $data): bool
     {
-        json_decode($data);
-        if (json_last_error() === JSON_ERROR_NONE)
-            return true;
-        return false;
+        return self::validateStringAsJson($data)[0];
+    }
+
+    /**
+     * Reads a valid JSON string, and if it is invalid, throws an exception.
+     *
+     * @param string $data String data to be read.
+     * @return mixed
+     * @throws \Exception When data is an invalid JSON string.
+     */
+    public static function readValidJson(string $data)
+    {
+        list($isValidJson, $decodedJson) = self::validateStringAsJson($data);
+        if (!$isValidJson)
+            throw new \Exception("Invalid JSON string");
+        return $decodedJson;
     }
 
     /**
