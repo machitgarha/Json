@@ -160,7 +160,7 @@ class JSON implements \ArrayAccess
 
     /**
      * Sets data to an array, a scalar data or null.
-     * The recommended way to change JSON::$data property is using this method, as it does prevents 
+     * The recommended way to change JSON::$data property is using this method, as it does prevents
      * from an invalid data to be replaced in JSON::$data.
      *
      * @param array|int|string|float|bool|null $data
@@ -170,8 +170,9 @@ class JSON implements \ArrayAccess
      */
     protected function setDataTo($data)
     {
-        if (!(is_array($data) || is_scalar($data) || is_null($data)))
+        if (!(is_array($data) || is_scalar($data) || is_null($data))) {
             throw new \InvalidArgumentException("Invalid data type");
+        }
         $this->data = $data;
     }
 
@@ -291,7 +292,7 @@ class JSON implements \ArrayAccess
 
     /**
      * Converts an object to an array completely.
-     * 
+     *
      * @param array|object $data Data as an array or an object.
      * @return array
      */
@@ -305,7 +306,7 @@ class JSON implements \ArrayAccess
      * Converts an array or an object to an object recursively.
      *
      * @param array $data Data as array or object.
-     * @param bool $forceObject Whether to convert indexed arrays to objects or not. It may be 
+     * @param bool $forceObject Whether to convert indexed arrays to objects or not. It may be
      * obvious, but data root will always be an object, even with numeric indexes.
      * @return object
      * @throws \InvalidArgumentException If data is not countable.
