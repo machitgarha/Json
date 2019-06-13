@@ -54,6 +54,12 @@ class JSON implements \ArrayAccess
      * extract it to an array and make further operations, like setting the new value.
      */
     const JSON_DECODE_ALWAYS = 1;
+    /**
+     * @var int Consider data passed into the constructor as string, even if it's a valid JSON data;
+     * in other words, don't decode it. This option has effect only in the constructor, and no other
+     * methods will be affected by this.
+     */
+    const TREAT_AS_STRING = 2;
 
     /**
      * Prepares JSON data.
@@ -68,6 +74,7 @@ class JSON implements \ArrayAccess
     {
         // Set options
         $this->jsonDecodeAlways = $options & self::JSON_DECODE_ALWAYS;
+        $treatAsString = $options & self::TREAT_AS_STRING;
 
         if (($isObject = is_object($data)) || is_array($data)) {
             $this->defaultDataType = $isObject ? self::TYPE_OBJECT : self::TYPE_ARRAY;
@@ -75,7 +82,7 @@ class JSON implements \ArrayAccess
             return;
         }
 
-        if (is_string($data) && self::isValidJson($data)) {
+        if (!$treatAsString && is_string($data) && self::isValidJson($data)) {
             $this->defaultDataType = self::TYPE_JSON_STRING;
             // This also checks for any JSON string errors
             $this->data = self::convertJsonToArray($data);
