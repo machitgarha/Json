@@ -96,8 +96,9 @@ class JSON implements \ArrayAccess
             $data = json_decode($data, true);
             
             // Set scalar data type as default
-            if (is_scalar($data) || $data === null)
+            if (is_scalar($data) || $data === null) {
                 $this->defaultDataType = self::TYPE_SCALAR;
+            }
 
             $this->data = $data;
             return;
@@ -465,10 +466,11 @@ class JSON implements \ArrayAccess
     public function get(string $index = null)
     {
         if ($this->isDataScalar()) {
-            if ($index === null)
-                return $this->data[0];
-            else
+            if ($index === null) {
+                return $this->data;
+            } else {
                 throw new \InvalidArgumentException("Data is scalar, indexing is invalid");
+            }
         }
 
         try {
@@ -483,12 +485,21 @@ class JSON implements \ArrayAccess
     /**
      * Sets the value to an index in the data.
      *
-     * @param string $index The index.
      * @param mixed $value The value to be set.
+     * @param string $index The index. Pass null if data is scalar.
      * @return self
      */
-    public function set(string $index = null, $value): self
+    public function set($value, string $index = null): self
     {
+        if ($this->isDataScalar()) {
+            if ($index === null) {
+                $this->data = $value;
+                return $this;
+            } else {
+                throw new \InvalidArgumentException("Data is scalar, indexing is invalid");
+            }
+        }
+
         $value = $this->getOptimalValue($value);
         $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
             $data[$key] = $value;
