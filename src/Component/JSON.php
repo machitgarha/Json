@@ -120,7 +120,7 @@ class JSON implements \ArrayAccess
 
         if ($type = self::isArrayOrObject($data)) {
             $this->defaultDataType = $type;
-            $this->data = self::convertToArray($data);
+            $this->setDataTo(self::convertToArray($data));
             return;
         }
 
@@ -137,7 +137,7 @@ class JSON implements \ArrayAccess
                     $this->defaultDataType = self::TYPE_SCALAR;
                 }
 
-                $this->data = $data;
+                $this->setDataTo($decodedData);
                 return;
             }
         }
@@ -150,12 +150,29 @@ class JSON implements \ArrayAccess
          */
         if (is_scalar($data) || $data === null) {
             $this->defaultDataType = self::TYPE_SCALAR;
-            $this->data = $data;
+            $this->setDataTo($data);
             return;
         }
 
         // If data is invalid
         throw new \InvalidArgumentException("Data must be either countable, scalar or null");
+    }
+
+    /**
+     * Sets data to an array, a scalar data or null.
+     * The recommended way to change JSON::$data property is using this method, as it does prevents 
+     * from an invalid data to be replaced in JSON::$data.
+     *
+     * @param array|int|string|float|bool|null $data
+     * @return void
+     * @throws \InvalidArgumentException On passing invalid data, i.e. not an array or scalar or
+     * null.
+     */
+    protected function setDataTo($data)
+    {
+        if (!(is_array($data) || is_scalar($data) || is_null($data)))
+            throw new \InvalidArgumentException("Invalid data type");
+        $this->data = $data;
     }
 
     /**
@@ -313,7 +330,7 @@ class JSON implements \ArrayAccess
             return self::convertToArray($value);
         }
 
-        // OPT_JSON_DECODE_ALWAYS handler
+        // JSON::OPT_JSON_DECODE_ALWAYS handler
         if ($this->jsonDecodeAlways && is_string($value)) {
             // Validating JSON string
             try {
@@ -554,16 +571,17 @@ class JSON implements \ArrayAccess
      */
     public function set($value, string $index = null): self
     {
+        $value = $this->getOptimalValue($value);
+
         if ($this->isDataScalar()) {
             if ($index === null) {
-                $this->data = $value;
+                $this->setDataTo($value);
                 return $this;
             } else {
                 throw new \InvalidArgumentException("Data is scalar, indexing is invalid");
             }
         }
 
-        $value = $this->getOptimalValue($value);
         $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
             $data[$key] = $value;
         });
