@@ -450,8 +450,11 @@ class JSON implements \ArrayAccess
      */
     public function get(string $index = null)
     {
-        if ($index === null && $this->isDataScalar()) {
-            return $this->data[0];
+        if ($this->isDataScalar()) {
+            if ($index === null)
+                return $this->data[0];
+            else
+                throw new \InvalidArgumentException("Data is scalar, indexing is invalid");
         }
 
         try {
