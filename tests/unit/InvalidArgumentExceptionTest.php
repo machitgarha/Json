@@ -33,30 +33,20 @@ class InvalidArgumentExceptionTest extends TestCase
      * Tests invalid data.
      * Tests invalid data types and some invalid JSON strings.
      * @todo Import JSON schema.
-     * @dataProvider dataTypeProvider
-     * @dataProvider invalidJsonProvider
+     * @dataProvider invalidDataProvider
      */
     public function testInvalidData($data)
     {
         new JSON($data);
     }
 
-    public function dataTypeProvider()
+    public function invalidDataProvider()
     {
         return [
-            [null],
-            [true],
-            [1234],
-            [M_PI],
-            ["no"],
-            // Resources are not valid
-            [fopen(__FILE__, "r")]
-        ];
-    }
+            // Resources
+            [fopen(__FILE__, "r")],
 
-    public function invalidJsonProvider()
-    {
-        return [
+            // Invalid JSON strings
             ["[] // Commenting"],
             ["{'user_id':1234}"],
             ["[function () {}]"],
