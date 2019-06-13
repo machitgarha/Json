@@ -356,37 +356,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Sets the value of keys in a data recursively.
-     *
-     * @param array $keys The keys.
-     * @param mixed $value The value to set.
-     * @param array $data The data to crawl keys in it.
-     * @return self
-     */
-    protected function setKeysRecursive(
-        array $keys,
-        $value,
-        array &$data
-    ): self {
-        // Get the current key, and remove it from keys array
-        $currentKey = array_shift($keys);
-        // Reached the last key, so, setting the value
-        if (count($keys) === 0) {
-            $data[$currentKey] = $value;
-        // Recurs on remained keys
-        } else {
-            if ($data[$currentKey] === null) {
-                $data[$currentKey] = [];
-            }
-
-            $data = &$this->getKeyByReference($currentKey, $data);
-            $this->setKeysRecursive($keys, $value, $data);
-        }
-
-        return $this;
-    }
-
-    /**
      * Extract keys from an index into an array by the delimiter.
      *
      * @param string $index The index.
