@@ -337,7 +337,7 @@ class JSON implements \ArrayAccess
      * @param callable $operation A set of operations to do with the element, as a closure. The
      * closure will get two arguments:
      * 1. The parent array of the element,
-     * 2. The key to be accessed to that element using the parent array. 
+     * 2. The key (as integer or string) to be accessed to that element using the parent array. 
      * The value returned by the closure will also be returned by this method.
      * @param boolean $strictIndexing To create keys as empty arrays and continue recursion if the
      * key cannot be found. For example, you can turn this on when you want to get an element's
@@ -395,7 +395,7 @@ class JSON implements \ArrayAccess
     protected function crawlKeys(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
     {
         if (count($keys) === 0) {
-            return $operation($data, null);
+            return $operation([$data], 0);
         }
         return $this->crawlKeysRecursive($keys, $data, $operation, $strictIndexing);
     }
@@ -654,17 +654,11 @@ class JSON implements \ArrayAccess
     {
         $value = $this->getOptimalValue($value);
 
-        if ($index === null) {
-            array_push($this->data, $value);
-        } else {
-            if (($arrayValue = $this->getCountable($index)) === null) {
+        $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
+            if (!is_array($data))
                 throw new \Exception("The index is not countable");
-            }
-
-            array_push($arrayValue, $value);
-
-            $this->set($index, $arrayValue);
-        }
+            array_push($data[$key], $value);
+        }, true);
 
         return $this;
     }
@@ -679,17 +673,11 @@ class JSON implements \ArrayAccess
      */
     public function pop(string $index = null): self
     {
-        if ($index === null) {
-            array_pop($this->data);
-        } else {
-            if (($arrayValue = $this->getCountable($index)) === null) {
+        $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) {
+            if (!is_array($data))
                 throw new \Exception("The index is not countable");
-            }
-
-            array_pop($arrayValue);
-
-            $this->set($index, $arrayValue);
-        }
+            array_pop($data[$key]);
+        }, true);
 
         return $this;
     }
