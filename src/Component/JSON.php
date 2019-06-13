@@ -64,11 +64,6 @@ class JSON implements \ArrayAccess
      */
     public function __construct($data = [], $options = 0)
     {
-        /*
-         * Everything must be converted to a complete array, even the in-depth sub-elements. This
-         * makes life a lot easier!
-         */
-
         // Set options
         $this->jsonDecodeAlways = $options & self::JSON_DECODE_ALWAYS;
 
@@ -87,6 +82,20 @@ class JSON implements \ArrayAccess
 
         // If data is invalid (i.e. is not a countable one)
         throw new \InvalidArgumentException("Wrong data type");
+    }
+
+    /**
+     * Checks if a string is a valid JSON or not.
+     *
+     * @param string $data Data to be checked.
+     * @return boolean
+     */
+    public static function isValidJson(string $data): bool
+    {
+        json_decode($data);
+        if (json_last_error() === JSON_ERROR_NONE)
+            return true;
+        return false;
     }
 
     /**
@@ -462,7 +471,7 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index The index.
      * @param int $returnType Specifies the value type in each iteration if the value is
-     * countable. This can be of the JSON::TYPE_* constants. This way, you will ensure
+     * countable. Can be of the JSON::TYPE_* constants.
      * @return \Generator
      * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor
      * an object).
