@@ -35,8 +35,14 @@ class JSON implements \ArrayAccess
      */
     protected $defaultDataType = null;
 
-    /** @var bool To decode every valid JSON string when setting values or not. */
+    /** @var int Options passed to the constructor. */
+    protected $options = 0;
+
+    /** @var bool {@see self::JSON_DECODE_ALWAYS} */
     protected $jsonDecodeAlways = false;
+
+    /** @var int {@see self::PRINT_SCALAR_AS_IS} */
+    protected $printScalarAsIs = false;
 
     // Data types
     /** @var int The data type which you passed at creating new instance (i.e. constructor). */
@@ -52,7 +58,7 @@ class JSON implements \ArrayAccess
     /** @var int JSON class data type, i.e. a new instance of the class itself. */
     const TYPE_JSON_CLASS = 5;
     /** @var int Scalar data type, either an integer, string, float or boolean. */
-    const TYPE_SCALAR = 8;
+    const TYPE_SCALAR = 6;
 
     // Options
     /**
@@ -68,6 +74,11 @@ class JSON implements \ArrayAccess
      * methods will be affected by this.
      */
     const TREAT_AS_STRING = 2;
+    /**
+     * @var int When using 'echo' or like to print JSON class, i.e. when calling JSON::__toString(),
+     * print all scalar data as is, without encoding it as a JSON string. 
+     */
+    const PRINT_SCALAR_AS_IS = 4;
 
     /**
      * Prepares JSON data.
@@ -81,8 +92,11 @@ class JSON implements \ArrayAccess
      */
     public function __construct($data = [], int $options = 0)
     {
+        $this->options = $options;
+
         // Set options
         $this->jsonDecodeAlways = (bool)($options & self::JSON_DECODE_ALWAYS);
+        $this->printScalarAsIs = (bool)($options & self::PRINT_SCALAR_AS_IS);
         $treatAsString = (bool)($options & self::TREAT_AS_STRING);
 
         if (($isObject = is_object($data)) || is_array($data)) {
@@ -302,7 +316,7 @@ class JSON implements \ArrayAccess
     public function getDataAsJsonString(int $options = 0): string
     {
         if ($this->isDataScalar()) {
-            return json_encode($this->data[0], $options);
+            return json_encode($this->data, $options);
         }
         return json_encode($this->data, $options);
     }
@@ -593,12 +607,15 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Gets the JSON data string.
+     * Gets data as JSON string.
      *
      * @return string
      */
     public function __toString(): string
     {
+        if ($this->printScalarAsIs && $this->isDataScalar()) {
+            return $this->data;
+        }
         return $this->getDataAsJsonString();
     }
 
