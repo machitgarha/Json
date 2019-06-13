@@ -400,7 +400,11 @@ class JSON implements \ArrayAccess
         }
 
         if (count($keys) === 0) {
-            return $operation([$data], 0);
+            // Don't merge these two lines, to make passing by reference work
+            $data = [$data];
+            $returnValue = $operation($data, 0);
+            $data = $data[0];
+            return $returnValue;
         }
         return $this->crawlKeysRecursive($keys, $data, $operation, $strictIndexing);
     }
@@ -473,7 +477,7 @@ class JSON implements \ArrayAccess
      * @param mixed $value The value to be set.
      * @return self
      */
-    public function set(string $index, $value): self
+    public function set(string $index = null, $value): self
     {
         $value = $this->getOptimalValue($value);
         $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
