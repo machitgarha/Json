@@ -159,9 +159,9 @@ class MethodTest extends TestCase
         }
 
         // Checking the second argument
-        $this->assertInstanceOf(JSON::class, $json->iterate("apps", JSON::TYPE_JSON)->current());
         $this->assertIsArray($json->iterate("apps", JSON::TYPE_ARRAY)->current());
         $this->assertIsObject($json->iterate("apps", JSON::TYPE_OBJECT)->current());
+        $this->assertTrue(JSON::isValidJson($json->iterate("apps", JSON::TYPE_JSON_STRING)->current()));
     }
 
     /**
