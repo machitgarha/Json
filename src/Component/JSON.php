@@ -81,7 +81,8 @@ class JSON implements \ArrayAccess
         }
 
         // If data is invalid (i.e. is not a countable one)
-        throw new \InvalidArgumentException("Wrong data type");
+        throw new \InvalidArgumentException("Data must be an array, an object or a valid JSON"
+            . " string");
     }
 
     /**
@@ -104,7 +105,7 @@ class JSON implements \ArrayAccess
      * Checks if a string is a valid JSON or not.
      *
      * @param string $data Data to be checked.
-     * @return boolean
+     * @return bool
      */
     public static function isValidJson(string $data): bool
     {
@@ -115,7 +116,7 @@ class JSON implements \ArrayAccess
      * Reads a valid JSON string, and if it is invalid, throws an exception.
      *
      * @param string $data String data to be read.
-     * @return mixed
+     * @return mixed A non-null value.
      * @throws \Exception When data is an invalid JSON string.
      */
     public static function readValidJson(string $data)
