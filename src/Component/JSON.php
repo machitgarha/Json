@@ -344,6 +344,8 @@ class JSON implements \ArrayAccess
                 } else {
                     $data[$currentKey] = [];
                 }
+            } elseif (!is_array($data[$currentKey])) {
+                throw new \Exception("The key '$currentKey' contains non-countable value");
             }
 
             // Recursion
