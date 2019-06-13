@@ -43,6 +43,8 @@ class JSON implements \ArrayAccess
     const TYPE_FULL_OBJECT = 4;
     /** @var int JSON class data type, i.e. a new instance of the class itself. */
     const TYPE_JSON_CLASS = 5;
+    /** @var int Scalar data type, either an integer, string, float or boolean. */
+    const TYPE_SCALAR = 6;
 
     // Options
     /**
@@ -73,16 +75,21 @@ class JSON implements \ArrayAccess
             return;
         }
 
-        if (is_string($data)) {
+        if (is_string($data) && self::isValidJson($data)) {
             $this->defaultDataType = self::TYPE_JSON_STRING;
             // This also checks for any JSON string errors
             $this->data = self::convertJsonToArray($data);
             return;
         }
 
-        // If data is invalid (i.e. is not a countable one)
-        throw new \InvalidArgumentException("Data must be an array, an object or a valid JSON"
-            . " string");
+        if (is_scalar($data)) {
+            $this->defaultDataType = self::TYPE_SCALAR;
+            $this->data = [$data];
+            return;
+        }
+
+        // If data is invalid
+        throw new \InvalidArgumentException("Data must be either countable or scalar");
     }
 
     /**
@@ -520,7 +527,7 @@ class JSON implements \ArrayAccess
         switch ($returnType) {
             case self::TYPE_JSON_STRING:
                 $getValue = function ($val) {
-                    return new self($val);
+                    return self::convertToJson($val);
                 };
                 break;
 
