@@ -342,7 +342,10 @@ class JSON implements \ArrayAccess
      * @param boolean $strictIndexing To create keys as empty arrays and continue recursion if the
      * key cannot be found. For example, you can turn this on when you want to get an element's
      * value and you want to ensure that the element exists.
-     * @return void
+     * @return mixed Return the return value of the closure ($operation).
+     * @throws \Exception When strict indexing is enable but a key does not exist.
+     * @throws \Exception When a key doesn't contain an array (i.e. is non-countable) and cannot
+     * continue crawling keys.
      */
     protected function crawlKeys(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
     {
