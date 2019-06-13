@@ -21,7 +21,12 @@ namespace MAChitgarha\Component;
  */
 class JSON implements \ArrayAccess
 {
-    /** @var array Holds JSON data as a complete native PHP array (to be handled more easily). */
+    /**
+     * @var array|int|string|float|bool|null Holds JSON data as a complete native PHP array (to be
+     * handled more easily). If the data passed to the constructor is countable, then the data will
+     * be saved as an array; otherwise, if it's scalar or null, it will be saved exactly as it is.
+     * Also, these allowed types can be in a string that contains a valid JSON data.
+     */
     protected $data;
 
     /**
@@ -88,14 +93,14 @@ class JSON implements \ArrayAccess
 
         if (!$treatAsString && is_string($data) && self::isValidJson($data)) {
             $this->defaultDataType = self::TYPE_JSON_STRING;
-            // This also checks for any JSON string errors
-            $this->data = self::convertJsonToArray($data);
+            // Decode JSON string, in the case of countable data type, save it as an array
+            $this->data = json_decode($data, true);    
             return;
         }
 
         if (is_scalar($data) || $data === null) {
             $this->defaultDataType = self::TYPE_SCALAR;
-            $this->data = [$data];
+            $this->data = $data;
             return;
         }
 
