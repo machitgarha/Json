@@ -71,11 +71,11 @@ class JSON implements \ArrayAccess
      * JSON::TREAT_AS_STRING.
      * @throws \InvalidArgumentException If data is not either countable or scalar.
      */
-    public function __construct($data = [], $options = 0)
+    public function __construct($data = [], int $options = 0)
     {
         // Set options
-        $this->jsonDecodeAlways = $options & self::JSON_DECODE_ALWAYS;
-        $treatAsString = $options & self::TREAT_AS_STRING;
+        $this->jsonDecodeAlways = (bool)($options & self::JSON_DECODE_ALWAYS);
+        $treatAsString = (bool)($options & self::TREAT_AS_STRING);
 
         if (($isObject = is_object($data)) || is_array($data)) {
             $this->defaultDataType = $isObject ? self::TYPE_OBJECT : self::TYPE_ARRAY;
@@ -231,7 +231,7 @@ class JSON implements \ArrayAccess
      * @param mixed $value
      * @return mixed
      */
-    protected static function getOptimalValue($value)
+    protected function getOptimalValue($value)
     {
         if (is_array($value) || is_object($value))
             return self::convertToArray($value);
@@ -467,14 +467,11 @@ class JSON implements \ArrayAccess
      *
      * @param string $index The index.
      * @param mixed $value The value to be set.
-     * @param bool $extractJson Does value contains a countable JSON string, and you want to
-     * extract it to a regular value (i.e. treat it as an array)? Then using this option will be so
-     * useful!
      * @return self
      */
     public function set(string $index, $value): self
     {
-        $value = self::getOptimalValue($value);
+        $value = $this->getOptimalValue($value);
         $delimitedIndex = $this->extractKeysFromIndex($index);
 
         $this->setKeysRecursive($delimitedIndex, $value, $this->data);
@@ -671,7 +668,7 @@ class JSON implements \ArrayAccess
      */
     public function push($value, string $index = null): self
     {
-        $value = self::getOptimalValue($value);
+        $value = $this->getOptimalValue($value);
 
         if ($index === null) {
             array_push($this->data, $value);
@@ -699,7 +696,7 @@ class JSON implements \ArrayAccess
     public function pop(string $index = null): self
     {
         if ($index === null) {
-            array_push($this->data);
+            array_pop($this->data);
         } else {
             if (($arrayValue = $this->getCountable($index)) === null) {
                 throw new \Exception("The index is not countable");
