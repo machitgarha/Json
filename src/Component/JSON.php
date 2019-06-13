@@ -331,7 +331,7 @@ class JSON implements \ArrayAccess
      * Crawl keys recursively, and find the requested element. Then, by using the closure, do a
      * specific set of operations with that element.
      * 
-     * @param array $keys The keys to be crawled recursively.
+     * @param array $keys The keys to be crawled recursively (must not be empty).
      * @param array $data The data. It must be completely array (including its sub-elements), or
      * you may encounter errors.
      * @param callable $operation A set of operations to do with the element, as a closure. The
@@ -346,11 +346,17 @@ class JSON implements \ArrayAccess
      * @throws \Exception When strict indexing is enable but a key does not exist.
      * @throws \Exception When a key doesn't contain an array (i.e. is non-countable) and cannot
      * continue crawling keys.
+     * @throws \Exception If the keys is an empty array.
      */
-    protected function crawlKeys(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
+    protected function crawlKeysRecursive(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
     {
+        $keysCount = count($keys);
+
+        if ($keysCount === 0) {
+            throw new \Exception("Keys array cannot be empty");
+        }
         // End of recursion
-        if (count($keys) === 1) {
+        elseif ($keysCount === 1) {
             $lastKey = $keys[0];
             if (!array_key_exists($lastKey, $data)) {
                 if ($strictIndexing) {
@@ -364,21 +370,34 @@ class JSON implements \ArrayAccess
         // Crawl keys recursively
         else {
             // Get the current key, and remove it from keys array
-            $currentKey = array_shift($keys);
+            $curKey = array_shift($keys);
 
-            if (!array_key_exists($currentKey, $data)) {
+            if (!array_key_exists($curKey, $data)) {
                 if ($strictIndexing) {
-                    throw new \Exception("The key '$currentKey' does not exist");
+                    throw new \Exception("The key '$curKey' does not exist");
                 } else {
-                    $data[$currentKey] = [];
+                    $data[$curKey] = [];
                 }
-            } elseif (!is_array($data[$currentKey])) {
-                throw new \Exception("The key '$currentKey' contains non-countable value");
+            } elseif (!is_array($data[$curKey])) {
+                throw new \Exception("The key '$curKey' contains non-countable value");
             }
 
             // Recursion
-            return $this->crawlKeys($keys, $data[$currentKey], $operation, $strictIndexing);
+            return $this->crawlKeysRecursive($keys, $data[$curKey], $operation, $strictIndexing);
         }
+    }
+
+    /**
+     * Handles empty keys for {@link self::crawlKeysRecursive()}
+     *
+     * @see self::crawlKeysRecursive()
+     */
+    protected function crawlKeys(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
+    {
+        if (count($keys) === 0) {
+            return $operation($data, null);
+        }
+        return $this->crawlKeysRecursive($keys, $data, $operation, $strictIndexing);
     }
 
     /**
@@ -593,7 +612,7 @@ class JSON implements \ArrayAccess
     /**
      * Replaces data with a new data.
      *
-     * @param array|object|string $data The new data to be replaced.
+     * @param mixed $data The new data to be replaced.
      * @return self
      */
     public function exchange($data): self
