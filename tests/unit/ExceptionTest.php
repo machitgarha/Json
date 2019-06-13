@@ -24,9 +24,6 @@ class ExceptionTest extends TestCase
     protected function setUp()
     {
         $this->expectException(\Exception::class);
-
-        // Set up fixtures
-        $this->json = new JSON();
     }
 
     /**

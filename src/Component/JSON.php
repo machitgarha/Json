@@ -126,7 +126,7 @@ class JSON implements \ArrayAccess
             return;
         }
 
-        if (($treatAsJsonString || !$treatAsString) && is_string($data)) {
+        if (($treatAsJsonString || !$treatAsString) && $isString) {
             list($isJsonValid, $decodedData) = $this->validateStringAsJson($data);
 
             if (!$isJsonValid && $treatAsJsonString) {

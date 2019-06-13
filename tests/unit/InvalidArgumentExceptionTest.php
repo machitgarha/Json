@@ -29,42 +29,10 @@ class InvalidArgumentExceptionTest extends TestCase
         $this->json = new JSON([]);
     }
 
-    /**
-     * Tests invalid data.
-     * Tests invalid data types and some invalid JSON strings.
-     * @todo Import JSON schema.
-     * @dataProvider resourceDataProvider
-     * @dataProvider invalidJsonDataProvider
-     */
-    public function testInvalidData($data, $options = 0)
+    /** Tests invalid data. */
+    public function testInvalidData()
     {
-        new JSON($data, $options);
-    }
-
-    public function resourceDataProvider()
-    {
-        return [
-            [fopen(__FILE__, "r")],
-        ];
-    }
-
-    public function invalidJsonDataProvider()
-    {
-        $invalidJson = [
-            "[] // Commenting",
-            "{'user_id':1234}",
-            "[function () {}]",
-            "{color: \"red\"}",
-            "[0,1,2,3,4,5,6,]",
-        ];
-
-        // Pass the option force JSON class to treat string as a JSON data
-        $returnValue = [];
-        foreach ($invalidJson as $json) {
-            $returnValue[] = [$json, JSON::OPT_TREAT_AS_JSON_STRING];
-        }
-
-        return $returnValue;
+        new JSON(fopen(__FILE__, "r"));
     }
 
     /**
