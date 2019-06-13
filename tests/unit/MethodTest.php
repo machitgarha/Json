@@ -212,22 +212,6 @@ class MethodTest extends TestCase
     }
 
     /**
-     * Tests JSON::toFullObject() method.
-     * @dataProvider dataProvider
-     */
-    public function testToFullObject($data)
-    {
-        $json = new JSON($data);
-        
-        $this->assertIsObject($json->toFullObject()->getData());
-
-        // When data is fully converted to object, then it should not contain any arrays inside
-        foreach ($json->iterate() as $item) {
-            $this->assertIsNotArray($item);
-        }
-    }
-
-    /**
      * Provides prepared data to be used in JSON class.
      */
     public function dataProvider()
