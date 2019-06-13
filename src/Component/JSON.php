@@ -64,11 +64,12 @@ class JSON implements \ArrayAccess
     /**
      * Prepares JSON data.
      *
-     * @param string|array|object $data The data; can be either a JSON string, array or object.
-     * A JSON string must be a valid JSON object or array, and must not be a boolean, for example.
-     * It should not contain any closures, otherwise, they will be considered as empty objects.
-     * @throws \InvalidArgumentException When data is not a valid JSON (as described), an array or
-     * an object.
+     * @param mixed $data The data; can be either a countable value (i.e. a valid JSON string, array
+     * or object) or a scalar type. Data should not contain any closures; otherwise, they will be
+     * considered as empty objects.
+     * @param int $options The additional options. Possible values: JSON::JSON_DECODE_ALWAYS,
+     * JSON::TREAT_AS_STRING.
+     * @throws \InvalidArgumentException If data is not either countable or scalar.
      */
     public function __construct($data = [], $options = 0)
     {
