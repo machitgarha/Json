@@ -111,8 +111,6 @@ class JSON implements \ArrayAccess
         $treatAsString = (bool)($options & self::OPT_TREAT_AS_STRING);
 
         // Check data type
-        $isArray = is_array($data);
-        $isObject = is_object($data);
         $isString = is_string($data);
 
         if (($treatAsJsonString || $treatAsString) && !$isString) {
@@ -120,8 +118,8 @@ class JSON implements \ArrayAccess
                 . "the JSON::OPT_TREAT_AS_STRING or JSON::OPT_TREAT_AS_JSON_STRING options");
         }
 
-        if ($isObject || $isArray) {
-            $this->defaultDataType = $isObject ? self::TYPE_OBJECT : self::TYPE_ARRAY;
+        if ($type = self::isArrayOrObject($data)) {
+            $this->defaultDataType = $type;
             $this->data = self::convertToArray($data);
             return;
         }
@@ -205,6 +203,30 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Tells if data is an array or data to be either an array or object
+     *
+     * @param mixed $data The data.
+     * @param bool $throwException To throw exceptions when data is not either an array or an
+     * object or not.
+     * @return int 0 if is not any of them, JSON::TYPE_ARRAY if it is an array and JSON::TYPE_OBJECT
+     * if it is an object.
+     * @throws \InvalidArgumentException When $throwException is set to true and data is not either
+     * an array or an object.
+     */
+    protected static function isArrayOrObject($data, bool $throwException = false): int
+    {
+        $isArray = is_array($data);
+        $isObject = is_object($data);
+
+        if (!($isArray || $isObject) && $throwException) {
+            throw new \InvalidArgumentException("Data must be either an array or an object");
+        }
+
+        return ($isArray ? self::TYPE_ARRAY :
+            ($isObject ? self::TYPE_OBJECT : 0));
+    }
+
+    /**
      * Converts a JSON string to an array.
      *
      * @param string $data Data as JSON string.
@@ -242,24 +264,21 @@ class JSON implements \ArrayAccess
      *
      * @param mixed $data A countable data, either an array or an object.
      * @return string
-     * @throws \InvalidArgumentException If data is not countable.
      */
-    protected function convertToJson($data): string
+    protected static function convertCountableToJson($data): string
     {
         return json_encode($data);
     }
 
     /**
      * Converts an object to an array completely.
+     * 
      * @param array|object $data Data as an array or an object.
      * @return array
-     * @throws \InvalidArgumentException If data is not countable.
      */
     protected static function convertToArray($data): array
     {
-        if (!(is_object($data) || is_array($data))) {
-            throw new \InvalidArgumentException("Data must be either an array or an object");
-        }
+        self::isArrayOrObject($data, true);
 
         return json_decode(json_encode($data), true);
     }
@@ -274,9 +293,7 @@ class JSON implements \ArrayAccess
      */
     protected static function convertToObject($data, bool $forceObject = false): object
     {
-        if (!(is_object($data) || is_array($data))) {
-            throw new \InvalidArgumentException("Data must be either an array or an object");
-        }
+        self::isArrayOrObject($data, true);
 
         return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
     }
@@ -292,7 +309,7 @@ class JSON implements \ArrayAccess
      */
     protected function getOptimalValue($value)
     {
-        if (is_array($value) || is_object($value)) {
+        if (self::isArrayOrObject($value)) {
             return self::convertToArray($value);
         }
 
@@ -603,7 +620,7 @@ class JSON implements \ArrayAccess
         switch ($returnType) {
             case self::TYPE_JSON_STRING:
                 $getValue = function ($val) {
-                    return self::convertToJson($val);
+                    return self::convertCountableToJson($val);
                 };
                 break;
 
