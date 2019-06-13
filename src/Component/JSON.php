@@ -330,14 +330,14 @@ class JSON implements \ArrayAccess
      * Follows keys to do (a) specific operation(s) with the element.
      * Crawl keys recursively, and find the requested element. Then, by using the closure, do a
      * specific set of operations with that element.
-     * 
+     *
      * @param array $keys The keys to be crawled recursively (must not be empty).
      * @param array $data The data. It must be completely array (including its sub-elements), or
      * you may encounter errors.
      * @param callable $operation A set of operations to do with the element, as a closure. The
      * closure will get two arguments:
      * 1. The parent array of the element,
-     * 2. The key (as integer or string) to be accessed to that element using the parent array. 
+     * 2. The key (as integer or string) to be accessed to that element using the parent array.
      * The value returned by the closure will also be returned by this method.
      * @param boolean $strictIndexing To create keys as empty arrays and continue recursion if the
      * key cannot be found. For example, you can turn this on when you want to get an element's
@@ -388,12 +388,17 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Handles empty keys for {@link self::crawlKeysRecursive()}
+     * Handles empty keys and scalar data for {@link self::crawlKeysRecursive()}.
      *
      * @see self::crawlKeysRecursive()
+     * @throws \Exception If data is scalar.
      */
     protected function crawlKeys(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
     {
+        if ($this->isDataScalar()) {
+            throw new \Exception("Cannot operate with scalar data types");
+        }
+
         if (count($keys) === 0) {
             return $operation([$data], 0);
         }
@@ -655,8 +660,9 @@ class JSON implements \ArrayAccess
         $value = $this->getOptimalValue($value);
 
         $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
-            if (!is_array($data))
+            if (!is_array($data)) {
                 throw new \Exception("The index is not countable");
+            }
             array_push($data[$key], $value);
         }, true);
 
@@ -674,8 +680,9 @@ class JSON implements \ArrayAccess
     public function pop(string $index = null): self
     {
         $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) {
-            if (!is_array($data))
+            if (!is_array($data)) {
                 throw new \Exception("The index is not countable");
+            }
             array_pop($data[$key]);
         }, true);
 
