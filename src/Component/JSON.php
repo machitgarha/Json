@@ -391,7 +391,7 @@ class JSON implements \ArrayAccess
      * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping
      * them using a backslash.
      */
-    protected function extractKeys(string $index, string $delimiter = "."): array
+    protected function extractIndex(string $index, string $delimiter = "."): array
     {
         if ($index === "") {
             return [""];
@@ -423,7 +423,7 @@ class JSON implements \ArrayAccess
     public function get(string $index)
     {
         try {
-            return $this->crawlKeys($this->extractKeys($index), $this->data, function ($data, $key) {
+            return $this->crawlKeys($this->extractIndex($index), $this->data, function ($data, $key) {
                 return $data[$key];
             }, true);
         } catch (\Exception $e) {
@@ -441,7 +441,7 @@ class JSON implements \ArrayAccess
     public function set(string $index, $value): self
     {
         $value = $this->getOptimalValue($value);
-        $this->crawlKeys($this->extractKeys($index), $this->data, function (&$data, $key) use ($value) {
+        $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
             $data[$key] = $value;
         });
         return $this;
@@ -455,7 +455,7 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index): self
     {
-        $this->crawlKeys($this->extractKeys($index), $this->data, function (&$data, $key) {
+        $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) {
             unset($data[$key]);
         }, true);
         return $this;
