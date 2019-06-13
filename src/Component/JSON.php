@@ -454,13 +454,8 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index): self
     {
-        $this->set($index, null);
-
-        // Remove null value from the data
-        $this->data = array_filter($this->data, function ($val) {
-            return $val !== null;
-        });
-
+        $element = &$this->getKeysByReference($this->extractKeys($index), $this->data);
+        unset($element);
         return $this;
     }
 
