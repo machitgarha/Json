@@ -40,55 +40,40 @@ class MethodTest extends TestCase
      * Tests JSON::getData*() methods.
      * @dataProvider expectedGetDataReturnValuesProvider
      */
-    public function testGetData($expected, $actual)
+    public function testGetData($data, $asJson, $asArray, $asObject)
     {
-        $this->assertEquals($expected, $actual);
+        $json = new JSON($data);
+
+        // JSON::getData() assertions
+        $this->assertEquals($data, $json->getData(JSON::TYPE_DEFAULT));
+        $this->assertEquals($asJson, $json->getData(JSON::TYPE_JSON_STRING));
+        $this->assertEquals($asArray, $json->getData(JSON::TYPE_ARRAY));
+        $this->assertEquals($asObject, $json->getData(JSON::TYPE_OBJECT));
+
+        // JSON::getDataAs*() assertions
+        $this->assertEquals($asJson, $json->getDataAsJsonString());
+        $this->assertEquals($asArray, $json->getDataAsArray());
+        $this->assertEquals($asObject, $json->getDataAsObject());
     }
 
     /** Provider for JSON::getData*() methods. */
     public function expectedGetDataReturnValuesProvider()
     {
         // JSON data that we expect
-        $jsonData = [
+        return [
             [
-                "data" => [new \stdClass()],
-                "asJson" => "[{}]",
-                "asArray" => [[]],
-                "asObject" => (object)[(object)[]]
+                [new \stdClass()],
+                "[{}]",
+                [[]],
+                (object)[(object)[]]
             ],
             [
-                "data" => '{"instance":"JSON"}',
-                "asJson" => '{"instance":"JSON"}',
-                "asArray" => ["instance" => "JSON"],
-                "asObject" => (object)["instance" => "JSON"]
+                '{"instance":"JSON"}',
+                '{"instance":"JSON"}',
+                ["instance" => "JSON"],
+                (object)["instance" => "JSON"]
             ]
         ];
-
-        $jsonValidationProviderData = [];
-        foreach ($jsonData as $jsonDatum) {
-            $data = $jsonDatum["data"];
-            $json = new JSON($data);
-
-            $asJson = $jsonDatum["asJson"];
-            $asArray = $jsonDatum["asArray"];
-            $asObject = $jsonDatum["asObject"];
-            
-            // Add each of the JSON data as a provider template
-            $jsonValidationProviderData = array_merge($jsonValidationProviderData, [
-                // JSON::getData() assertions
-                [$data, $json->getData(JSON::TYPE_DEFAULT)],
-                [$asJson, $json->getData(JSON::TYPE_JSON_STRING)],
-                [$asArray, $json->getData(JSON::TYPE_ARRAY)],
-                [$asObject, $json->getData(JSON::TYPE_OBJECT)],
-
-                // JSON::getDataAs*() assertions
-                [$asJson, $json->getDataAsJsonString()],
-                [$asArray, $json->getDataAsArray()],
-                [$asObject, $json->getDataAsObject()]
-            ]);
-        }
-
-        return $jsonValidationProviderData;
     }
 
     /**
@@ -142,7 +127,7 @@ class MethodTest extends TestCase
 
         $this->assertFalse(isset($json[$index]));
 
-        $json->set($index, $value);
+        $json->set($value, $index);
         unset($json[$index]);
 
         $this->assertFalse(isset($json[$index]));
