@@ -125,7 +125,7 @@ class JSON implements \ArrayAccess
         }
 
         if (($treatAsJsonString || !$treatAsString) && $isString) {
-            list($isJsonValid, $decodedData) = $this->validateStringAsJson($data);
+            list($isJsonValid, $decodedData) = $this->validateStringAsJson($data, true);
 
             if (!$isJsonValid && $treatAsJsonString) {
                 throw new \Exception("JSON string is not valid");
@@ -179,13 +179,14 @@ class JSON implements \ArrayAccess
      * Checks a string data to be a valid JSON string.
      *
      * @param string $data Data to be validated.
+     * @param bool $assoc Return decoded JSON as associative array or not.
      * @return array An array of two values:
      * [0]: Is the string a valid JSON or not,
      * [1]: The decoded JSON string, and it will be null if the string is not a valid JSON.
      */
-    protected static function validateStringAsJson(string $data): array
+    protected static function validateStringAsJson(string $data, bool $assoc = true): array
     {
-        $decodedData = json_decode($data);
+        $decodedData = json_decode($data, $assoc);
         if (json_last_error() === JSON_ERROR_NONE) {
             return [true, $decodedData];
         }
