@@ -319,26 +319,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Gets a key from a data based on the data type.
-     *
-     * @param string $key The key.
-     * @param array|object $data The data to search in.
-     * @return mixed Return the value of the key in data, and if the data is not countable or the
-     * key does not exists, return null.
-     */
-    protected function getKey(string $key, $data)
-    {
-        if (is_array($data)) {
-            return $data[$key] ?? null;
-        }
-        if (is_object($data)) {
-            return $data->$key ?? null;
-        }
-        // If data is neither array nor object
-        return null;
-    }
-
-    /**
      * Returns a key by reference.
      * Returns the value of a key in a data by reference. If the key does not exist, sets it to
      * null before returning.
@@ -387,13 +367,13 @@ class JSON implements \ArrayAccess
      *
      * @param array $keys The keys.
      * @param mixed $value The value to set.
-     * @param mixed $data The data to crawl keys in it.
+     * @param array $data The data to crawl keys in it.
      * @return self
      */
     protected function setKeysRecursive(
         array $keys,
         $value,
-        &$data
+        array &$data
     ): self {
         // Get the current key, and remove it from keys array
         $currentKey = array_shift($keys);
@@ -402,12 +382,7 @@ class JSON implements \ArrayAccess
             $data[$currentKey] = $value;
         // Recurs on remained keys
         } else {
-            /*
-             * If the current key does not exist, set it to an empty countable element based on
-             * indexing type. After making sure that the key exists, change the reference of the
-             * data to the data key, for next recursion.
-             */
-            if ($this->getKey($currentKey, $data) === null) {
+            if ($data[$currentKey] === null) {
                 $data[$currentKey] = [];
             }
 
