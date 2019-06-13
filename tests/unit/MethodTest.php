@@ -77,12 +77,12 @@ class MethodTest extends TestCase
             $jsonValidationProviderData = array_merge($jsonValidationProviderData, [
                 // JSON::getData() assertions
                 [$data, $json->getData(JSON::TYPE_DEFAULT)],
-                [$asJson, $json->getData(JSON::TYPE_JSON)],
+                [$asJson, $json->getData(JSON::TYPE_JSON_STRING)],
                 [$asArray, $json->getData(JSON::TYPE_ARRAY)],
                 [$asObject, $json->getData(JSON::TYPE_OBJECT)],
 
                 // JSON::getDataAs*() assertions
-                [$asJson, $json->getDataAsJson()],
+                [$asJson, $json->getDataAsJsonString()],
                 [$asArray, $json->getDataAsArray()],
                 [$asObject, $json->getDataAsObject()]
             ]);
@@ -95,11 +95,11 @@ class MethodTest extends TestCase
      * Tests JSON::set() and JSON::get() methods.
      * @dataProvider indexValuePairsProvider
      */
-    public function testSetAndGet(string $index, $value, $indexingType = JSON::TYPE_ARRAY)
+    public function testSetAndGet(string $index, $value)
     {
         $json = new JSON();
 
-        $json->set($index, $value, $indexingType);
+        $json->set($value, $index);
         $this->assertEquals($value, $json->get($index));
     }
 
@@ -123,7 +123,7 @@ class MethodTest extends TestCase
     {
         $json = new JSON();
 
-        $json->set($index, $value);
+        $json->set($value, $index);
 
         $this->assertTrue($json->isSet($index));
         $this->assertTrue(isset($json[$index]));
@@ -137,7 +137,7 @@ class MethodTest extends TestCase
     {
         $json = new JSON();
 
-        $json->set($index, $value);
+        $json->set($value, $index);
         $json->unset($index);
 
         $this->assertFalse(isset($json[$index]));
