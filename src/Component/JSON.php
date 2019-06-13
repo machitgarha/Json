@@ -24,7 +24,10 @@ class JSON implements \ArrayAccess
     /** @var array Holds JSON data as a complete native PHP array (to be handled more easily). */
     protected $data;
 
-    /** @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT. */
+    /**
+     * @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT,
+     * TYPE_SCALAR (class constants).
+     */
     protected $defaultDataType = null;
 
     /** @var bool To decode every valid JSON string when setting values or not. */
@@ -154,7 +157,7 @@ class JSON implements \ArrayAccess
     {
         $decodedData = json_decode($data, true);
         if (!is_array($decodedData)) {
-            throw new \InvalidArgumentException("Invalid (non-objective) JSON string");
+            throw new \InvalidArgumentException("Non-countable JSON string");
         }
         return $decodedData;
     }
@@ -170,7 +173,7 @@ class JSON implements \ArrayAccess
     {
         $decodedData = json_decode($data);
         if (!is_object($decodedData)) {
-            throw new \InvalidArgumentException("Non-objective JSON string");
+            throw new \InvalidArgumentException("Non-countable JSON string");
         }
         return $decodedData;
     }
@@ -182,11 +185,9 @@ class JSON implements \ArrayAccess
      * @return string
      * @throws \InvalidArgumentException If data is not countable.
      */
-    protected static function convertToJson($data): string
+    protected function convertToJson($data): string
     {
-        if (!(is_array($data) || is_object($data))) {
-            throw new \InvalidArgumentException("Data must be countable (i.e. array or object)");
-        }
+        
         return json_encode($data);
     }
 
@@ -318,22 +319,36 @@ class JSON implements \ArrayAccess
         return self::convertToObject($this->data, true);
     }
 
-    /**
-     * Returns a key by reference.
-     * Returns the value of a key in a data by reference. If the key does not exist, sets it to
-     * null before returning.
-     *
-     * @param string $key The key.
-     * @param array $data The data to search in.
-     * @return mixed The value of the key in the data by reference.
-     * @throws \InvalidArgumentException When data is not countable.
-     */
-    protected function &getKeyByReference(string $key, array &$data)
+    protected function &getKeysByReference(array $keys, array &$data, bool $strictIndexing = false)
     {
-        if (!isset($data[$key])) {
-            $data[$key] = null;
+        // End of recursion
+        if (count($keys) === 1) {
+            $lastKey = $keys[0];
+            if ($data[$lastKey] === null) {
+                if ($strictIndexing) {
+                    throw new \Exception("The key '$lastKey' does not exist");
+                } else {
+                    $data[$lastKey] = null;
+                }
+            }
+            return $data[$lastKey];
         }
-        return $data[$key];
+        // Crawl keys recursively
+        else {
+            // Get the current key, and remove it from keys array
+            $currentKey = array_shift($keys);
+
+            if ($data[$currentKey] === null) {
+                if ($strictIndexing) {
+                    throw new \Exception("The key '$currentKey' does not exist");
+                } else {
+                    $data[$currentKey] = [];
+                }
+            }
+
+            // Recursion
+            return $this->getKeysByReference($keys, $this->data[$currentKey]);
+        }
     }
 
     /**
@@ -683,5 +698,15 @@ class JSON implements \ArrayAccess
         }
 
         return $this;
+    }
+
+    /**
+     * Tells whether data is scalar or not.
+     *
+     * @return bool
+     */
+    protected function isDataScalar(): bool
+    {
+        return $this->defaultDataType === self::TYPE_SCALAR;
     }
 }
