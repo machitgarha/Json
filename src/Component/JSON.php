@@ -38,10 +38,10 @@ class JSON implements \ArrayAccess
     /** @var int Options passed to the constructor. */
     protected $options = 0;
 
-    /** @var bool {@see self::JSON_DECODE_ALWAYS} */
+    /** @var bool {@see self::OPT_JSON_DECODE_ALWAYS} */
     protected $jsonDecodeAlways = false;
 
-    /** @var int {@see self::PRINT_SCALAR_AS_IS} */
+    /** @var int {@see self::OPT_PRINT_SCALAR_AS_IS} */
     protected $printScalarAsIs = false;
 
     // Data types
@@ -67,18 +67,25 @@ class JSON implements \ArrayAccess
      * that checks if a JSON string is a valid one and contains an object; and if it is, then
      * extract it to an array and make further operations, like setting the new value.
      */
-    const JSON_DECODE_ALWAYS = 1;
+    const OPT_JSON_DECODE_ALWAYS = 1;
     /**
      * @var int Consider data passed into the constructor as string, even if it's a valid JSON data;
      * in other words, don't decode it. This option has effect only in the constructor, and no other
-     * methods will be affected by this.
+     * methods will be affected by this. It won't work if you use it in combination with
+     * JSON::OPT_TREAT_AS_JSON_STRING.
      */
-    const TREAT_AS_STRING = 2;
+    const OPT_TREAT_AS_STRING = 2;
+    /**
+     * @var int Consider data passed into the constructor as a JSON string. Using this option leads
+     * to exceptions if the JSON string is not valid. This option has effect only in the
+     * constructor, and no other methods will be affected by this.
+     */
+    const OPT_TREAT_AS_JSON_STRING = 8;
     /**
      * @var int When using 'echo' or like to print JSON class, i.e. when calling JSON::__toString(),
-     * print all scalar data as is, without encoding it as a JSON string. 
+     * print all scalar data as is, without encoding it as a JSON string.
      */
-    const PRINT_SCALAR_AS_IS = 4;
+    const OPT_PRINT_SCALAR_AS_IS = 4;
 
     /**
      * Prepares JSON data.
@@ -86,38 +93,63 @@ class JSON implements \ArrayAccess
      * @param mixed $data The data; can be either a countable value (i.e. a valid JSON string, array
      * or object), a scalar type or NULL. Data should not contain any closures; otherwise, they
      * will be considered as empty objects.
-     * @param int $options The additional options. Possible values: JSON::JSON_DECODE_ALWAYS,
-     * JSON::TREAT_AS_STRING.
-     * @throws \InvalidArgumentException If data is not either countable or scalar.
+     * @param int $options The additional options. Can be one of the JSON::OPT_* constants.
+     * @throws \InvalidArgumentException Using one of the JSON::OPT_TREAT_AS_STRING or
+     * JSON::OPT_TREAT_AS_JSON_STRING options and passing data as non-string.
+     * @throws \InvalidArgumentException If data is not either countable, scalar or null.
+     * @throws \Exception If JSON::OPT_TREAT_AS_JSON_STRING is enabled and data is not a valid JSON.
      */
     public function __construct($data = [], int $options = 0)
     {
         $this->options = $options;
 
-        // Set options
-        $this->jsonDecodeAlways = (bool)($options & self::JSON_DECODE_ALWAYS);
-        $this->printScalarAsIs = (bool)($options & self::PRINT_SCALAR_AS_IS);
-        $treatAsString = (bool)($options & self::TREAT_AS_STRING);
+        // Set global options
+        $this->jsonDecodeAlways = (bool)($options & self::OPT_JSON_DECODE_ALWAYS);
+        $this->printScalarAsIs = (bool)($options & self::OPT_PRINT_SCALAR_AS_IS);
 
-        if (($isObject = is_object($data)) || is_array($data)) {
+        $treatAsJsonString = (bool)($options & self::OPT_TREAT_AS_JSON_STRING);
+        $treatAsString = (bool)($options & self::OPT_TREAT_AS_STRING);
+
+        // Check data type
+        $isArray = is_array($data);
+        $isObject = is_object($data);
+        $isString = is_string($data);
+
+        if (($treatAsJsonString || $treatAsString) && !$isString) {
+            throw new \InvalidArgumentException("You must pass data as string when you use one of "
+                . "the JSON::OPT_TREAT_AS_STRING or JSON::OPT_TREAT_AS_JSON_STRING options");
+        }
+
+        if ($isObject || $isArray) {
             $this->defaultDataType = $isObject ? self::TYPE_OBJECT : self::TYPE_ARRAY;
             $this->data = self::convertToArray($data);
             return;
         }
 
-        if (!$treatAsString && is_string($data) && self::isValidJson($data)) {
-            $this->defaultDataType = self::TYPE_JSON_STRING;
-            $data = json_decode($data, true);
-            
-            // Set scalar data type as default
-            if (is_scalar($data) || $data === null) {
-                $this->defaultDataType = self::TYPE_SCALAR;
-            }
+        if (($treatAsJsonString || !$treatAsString) && is_string($data)) {
+            list($isJsonValid, $decodedData) = $this->validateStringAsJson($data);
 
-            $this->data = $data;
-            return;
+            if (!$isJsonValid && $treatAsJsonString) {
+                throw new \Exception("JSON string is not valid");
+            }
+            
+            if ($isJsonValid) {
+                $this->defaultDataType = self::TYPE_JSON_STRING;
+                if (is_scalar($decodedData) || $decodedData === null) {
+                    $this->defaultDataType = self::TYPE_SCALAR;
+                }
+
+                $this->data = $data;
+                return;
+            }
         }
 
+        /*
+         * The code will NOT reach here, if, JSON::OPT_TREAT_AS_JSON_STRING is enabled. So, the
+         * code will reach here only if one of the following things happen:
+         * 1. JSON::OPT_TREAT_AS_STRING is enabled.
+         * 2. JSON::OPT_TREAT_AS_STRING is not enabled, and data is not a valid JSON string.
+         */
         if (is_scalar($data) || $data === null) {
             $this->defaultDataType = self::TYPE_SCALAR;
             $this->data = $data;
@@ -125,7 +157,7 @@ class JSON implements \ArrayAccess
         }
 
         // If data is invalid
-        throw new \InvalidArgumentException("Data must be either countable or scalar");
+        throw new \InvalidArgumentException("Data must be either countable, scalar or null");
     }
 
     /**
@@ -253,7 +285,7 @@ class JSON implements \ArrayAccess
      * Get the desirable value to be used elsewhere.
      * It will convert all countable values to full-indexed arrays. All other values than countable
      * values would be returned exactly the same.
-     * Also, if JSON_DECODE_ALWAYS option is enabled, then it returns all
+     * Also, if OPT_JSON_DECODE_ALWAYS option is enabled, then it returns all
      *
      * @param mixed $value
      * @return mixed
@@ -264,7 +296,7 @@ class JSON implements \ArrayAccess
             return self::convertToArray($value);
         }
 
-        // JSON_DECODE_ALWAYS handler
+        // OPT_JSON_DECODE_ALWAYS handler
         if ($this->jsonDecodeAlways && is_string($value)) {
             // Validating JSON string
             try {
