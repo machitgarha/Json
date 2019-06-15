@@ -43,7 +43,7 @@ class JSON implements \ArrayAccess
     /** @var bool {@see self::OPT_JSON_DECODE_ALWAYS} */
     protected $jsonDecodeAlways = false;
 
-    /** @var int {@see self::OPT_PRINT_SCALAR_AS_IS} */
+    /** @var bool {@see self::OPT_PRINT_SCALAR_AS_IS} */
     protected $printScalarAsIs = false;
 
     // Data types
@@ -167,7 +167,7 @@ class JSON implements \ArrayAccess
      *
      * @param array|int|string|float|bool|null $data The data to be replaced in JSON::$data.
      * @return void
-     * @throws \InvalidArgumentException If invalid data is passed; anything except an array, a 
+     * @throws \InvalidArgumentException If invalid data is passed; anything except an array, a
      * scalar value or NULL.
      */
     protected function setDataTo($data)
@@ -575,7 +575,7 @@ class JSON implements \ArrayAccess
     /**
      * Gets the value of an index in the data.
      *
-     * @param string $index The index.
+     * @param ?string $index The index.
      * @return mixed The value of the index. Returns null if the index not found.
      */
     public function get(string $index = null)
@@ -601,7 +601,7 @@ class JSON implements \ArrayAccess
      * Sets the value to an index in the data.
      *
      * @param mixed $value The value to be set.
-     * @param string $index The index. Pass null if data is scalar.
+     * @param ?string $index The index. Pass null if data is scalar.
      * @return self
      */
     public function set($value, string $index = null): self
