@@ -18,14 +18,16 @@ namespace MAChitgarha\Component;
  * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
  * @todo Import all methods from \ArrayObject.
  * @todo {@see https://stackoverflow.com/questions/29308898/how-do-i-extract-data-from-json-with-php}
+ * @todo Add toArray() method for scalar types.
+ * @todo Add clear() method to clear an array.
  */
 class JSON implements \ArrayAccess
 {
     /**
      * @var array|int|string|float|bool|null Holds JSON data as a complete native PHP array (to be
      * handled more easily). If the data passed to the constructor is countable, then the data will
-     * be saved as an array; otherwise, if it's scalar or null, it will be saved exactly as it is.
-     * Also, these allowed types can be in a string that contains a valid JSON data.
+     * be saved as an array; otherwise, if it's scalar, it will be saved exactly as it is. Also,
+     * these allowed types can be in a string that contains a valid JSON data.
      */
     protected $data;
 
@@ -57,7 +59,7 @@ class JSON implements \ArrayAccess
     const TYPE_FULL_OBJECT = 4;
     /** @var int JSON class data type, i.e. a new instance of the class itself. */
     const TYPE_JSON_CLASS = 5;
-    /** @var int Scalar data type, either an integer, string, float or boolean. */
+    /** @var int Scalar data type, either an integer, a string, a float, a boolean or NULL. */
     const TYPE_SCALAR = 6;
 
     // Options
@@ -90,13 +92,13 @@ class JSON implements \ArrayAccess
     /**
      * Prepares JSON data.
      *
-     * @param mixed $data The data; can be either a countable value (i.e. a valid JSON string, array
-     * or object), a scalar type or NULL. Data should not contain any closures; otherwise, they
-     * will be considered as empty objects.
+     * @param mixed $data The data; can be either countable (i.e. a valid JSON string, array or
+     * object) or scalar. Data should not contain any closures; otherwise, they will be considered
+     * as empty objects.
      * @param int $options The additional options. Can be one of the JSON::OPT_* constants.
      * @throws \InvalidArgumentException Using one of the JSON::OPT_TREAT_AS_STRING or
      * JSON::OPT_TREAT_AS_JSON_STRING options and passing data as non-string.
-     * @throws \InvalidArgumentException If data is not either countable, scalar or null.
+     * @throws \InvalidArgumentException If data is neither countable nor scalar.
      * @throws \Exception If JSON::OPT_TREAT_AS_JSON_STRING is enabled and data is not a valid JSON.
      */
     public function __construct($data = [], int $options = 0)
@@ -163,10 +165,10 @@ class JSON implements \ArrayAccess
      * The recommended way to change JSON::$data property is using this method, as it does prevents
      * from an invalid data to be replaced in JSON::$data.
      *
-     * @param array|int|string|float|bool|null $data
+     * @param array|int|string|float|bool|null $data The data to be replaced in JSON::$data.
      * @return void
-     * @throws \InvalidArgumentException On passing invalid data, i.e. not an array or scalar or
-     * null.
+     * @throws \InvalidArgumentException If invalid data is passed; anything except an array, a 
+     * scalar value or NULL.
      */
     protected function setDataTo($data)
     {
@@ -243,6 +245,36 @@ class JSON implements \ArrayAccess
 
         return ($isArray ? self::TYPE_ARRAY :
             ($isObject ? self::TYPE_OBJECT : 0));
+    }
+
+    /**
+     * Tells whether data type is scalar or not.
+     * A scalar type, can be an integer, a string, a float, a boolean, or a null value.
+     *
+     * @param mixed $data The data.
+     * @param bool $throwException Throw exceptions when data is not scalar?
+     * @return bool
+     * @throws \InvalidArgumentException When $throwException is set to true and data is not scalar.
+     */
+    protected static function isScalar($data, bool $throwException = false): bool
+    {
+        $isScalar = is_scalar($data) || $data === null;
+
+        if (!$isScalar && $throwException) {
+            throw new \InvalidArgumentException("Data must be scalar");
+        }
+
+        return $isScalar;
+    }
+
+    /**
+     * Tells whether JSON::$data is scalar or not.
+     *
+     * @return bool
+     */
+    protected function isDataScalar()
+    {
+        return self::isScalar($this->data);
     }
 
     /**
@@ -348,7 +380,7 @@ class JSON implements \ArrayAccess
      * Returns data as the determined type.
      *
      * @param int $type Return type. Can be any of the JSON::TYPE_* constants, except
-     * JSON::TYPE_JSON_CLASS.
+     * JSON::TYPE_JSON_CLASS and JSON::TYPE_SCALAR.
      * @return string|array|object
      * @throws \InvalidArgumentException If the requested type is unknown.
      *
@@ -370,7 +402,7 @@ class JSON implements \ArrayAccess
             case self::TYPE_FULL_OBJECT:
                 return $this->getDataAsFullObject();
             default:
-                throw new \InvalidArgumentException("Unknown data type");
+                throw new \InvalidArgumentException("Unknown requested data type");
         }
     }
 
@@ -383,9 +415,6 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsJsonString(int $options = 0): string
     {
-        if ($this->isDataScalar()) {
-            return json_encode($this->data, $options);
-        }
         return json_encode($this->data, $options);
     }
 
@@ -424,7 +453,8 @@ class JSON implements \ArrayAccess
      * Crawl keys recursively, and find the requested element. Then, by using the closure, do a
      * specific set of operations with that element.
      *
-     * @param array $keys The keys to be crawled recursively (must not be empty).
+     * @param array $keys The keys to be crawled recursively. If you pass it an empty array, then
+     * the method won't do anything.
      * @param array $data The data. It must be completely array (including its sub-elements), or
      * you may encounter errors.
      * @param callable $operation A set of operations to do with the element, as a closure. The
@@ -436,20 +466,16 @@ class JSON implements \ArrayAccess
      * key cannot be found. For example, you can turn this on when you want to get an element's
      * value and you want to ensure that the element exists.
      * @return mixed Return the return value of the closure ($operation).
-     * @throws \Exception When strict indexing is enable but a key does not exist.
-     * @throws \Exception When a key doesn't contain an array (i.e. is non-countable) and cannot
-     * continue crawling keys.
-     * @throws \Exception If the keys is an empty array.
+     * @throws \Exception When strict indexing is enabled but a key does not exist.
+     * @throws \Exception When a key contains a non-array (i.e. non-countable) data, and thus,
+     * cannot code crawling keys cannot be continued.
      */
     protected function crawlKeysRecursive(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
     {
         $keysCount = count($keys);
 
-        if ($keysCount === 0) {
-            throw new \Exception("Keys array cannot be empty");
-        }
         // End of recursion
-        elseif ($keysCount === 1) {
+        if ($keysCount === 1) {
             $lastKey = $keys[0];
             if (!array_key_exists($lastKey, $data)) {
                 if ($strictIndexing) {
@@ -460,8 +486,9 @@ class JSON implements \ArrayAccess
             }
             return $operation($data, $lastKey);
         }
+
         // Crawl keys recursively
-        else {
+        if ($keysCount > 1) {
             // Get the current key, and remove it from keys array
             $curKey = array_shift($keys);
 
@@ -482,14 +509,20 @@ class JSON implements \ArrayAccess
 
     /**
      * Handles empty keys and scalar data for {@link self::crawlKeysRecursive()}.
+     * Don't allow scalar types, and throw a special exception when data passed to the method is
+     * scalar.
      *
      * @see self::crawlKeysRecursive()
      * @throws \Exception If data is scalar.
      */
-    protected function crawlKeys(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
+    protected function crawlKeys(array $keys, &$data, callable $operation, bool $strictIndexing = false)
     {
-        if ($this->isDataScalar()) {
-            throw new \Exception("Cannot operate with scalar data types");
+        if (self::isScalar($data)) {
+            throw new \Exception("Cannot use the function on scalar data");
+        }
+
+        if (!is_array($data)) {
+            throw new \InvalidArgumentException("Non-array data passed");
         }
 
         if (count($keys) === 0) {
@@ -809,15 +842,5 @@ class JSON implements \ArrayAccess
         }, true);
 
         return $this;
-    }
-
-    /**
-     * Tells whether data is scalar or not.
-     *
-     * @return bool
-     */
-    protected function isDataScalar(): bool
-    {
-        return $this->defaultDataType === self::TYPE_SCALAR;
     }
 }
