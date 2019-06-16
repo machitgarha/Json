@@ -12,10 +12,8 @@ namespace MAChitgarha\UnitTest\JSON;
 
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\JSON;
+use MAChitgarha\Exception\JSON\InvalidArgumentException;
 
-/**
- * Expect \InvalidArgumentException in all of these tests.
- */
 class InvalidArgumentExceptionTest extends TestCase
 {
     /** @var JSON */
@@ -23,30 +21,30 @@ class InvalidArgumentExceptionTest extends TestCase
 
     protected function setUp()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         // Set up fixtures
         $this->json = new JSON([]);
     }
 
-    /** Tests invalid data. */
-    public function testInvalidData()
-    {
-        new JSON(fopen(__FILE__, "r"));
-    }
-
     /**
-     * Calling a method with bad arguments.
-     * @todo Create a test for each method call, statically.
-     * @dataProvider badMethodCallProvider
+     * @dataProvider constructorInvalidArgsProvider
      */
-    public function testMethodCall(string $methodName, array $arguments)
+    public function testConstructorInvalidArgs($data, int $options)
     {
-        $this->json->$methodName(...$arguments);
+        new JSON($data);
     }
 
-    public function badMethodCallProvider()
+    public function constructorInvalidArgsProvider()
     {
-        return [];
+        return [
+            // Invalid data
+            [fopen(__FILE__, "r")],
+
+            // Invalid combination of data and options
+            [false, JSON::OPT_TREAT_AS_STRING],
+            [51004, JSON::OPT_TREAT_AS_JSON_STRING],
+            [4.262, JSON::OPT_TREAT_AS_STRING | JSON::OPT_TREAT_AS_JSON_STRING],
+        ];
     }
 }
