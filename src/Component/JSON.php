@@ -9,6 +9,13 @@
 
 namespace MAChitgarha\Component;
 
+use MAChitgarha\Exception\JSON\Exception;
+use MAChitgarha\Exception\JSON\InvalidArgumentException;
+use MAChitgarha\Exception\JSON\InvalidJsonException;
+use MAChitgarha\Exception\JSON\UncountableJsonException;
+use MAChitgarha\Exception\JSON\UncountableValueException;
+use MAChitgarha\Exception\JSON\DataIsScalarException;
+
 /**
  * Handles JSON data type.
  *
@@ -97,10 +104,11 @@ class JSON implements \ArrayAccess
      * object) or scalar. Data should not contain any closures; otherwise, they will be considered
      * as empty objects.
      * @param int $options The additional options. Can be one of the JSON::OPT_* constants.
-     * @throws \InvalidArgumentException Using one of the JSON::OPT_TREAT_AS_STRING or
+     * @throws InvalidArgumentException Using one of the JSON::OPT_TREAT_AS_STRING or
      * JSON::OPT_TREAT_AS_JSON_STRING options and passing data as non-string.
-     * @throws \InvalidArgumentException If data is neither countable nor scalar.
-     * @throws \Exception If JSON::OPT_TREAT_AS_JSON_STRING is enabled and data is not a valid JSON.
+     * @throws InvalidArgumentException If data is neither countable nor scalar.
+     * @throws InvalidJsonException If JSON::OPT_TREAT_AS_JSON_STRING is enabled and data is not a
+     * valid JSON.
      */
     public function __construct($data = [], int $options = 0)
     {
@@ -117,7 +125,7 @@ class JSON implements \ArrayAccess
         $isString = is_string($data);
 
         if (($treatAsJsonString || $treatAsString) && !$isString) {
-            throw new \InvalidArgumentException("You must pass data as string when you use one of "
+            throw new InvalidArgumentException("You must pass data as string when you use one of "
                 . "the JSON::OPT_TREAT_AS_STRING or JSON::OPT_TREAT_AS_JSON_STRING options");
         }
 
@@ -131,7 +139,7 @@ class JSON implements \ArrayAccess
             list($isJsonValid, $decodedData) = $this->validateStringAsJson($data, true);
 
             if (!$isJsonValid && $treatAsJsonString) {
-                throw new \Exception("JSON string is not valid");
+                throw new InvalidJsonException();
             }
             
             if ($isJsonValid) {
@@ -158,7 +166,7 @@ class JSON implements \ArrayAccess
         }
 
         // If data is invalid
-        throw new \InvalidArgumentException("Data must be either countable, scalar or null");
+        throw new InvalidArgumentException("Data must be either countable or scalar");
     }
 
     /**
@@ -168,13 +176,12 @@ class JSON implements \ArrayAccess
      *
      * @param array|int|string|float|bool|null $data The data to be replaced in JSON::$data.
      * @return void
-     * @throws \InvalidArgumentException If invalid data is passed; anything except an array, a
-     * scalar value or NULL.
+     * @throws InvalidArgumentException Any data that is not array or scalar is invalid.
      */
     protected function setDataTo($data)
     {
         if (!(is_array($data) || is_scalar($data) || is_null($data))) {
-            throw new \InvalidArgumentException("Invalid data type");
+            throw new InvalidArgumentException("Invalid data type");
         }
         $this->data = $data;
     }
@@ -213,13 +220,13 @@ class JSON implements \ArrayAccess
      *
      * @param string $data String data to be read.
      * @return mixed A non-null value.
-     * @throws \Exception When data is an invalid JSON string.
+     * @throws Exception When data is an invalid JSON string.
      */
     public static function readValidJson(string $data)
     {
         list($isValidJson, $decodedJson) = self::validateStringAsJson($data);
         if (!$isValidJson) {
-            throw new \Exception("Invalid JSON string");
+            throw new InvalidJsonException();
         }
         return $decodedJson;
     }
@@ -232,7 +239,7 @@ class JSON implements \ArrayAccess
      * object or not.
      * @return int 0 if is not any of them, JSON::TYPE_ARRAY if it is an array and JSON::TYPE_OBJECT
      * if it is an object.
-     * @throws \InvalidArgumentException When $throwException is set to true and data is not either
+     * @throws InvalidArgumentException When $throwException is set to true and data is not either
      * an array or an object.
      */
     protected static function isArrayOrObject($data, bool $throwException = false): int
@@ -241,7 +248,7 @@ class JSON implements \ArrayAccess
         $isObject = is_object($data);
 
         if (!($isArray || $isObject) && $throwException) {
-            throw new \InvalidArgumentException("Data must be either an array or an object");
+            throw new InvalidArgumentException("Data must be either an array or an object");
         }
 
         return ($isArray ? self::TYPE_ARRAY :
@@ -255,14 +262,14 @@ class JSON implements \ArrayAccess
      * @param mixed $data The data.
      * @param bool $throwException Throw exceptions when data is not scalar?
      * @return bool
-     * @throws \InvalidArgumentException When $throwException is set to true and data is not scalar.
+     * @throws InvalidArgumentException When $throwException is set to true and data is not scalar.
      */
     protected static function isScalar($data, bool $throwException = false): bool
     {
         $isScalar = is_scalar($data) || $data === null;
 
         if (!$isScalar && $throwException) {
-            throw new \InvalidArgumentException("Data must be scalar");
+            throw new InvalidArgumentException("Data must be scalar");
         }
 
         return $isScalar;
@@ -283,14 +290,14 @@ class JSON implements \ArrayAccess
      *
      * @param string $data Data as JSON string.
      * @return array
-     * @throws \InvalidArgumentException If JSON string does not contain a data that could be
+     * @throws InvalidArgumentException If JSON string does not contain a data that could be
      * converted to an array.
      */
     protected static function convertJsonToArray(string $data): array
     {
         $decodedData = json_decode($data, true);
         if (!is_array($decodedData)) {
-            throw new \InvalidArgumentException("Non-countable JSON string");
+            throw new UncountableJsonException();
         }
         return $decodedData;
     }
@@ -300,13 +307,13 @@ class JSON implements \ArrayAccess
      *
      * @param string $data Data as JSON string.
      * @return object
-     * @throws \InvalidArgumentException If the data cannot be converted to an object.
+     * @throws InvalidArgumentException If the data cannot be converted to an object.
      */
     protected static function convertJsonToObject(string $data): object
     {
         $decodedData = json_decode($data);
         if (!is_object($decodedData)) {
-            throw new \InvalidArgumentException("Non-countable JSON string");
+            throw new UncountableJsonException();
         }
         return $decodedData;
     }
@@ -342,7 +349,7 @@ class JSON implements \ArrayAccess
      * @param bool $forceObject Whether to convert indexed arrays to objects or not. It may be
      * obvious, but data root will always be an object, even with numeric indexes.
      * @return object
-     * @throws \InvalidArgumentException If data is not countable.
+     * @throws InvalidArgumentException If data is not countable.
      */
     protected static function convertToObject($data, bool $forceObject = false): object
     {
@@ -370,7 +377,7 @@ class JSON implements \ArrayAccess
             // Validating JSON string
             try {
                 return self::convertJsonToArray($value);
-            } catch (\Exception $e) {
+            } catch (UncountableJsonException $e) {
             }
         }
         
@@ -383,7 +390,7 @@ class JSON implements \ArrayAccess
      * @param int $type Return type. Can be any of the JSON::TYPE_* constants, except
      * JSON::TYPE_JSON_CLASS and JSON::TYPE_SCALAR.
      * @return string|array|object
-     * @throws \InvalidArgumentException If the requested type is unknown.
+     * @throws InvalidArgumentException If $type is invalid.
      *
      * @since 0.3.1 Returns JSON if the passed data in constructor was a JSON string.
      */
@@ -403,7 +410,7 @@ class JSON implements \ArrayAccess
             case self::TYPE_FULL_OBJECT:
                 return $this->getDataAsFullObject();
             default:
-                throw new \InvalidArgumentException("Unknown requested data type");
+                throw new InvalidArgumentException("Unknown type to be returned");
         }
     }
 
@@ -467,8 +474,8 @@ class JSON implements \ArrayAccess
      * key cannot be found. For example, you can turn this on when you want to get an element's
      * value and you want to ensure that the element exists.
      * @return mixed Return the return value of the closure ($operation).
-     * @throws \Exception When strict indexing is enabled but a key does not exist.
-     * @throws \Exception When a key contains a non-array (i.e. non-countable) data, and thus,
+     * @throws Exception When strict indexing is enabled but a key does not exist.
+     * @throws Exception When a key contains a non-array (i.e. uncountable) data, and thus,
      * cannot code crawling keys cannot be continued.
      */
     protected function crawlKeysRecursive(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
@@ -480,7 +487,7 @@ class JSON implements \ArrayAccess
             $lastKey = $keys[0];
             if (!array_key_exists($lastKey, $data)) {
                 if ($strictIndexing) {
-                    throw new \Exception("The key '$lastKey' does not exist");
+                    throw new Exception("The key '$lastKey' does not exist");
                 } else {
                     $data[$lastKey] = null;
                 }
@@ -495,12 +502,12 @@ class JSON implements \ArrayAccess
 
             if (!array_key_exists($curKey, $data)) {
                 if ($strictIndexing) {
-                    throw new \Exception("The key '$curKey' does not exist");
+                    throw new Exception("The key '$curKey' does not exist");
                 } else {
                     $data[$curKey] = [];
                 }
             } elseif (!is_array($data[$curKey])) {
-                throw new \Exception("The key '$curKey' contains non-countable value");
+                throw new UncountableValueException("The key '$curKey' contains uncountable value");
             }
 
             // Recursion
@@ -514,17 +521,17 @@ class JSON implements \ArrayAccess
      * scalar.
      *
      * @see self::crawlKeysRecursive()
-     * @throws \Exception If data is scalar.
-     * @throws \InvalidArgumentException When a non-scalar and non-array data passed.
+     * @throws DataIsScalarException
+     * @throws InvalidArgumentException When a non-scalar and non-array data passed.
      */
     protected function crawlKeys(array $keys, &$data, callable $operation, bool $strictIndexing = false)
     {
         if (self::isScalar($data)) {
-            throw new \Exception("Cannot use the function on scalar data");
+            throw new DataIsScalarException("Cannot use the function on scalar data");
         }
 
         if (!is_array($data)) {
-            throw new \InvalidArgumentException("Non-array data passed");
+            throw new InvalidArgumentException("Non-array data passed");
         }
 
         if (count($keys) === 0) {
@@ -579,7 +586,7 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index The index.
      * @return mixed The value of the index. Returns null if the index not found.
-     * @throws \InvalidArgumentException When data is scalar.
+     * @throws DataIsScalarException When data is scalar.
      */
     public function get(string $index = null)
     {
@@ -587,7 +594,7 @@ class JSON implements \ArrayAccess
             if ($index === null) {
                 return $this->data;
             } else {
-                throw new \InvalidArgumentException("Data is scalar, indexing is invalid");
+                throw new DataIsScalarException("Indexing is invalid");
             }
         }
 
@@ -595,7 +602,7 @@ class JSON implements \ArrayAccess
             return $this->crawlKeys($this->extractIndex($index), $this->data, function ($data, $key) {
                 return $data[$key];
             }, true);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
     }
@@ -606,7 +613,7 @@ class JSON implements \ArrayAccess
      * @param mixed $value The value to be set.
      * @param ?string $index The index. Pass null if data is scalar.
      * @return self
-     * @throws \InvalidArgumentException If data is scalar.
+     * @throws DataIsScalarException If data is scalar and $index is not null.
      */
     public function set($value, string $index = null): self
     {
@@ -617,7 +624,7 @@ class JSON implements \ArrayAccess
                 $this->setDataTo($value);
                 return $this;
             } else {
-                throw new \InvalidArgumentException("Data is scalar, indexing is invalid");
+                throw new DataIsScalarException("Indexing is invalid");
             }
         }
 
@@ -659,14 +666,14 @@ class JSON implements \ArrayAccess
      * @param int $returnType Specifies the value type in each iteration if the value is
      * countable. Can be of the JSON::TYPE_* constants, except some.
      * @return \Generator
-     * @throws \Exception If the element is not iterable (i.e. is not an array).
-     * @throws \InvalidArgumentException When passing $returnType a wrong type.
+     * @throws UncountableValueException If the element is not iterable (i.e. is not an array).
+     * @throws InvalidArgumentException When passing $returnType a wrong type.
      */
     public function iterate(string $index = null, int $returnType = self::TYPE_DEFAULT): \Generator
     {
         // Get the value of the index in data
         if (($data = $this->getCountable($index)) === null) {
-            throw new \Exception("The element ('$index') is not iterable");
+            throw new UncountableValueException("'$index' is not iterable");
         }
 
         if ($returnType === self::TYPE_DEFAULT) {
@@ -700,7 +707,7 @@ class JSON implements \ArrayAccess
                 break;
             
             default:
-                throw new \InvalidArgumentException("Unknown return type");
+                throw new InvalidArgumentException("Unknown return type");
         }
 
         foreach ((array)($data) as $key => $val) {
@@ -761,14 +768,14 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index The index. Pass null if you want to get number of elements in the data.
      * @return int The elements number of the index.
-     * @throws \Exception If the element is not countable.
+     * @throws UncountableValueException If the element is not countable.
      */
     public function count(string $index = null): int
     {
         // Get the number of keys in the specified index
         $countableValue = $this->getCountable($index);
         if ($countableValue === null) {
-            throw new \Exception("The element ('$index') is not countable");
+            throw new UncountableValueException("'$index' is not countable");
         }
         return count($countableValue);
     }
@@ -812,7 +819,7 @@ class JSON implements \ArrayAccess
      * @param ?string $index The index of the countable element to be pushed into. Pass null if you
      * want to push to the data root.
      * @return self
-     * @throws \Exception If the element is not countable (i.e. cannot push into it).
+     * @throws UncountableValueException
      */
     public function push($value, string $index = null): self
     {
@@ -821,12 +828,12 @@ class JSON implements \ArrayAccess
         try {
             $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
                 if (!is_array($data)) {
-                    throw new \Exception("The element is not countable");
+                    throw new UncountableValueException();
                 }
                 array_push($data[$key], $value);
             }, true);
-        } catch (\Exception $e) {
-            throw new \Exception("The element ('$index') is not countable");
+        } catch (UncountableValueException $e) {
+            throw new UncountableValueException("'$index' is not countable");
         }
 
         return $this;
@@ -838,16 +845,20 @@ class JSON implements \ArrayAccess
      * @param ?string $index The index of the countable element to be popped from. Pass null if you
      * want to pop from the data root.
      * @return self
-     * @throws \Exception If the element is not countable (i.e. cannot pop from it).
+     * @throws UncountableValueException
      */
     public function pop(string $index = null): self
     {
-        $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) {
-            if (!is_array($data)) {
-                throw new \Exception("The element ('$index') is not countable");
-            }
-            array_pop($data[$key]);
-        }, true);
+        try {
+            $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) {
+                if (!is_array($data)) {
+                    throw new UncountableValueException();
+                }
+                array_pop($data[$key]);
+            }, true);
+        } catch (UncountableValueException $e) {
+            throw new UncountableValueException("'$index' is not countable");
+        }
 
         return $this;
     }
