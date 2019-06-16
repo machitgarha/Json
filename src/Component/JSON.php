@@ -27,7 +27,6 @@ use MAChitgarha\Exception\JSON\DataIsScalarException;
  * @todo {@see https://stackoverflow.com/questions/29308898/how-do-i-extract-data-from-json-with-php}
  * @todo Add toArray() method for scalar types.
  * @todo Add clear() method to clear an array.
- * @todo Define special exceptions.
  */
 class JSON implements \ArrayAccess
 {
@@ -522,7 +521,7 @@ class JSON implements \ArrayAccess
      *
      * @see self::crawlKeysRecursive()
      * @throws DataIsScalarException
-     * @throws InvalidArgumentException When a non-scalar and non-array data passed.
+     * @throws InvalidArgumentException When a non-scalar and non-array data is passed.
      */
     protected function crawlKeys(array $keys, &$data, callable $operation, bool $strictIndexing = false)
     {
@@ -586,7 +585,7 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index The index.
      * @return mixed The value of the index. Returns null if the index not found.
-     * @throws DataIsScalarException When data is scalar.
+     * @throws DataIsScalarException If data is scalar and $index is not null.
      */
     public function get(string $index = null)
     {
@@ -740,9 +739,8 @@ class JSON implements \ArrayAccess
      */
     protected function getCountable(string $index = null)
     {
-        // Get the data
-        if ($index === null) {
-            return $this->data;
+        if ($this->isDataScalar()) {
+            throw new DataIsScalarException();
         }
 
         $value = $this->get($index);
