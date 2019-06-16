@@ -20,6 +20,7 @@ namespace MAChitgarha\Component;
  * @todo {@see https://stackoverflow.com/questions/29308898/how-do-i-extract-data-from-json-with-php}
  * @todo Add toArray() method for scalar types.
  * @todo Add clear() method to clear an array.
+ * @todo Define special exceptions.
  */
 class JSON implements \ArrayAccess
 {
@@ -514,6 +515,7 @@ class JSON implements \ArrayAccess
      *
      * @see self::crawlKeysRecursive()
      * @throws \Exception If data is scalar.
+     * @throws \InvalidArgumentException When a non-scalar and non-array data passed.
      */
     protected function crawlKeys(array $keys, &$data, callable $operation, bool $strictIndexing = false)
     {
@@ -577,6 +579,7 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index The index.
      * @return mixed The value of the index. Returns null if the index not found.
+     * @throws \InvalidArgumentException When data is scalar.
      */
     public function get(string $index = null)
     {
@@ -603,6 +606,7 @@ class JSON implements \ArrayAccess
      * @param mixed $value The value to be set.
      * @param ?string $index The index. Pass null if data is scalar.
      * @return self
+     * @throws \InvalidArgumentException If data is scalar.
      */
     public function set($value, string $index = null): self
     {
@@ -653,16 +657,16 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index The index.
      * @param int $returnType Specifies the value type in each iteration if the value is
-     * countable. Can be of the JSON::TYPE_* constants.
+     * countable. Can be of the JSON::TYPE_* constants, except some.
      * @return \Generator
-     * @throws \Exception If the value of the data index is not iterable (i.e. neither an array nor
-     * an object).
+     * @throws \Exception If the element is not iterable (i.e. is not an array).
+     * @throws \InvalidArgumentException When passing $returnType a wrong type.
      */
     public function iterate(string $index = null, int $returnType = self::TYPE_DEFAULT): \Generator
     {
         // Get the value of the index in data
         if (($data = $this->getCountable($index)) === null) {
-            throw new \Exception("The index is not iterable");
+            throw new \Exception("The element ('$index') is not iterable");
         }
 
         if ($returnType === self::TYPE_DEFAULT) {
@@ -696,7 +700,7 @@ class JSON implements \ArrayAccess
                 break;
             
             default:
-                throw new \Exception("Unknown return type");
+                throw new \InvalidArgumentException("Unknown return type");
         }
 
         foreach ((array)($data) as $key => $val) {
@@ -764,7 +768,7 @@ class JSON implements \ArrayAccess
         // Get the number of keys in the specified index
         $countableValue = $this->getCountable($index);
         if ($countableValue === null) {
-            throw new \Exception("The index is not countable");
+            throw new \Exception("The element ('$index') is not countable");
         }
         return count($countableValue);
     }
@@ -808,18 +812,22 @@ class JSON implements \ArrayAccess
      * @param ?string $index The index of the countable element to be pushed into. Pass null if you
      * want to push to the data root.
      * @return self
-     * @throws \Exception If the index is not countable (i.e. cannot push into it).
+     * @throws \Exception If the element is not countable (i.e. cannot push into it).
      */
     public function push($value, string $index = null): self
     {
         $value = $this->getOptimalValue($value);
 
-        $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
-            if (!is_array($data)) {
-                throw new \Exception("The index is not countable");
-            }
-            array_push($data[$key], $value);
-        }, true);
+        try {
+            $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
+                if (!is_array($data)) {
+                    throw new \Exception("The element is not countable");
+                }
+                array_push($data[$key], $value);
+            }, true);
+        } catch (\Exception $e) {
+            throw new \Exception("The element ('$index') is not countable");
+        }
 
         return $this;
     }
@@ -830,13 +838,13 @@ class JSON implements \ArrayAccess
      * @param ?string $index The index of the countable element to be popped from. Pass null if you
      * want to pop from the data root.
      * @return self
-     * @throws \Exception If the index is not countable (i.e. cannot pop from it).
+     * @throws \Exception If the element is not countable (i.e. cannot pop from it).
      */
     public function pop(string $index = null): self
     {
         $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) {
             if (!is_array($data)) {
-                throw new \Exception("The index is not countable");
+                throw new \Exception("The element ('$index') is not countable");
             }
             array_pop($data[$key]);
         }, true);
