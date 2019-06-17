@@ -30,9 +30,9 @@ class InvalidArgumentExceptionTest extends TestCase
     /**
      * @dataProvider constructorInvalidArgsProvider
      */
-    public function testConstructorInvalidArgs($data, int $options)
+    public function testConstructorInvalidArgs($data, int $options = 0)
     {
-        new JSON($data);
+        new JSON($data, $options);
     }
 
     public function constructorInvalidArgsProvider()

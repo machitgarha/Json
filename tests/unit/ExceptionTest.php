@@ -12,6 +12,7 @@ namespace MAChitgarha\UnitTest\JSON;
 
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\JSON;
+use MAChitgarha\Exception\JSON\Exception;
 
 /**
  * Expect \Exception in all of these tests.
@@ -23,7 +24,7 @@ class ExceptionTest extends TestCase
 
     protected function setUp()
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
     }
 
     /**
