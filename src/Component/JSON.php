@@ -219,7 +219,7 @@ class JSON implements \ArrayAccess
      *
      * @param string $data String data to be read.
      * @return mixed A non-null value.
-     * @throws Exception When data is an invalid JSON string.
+     * @throws InvalidJsonException When data is an invalid JSON string.
      */
     public static function readValidJson(string $data)
     {
