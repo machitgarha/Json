@@ -289,7 +289,7 @@ class JSON implements \ArrayAccess
      *
      * @param string $data Data as JSON string.
      * @return array
-     * @throws InvalidArgumentException If JSON string does not contain a data that could be
+     * @throws UncountableJsonException If JSON string does not contain a data that could be
      * converted to an array.
      */
     protected static function convertJsonToArray(string $data): array
@@ -306,7 +306,7 @@ class JSON implements \ArrayAccess
      *
      * @param string $data Data as JSON string.
      * @return object
-     * @throws InvalidArgumentException If the data cannot be converted to an object.
+     * @throws UncountableJsonException If the data cannot be converted to an object.
      */
     protected static function convertJsonToObject(string $data): object
     {
@@ -348,7 +348,6 @@ class JSON implements \ArrayAccess
      * @param bool $forceObject Whether to convert indexed arrays to objects or not. It may be
      * obvious, but data root will always be an object, even with numeric indexes.
      * @return object
-     * @throws InvalidArgumentException If data is not countable.
      */
     protected static function convertToObject($data, bool $forceObject = false): object
     {

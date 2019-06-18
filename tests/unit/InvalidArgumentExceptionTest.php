@@ -24,7 +24,7 @@ class InvalidArgumentExceptionTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         // Set up fixtures
-        $this->json = new JSON([]);
+        $this->json = new JSON();
     }
 
     /**
@@ -45,6 +45,22 @@ class InvalidArgumentExceptionTest extends TestCase
             [false, JSON::OPT_TREAT_AS_STRING],
             [51004, JSON::OPT_TREAT_AS_JSON_STRING],
             [4.262, JSON::OPT_TREAT_AS_STRING | JSON::OPT_TREAT_AS_JSON_STRING],
+        ];
+    }
+
+    /**
+     * @dataProvider badIterateReturnTypeProvider
+     */
+    public function testIterate(int $type)
+    {
+        foreach ($this->json->iterate(null, $type) as $item) {}
+    }
+
+    public function badIterateReturnTypeProvider()
+    {
+        return [
+            [JSON::TYPE_JSON_CLASS],
+            [JSON::TYPE_SCALAR],
         ];
     }
 }
