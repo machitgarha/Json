@@ -42,6 +42,9 @@ class JSON implements \ArrayAccess
      */
     protected $data;
 
+    /** @var bool A scalar type, can be an integer, a string, a float, a boolean, or NULL. */
+    protected $isDataScalar = false;
+
     /** @var int Default data type; can be one of the JSON::TYPE_* constants. */
     protected $defaultDataType = self::TYPE_JSON_STRING;
 
@@ -159,6 +162,7 @@ class JSON implements \ArrayAccess
          * 2. JSON::OPT_TREAT_AS_STRING is not enabled, and data is not a valid JSON string.
          */
         if (is_scalar($data) || $data === null) {
+            $this->isDataScalar = true;
             $this->setDataTo($treatAsString ? (string)($data) : $data);
             return;
         }
@@ -274,15 +278,6 @@ class JSON implements \ArrayAccess
         return $isScalar;
     }
 
-    /**
-     * Tells whether JSON::$data is scalar or not.
-     *
-     * @return bool
-     */
-    protected function isDataScalar()
-    {
-        return self::isScalar($this->data);
-    }
 
     /**
      * Converts a JSON string to an array.
@@ -611,7 +606,7 @@ class JSON implements \ArrayAccess
      */
     public function get(string $index = null)
     {
-        if ($this->isDataScalar()) {
+        if ($this->isDataScalar) {
             if ($index === null) {
                 return $this->data;
             } else {
@@ -640,7 +635,7 @@ class JSON implements \ArrayAccess
     {
         $value = $this->getOptimalValue($value);
 
-        if ($this->isDataScalar()) {
+        if ($this->isDataScalar) {
             if ($index === null) {
                 $this->setDataTo($value);
                 return $this;
@@ -687,7 +682,7 @@ class JSON implements \ArrayAccess
      */
     public function __toString(): string
     {
-        if ($this->printScalarAsIs && $this->isDataScalar()) {
+        if ($this->printScalarAsIs && $this->isDataScalar) {
             return $this->data;
         }
         return $this->getDataAsJsonString();
