@@ -25,9 +25,10 @@ use MAChitgarha\Exception\JSON\ScalarDataException;
  * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
  * @todo Import all methods from \ArrayObject.
  * @todo {@see https://stackoverflow.com/questions/29308898/how-do-i-extract-data-from-json-with-php}
- * @todo Add toArray() method for scalar types.
+ * @todo Add toCountable() method for scalar types.
  * @todo Add clear() method to clear an array.
  * @todo Change default data type when changing data.
+ * @todo JSON::isCountable() should not throw exception when data is scalar, should return false.
  */
 class JSON implements \ArrayAccess
 {
@@ -40,10 +41,9 @@ class JSON implements \ArrayAccess
     protected $data;
 
     /**
-     * @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT,
-     * TYPE_SCALAR (class constants).
+     * @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT.
      */
-    protected $defaultDataType = null;
+    protected $defaultDataType = self::TYPE_JSON_STRING;
 
     /** @var int Options passed to the constructor. */
     protected $options = 0;
@@ -53,6 +53,10 @@ class JSON implements \ArrayAccess
 
     /** @var bool {@see self::OPT_PRINT_SCALAR_AS_IS} */
     protected $printScalarAsIs = false;
+
+    protected $returnType = self::TYPE_DEFAULT;
+
+    protected $returnScalarAsScalar = true;
 
     // Data types
     /** @var int The data type which you passed at creating new instance (i.e. constructor). */
@@ -65,10 +69,6 @@ class JSON implements \ArrayAccess
     const TYPE_ARRAY = 3;
     /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
     const TYPE_FULL_OBJECT = 4;
-    /** @var int JSON class data type, i.e. a new instance of the class itself. */
-    const TYPE_JSON_CLASS = 5;
-    /** @var int Scalar data type, either an integer, a string, a float, a boolean or NULL. */
-    const TYPE_SCALAR = 6;
 
     // Options
     /**
@@ -144,10 +144,6 @@ class JSON implements \ArrayAccess
             
             if ($isJsonValid) {
                 $this->defaultDataType = self::TYPE_JSON_STRING;
-                if (is_scalar($decodedData) || $decodedData === null) {
-                    $this->defaultDataType = self::TYPE_SCALAR;
-                }
-
                 $this->setDataTo($decodedData);
                 return;
             }
@@ -160,7 +156,6 @@ class JSON implements \ArrayAccess
          * 2. JSON::OPT_TREAT_AS_STRING is not enabled, and data is not a valid JSON string.
          */
         if (is_scalar($data) || $data === null) {
-            $this->defaultDataType = self::TYPE_SCALAR;
             $this->setDataTo($data);
             return;
         }
@@ -338,7 +333,6 @@ class JSON implements \ArrayAccess
      */
     protected static function convertToArray($data): array
     {
-        self::isArrayOrObject($data, true);
         return json_decode(json_encode($data), true);
     }
 
@@ -346,14 +340,12 @@ class JSON implements \ArrayAccess
      * Converts an array or an object to an object recursively.
      *
      * @param array $data Data as array or object.
-     * @param bool $forceObject Whether to convert indexed arrays to objects or not. It may be
-     * obvious, but data root will always be an object, even with numeric indexes.
+     * @param bool $forceObject Whether to convert indexed arrays to objects or not.
      * @return object
      */
-    protected static function convertToObject($data, bool $forceObject = false): object
+    protected static function convertToObject($data, bool $forceObject = false)
     {
-        self::isArrayOrObject($data, true);
-        return (object)(json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0)));
+        return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
     }
 
     /**
@@ -381,36 +373,6 @@ class JSON implements \ArrayAccess
         }
         
         return $value;
-    }
-
-    /**
-     * Returns data as the determined type.
-     *
-     * @param int $type Return type. Can be any of the JSON::TYPE_* constants, except
-     * JSON::TYPE_JSON_CLASS and JSON::TYPE_SCALAR.
-     * @return string|array|object
-     * @throws InvalidArgumentException If $type is invalid.
-     *
-     * @since 0.3.1 Returns JSON if the passed data in constructor was a JSON string.
-     */
-    public function getData(int $type = self::TYPE_DEFAULT)
-    {
-        if ($type === self::TYPE_DEFAULT) {
-            $type = $this->defaultDataType;
-        }
-
-        switch ($type) {
-            case self::TYPE_JSON_STRING:
-                return $this->getDataAsJsonString();
-            case self::TYPE_ARRAY:
-                return $this->getDataAsArray();
-            case self::TYPE_OBJECT:
-                return $this->getDataAsObject();
-            case self::TYPE_FULL_OBJECT:
-                return $this->getDataAsFullObject();
-            default:
-                throw new InvalidArgumentException("Unknown type to be returned");
-        }
     }
 
     /**
@@ -453,6 +415,57 @@ class JSON implements \ArrayAccess
     public function getDataAsFullObject(): object
     {
         return self::convertToObject($this->data, true);
+    }
+
+    /**
+     * Sets the return type used by class methods.
+     *
+     * @param int $type The type, can be one of the JSON::TYPE_* constants.
+     * @param bool $scalarAsIs Whether to return scalar as is (i.e. don't change its type), or
+     * forcefully convert it to $type (e.g. convert scalar to array when returning it).
+     * @return self
+     */
+    public function setReturnType(int $type = self::TYPE_DEFAULT, bool $scalarAsIs = true): self
+    {
+        switch ($type) {
+            case self::TYPE_DEFAULT:
+            case self::TYPE_JSON_STRING:
+            case self::TYPE_ARRAY:
+            case self::TYPE_OBJECT:
+            case self::TYPE_FULL_OBJECT:
+                $this->returnType = $type;
+                $this->returnScalarAsScalar = $scalarAsIs;
+                return $this;
+                break;
+
+            default:
+                throw new InvalidArgumentException("Unknown return type");
+        }
+    }
+
+    protected function getValueBasedOnReturnType($value)
+    {
+        if (self::isScalar($value) && $this->returnScalarAsScalar) {
+            return $value;
+        }
+
+        $returnType = $this->returnType;
+        if ($returnType === self::TYPE_DEFAULT) {
+            $returnType = $this->defaultDataType;
+        }
+
+        switch ($this->returnType) {
+            case self::TYPE_JSON_STRING:
+                return json_encode($value);
+            case self::TYPE_ARRAY:
+                return self::convertToArray($value);
+            case self::TYPE_OBJECT:
+                return self::convertToObject($value);
+            case self::TYPE_FULL_OBJECT:
+                return self::convertToObject($value, true);
+            default:
+                throw new InvalidArgumentException("Unknown return type");
+        }
     }
 
     /**
@@ -597,13 +610,9 @@ class JSON implements \ArrayAccess
             }
         }
 
-        try {
-            return $this->crawlKeys($this->extractIndex($index), $this->data, function ($data, $key) {
-                return $data[$key];
-            }, true);
-        } catch (Exception $e) {
-            return null;
-        }
+        return $this->crawlKeys($this->extractIndex($index), $this->data, function ($data, $key) {
+            return $this->getValueBasedOnReturnType($data[$key]);
+        }, true);
     }
 
     /**
