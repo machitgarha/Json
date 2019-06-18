@@ -126,10 +126,9 @@ class PublicMethodTest extends TestCase
         ];
     }
 
-    /** @dataProvider dataProvider */
-    public function testIterate($data)
+    public function testIterate()
     {
-        $json = new JSON($data);
+        $json = new JSON(self::$sampleData);
 
         foreach ($json->iterate("apps.browsers") as $i => $browserName) {
             $this->assertEquals($browserName, $json->get("apps.browsers.$i"));
@@ -165,13 +164,11 @@ class PublicMethodTest extends TestCase
         $this->assertFalse($json->isSet("test"));
     }
 
-    /** Provides prepared data to be used in JSON class. */
-    public function dataProvider()
+    public function testExchange()
     {
-        return [
-            [
-                self::$sampleData
-            ]
-        ];
+        $json = new JSON(self::$sampleData);
+
+        $this->assertEquals(self::$sampleData, $json->exchange([]));
+        $this->assertEquals([], $json->get());
     }
 }
