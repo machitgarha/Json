@@ -82,8 +82,10 @@ class JSON implements \ArrayAccess
     const OPT_JSON_DECODE_ALWAYS = 1;
     /**
      * @var int Consider data passed into the constructor as string, even if it's a valid JSON data;
-     * in other words, don't decode it. This option only affects the constructor. It won't have any
-     * effects if you use it in combination with JSON::OPT_TREAT_AS_JSON_STRING.
+     * in other words, don't decode it. Using this option, every non-string and uncountable values
+     * will be converted to a string (i.e. integers, booleans and NULL). This option only affects
+     * the constructor. It won't have any effects if you use it in combination with
+     * JSON::OPT_TREAT_AS_JSON_STRING.
      */
     const OPT_TREAT_AS_STRING = 2;
     /**
@@ -101,12 +103,12 @@ class JSON implements \ArrayAccess
     /**
      * Prepares JSON data.
      *
-     * @param mixed $data The data; can be either countable (i.e. a valid JSON string, array or
-     * object) or scalar. Data should not contain any closures; otherwise, they will be considered
-     * as empty objects.
+     * @param mixed $data The data; can be either countable (i.e. a valid JSON string, an array or
+     * an object) or scalar. Data should not contain any closures; otherwise, they will be
+     * considered as empty objects.
      * @param int $options The additional options. Can be one of the JSON::OPT_* constants.
-     * @throws InvalidArgumentException Using one of the JSON::OPT_TREAT_AS_STRING or
-     * JSON::OPT_TREAT_AS_JSON_STRING options and passing data as non-string.
+     * @throws InvalidArgumentException Using JSON::OPT_TREAT_AS_JSON_STRING option and passing
+     * a non-string data.
      * @throws InvalidArgumentException If data is neither countable nor scalar.
      * @throws InvalidJsonException If JSON::OPT_TREAT_AS_JSON_STRING is enabled and data is not a
      * valid JSON.
