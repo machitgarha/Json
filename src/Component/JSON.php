@@ -60,9 +60,6 @@ class JSON implements \ArrayAccess
     /** @var bool {@see self::OPT_JSON_DECODE_ALWAYS} */
     protected $jsonDecodeAlways = false;
 
-    /** @var bool {@see self::OPT_PRINT_SCALAR_AS_IS} */
-    protected $printScalarAsIs = false;
-
     // Data types
     /** @var int The data type which you passed at creating new instance (i.e. constructor). */
     const TYPE_DEFAULT = 0;
@@ -97,11 +94,6 @@ class JSON implements \ArrayAccess
      * that the constructor checks a string data as a JSON string by default.
      */
     const OPT_TREAT_AS_JSON_STRING = 8;
-    /**
-     * @var int When using 'echo' or like to print JSON class, i.e. when calling JSON::__toString(),
-     * print all scalar data as is, without encoding it as a JSON string.
-     */
-    const OPT_PRINT_SCALAR_AS_IS = 4;
 
     /**
      * Prepares JSON data.
@@ -122,7 +114,6 @@ class JSON implements \ArrayAccess
 
         // Set global options
         $this->jsonDecodeAlways = (bool)($options & self::OPT_JSON_DECODE_ALWAYS);
-        $this->printScalarAsIs = (bool)($options & self::OPT_PRINT_SCALAR_AS_IS);
 
         $treatAsJsonString = (bool)($options & self::OPT_TREAT_AS_JSON_STRING);
         $treatAsString = (bool)($options & self::OPT_TREAT_AS_STRING);
@@ -418,6 +409,11 @@ class JSON implements \ArrayAccess
         return self::convertToObject($this->data, true);
     }
 
+    public function __toString(): string
+    {
+        return $this->getDataAsJsonString();
+    }
+
     /**
      * Sets the return type used by other methods.
      *
@@ -675,19 +671,6 @@ class JSON implements \ArrayAccess
     public function isSet(string $index): bool
     {
         return $this->get($index) !== null;
-    }
-
-    /**
-     * Gets data as JSON string.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        if ($this->printScalarAsIs && $this->isDataScalar) {
-            return $this->data;
-        }
-        return $this->getDataAsJsonString();
     }
 
     /**
