@@ -13,10 +13,7 @@ namespace MAChitgarha\UnitTest\JSON;
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\JSON;
 
-/**
- * Tests all public methods.
- */
-class MethodTest extends TestCase
+class PublicMethodTest extends TestCase
 {
     /** @var array A simple sample data to be used as JSON data. */
     public static $sampleData = [
@@ -69,10 +66,7 @@ class MethodTest extends TestCase
         ];
     }
 
-    /**
-     * Tests JSON::set() and JSON::get() methods.
-     * @dataProvider indexValuePairsProvider
-     */
+    /** @dataProvider indexValuePairsProvider */
     public function testSetAndGet(string $index, $value)
     {
         $json = new JSON();
@@ -81,11 +75,8 @@ class MethodTest extends TestCase
         $this->assertEquals($value, $json->get($index));
     }
 
-    /**
-     * Tests JSON::offsetSet() and JSON::offsetGet() methods (i.e. implementing ArrayAccess).
-     * @dataProvider indexValuePairsProvider
-     */
-    public function testArrayAccessSetAndGet(string $index, $value)
+    /** @dataProvider indexValuePairsProvider */
+    public function testSetAndGetUsingArrayAccess(string $index, $value)
     {
         $json = new JSON();
 
@@ -93,10 +84,7 @@ class MethodTest extends TestCase
         $this->assertEquals($value, $json[$index]);
     }
 
-    /**
-     * Tests JSON::isSet() and JSON::offsetExists() methods (i.e. implementing ArrayAccess).
-     * @dataProvider indexValuePairsProvider
-     */
+    /** @dataProvider indexValuePairsProvider */
     public function testIsSet(string $index, $value)
     {
         $json = new JSON();
@@ -107,10 +95,7 @@ class MethodTest extends TestCase
         $this->assertTrue(isset($json[$index]));
     }
 
-    /**
-     * Tests JSON::offsetUnset() (i.e. implementing ArrayAccess).
-     * @dataProvider indexValuePairsProvider
-     */
+    /** @dataProvider indexValuePairsProvider */
     public function testUnset(string $index, $value)
     {
         $json = new JSON();
@@ -126,9 +111,7 @@ class MethodTest extends TestCase
         $this->assertFalse(isset($json[$index]));
     }
 
-    /**
-     * Provides index and values pairs.
-     */
+    /** Provides index and values pairs. */
     public function indexValuePairsProvider()
     {
         return [
@@ -139,10 +122,7 @@ class MethodTest extends TestCase
         ];
     }
 
-    /**
-     * Tests JSON::iterate() method.
-     * @dataProvider dataProvider
-     */
+    /** @dataProvider dataProvider */
     public function testIterate($data)
     {
         $json = new JSON($data);
@@ -152,9 +132,7 @@ class MethodTest extends TestCase
         }
     }
 
-    /**
-     * Tests JSON::isCountable() and JSON::count() methods.
-     */
+    /** Tests JSON::isCountable() and JSON::count() methods. */
     public function testCountableElements()
     {
         $json = new JSON(self::$sampleData);
@@ -166,10 +144,7 @@ class MethodTest extends TestCase
         );
     }
 
-    /**
-     * Tests JSON::push() and JSON::pop() methods.
-     */
-    public function testPushPop()
+    public function testPushAndPop()
     {
         $json = new JSON([
             "test" => "pass"
@@ -186,9 +161,7 @@ class MethodTest extends TestCase
         $this->assertFalse($json->isSet("test"));
     }
 
-    /**
-     * Provides prepared data to be used in JSON class.
-     */
+    /** Provides prepared data to be used in JSON class. */
     public function dataProvider()
     {
         return [

@@ -13,15 +13,9 @@ namespace MAChitgarha\UnitTest\JSON;
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\JSON;
 
-/**
- * Tests visible or hidden features of the class.
- */
 class FeatureTest extends TestCase
 {
-    /**
-     * Tests escaped delimiters.
-     * @see JSON::extractKeysFromIndex()
-     */
+    /** @see JSON::extractKeysFromIndex() */
     public function testEscapedDelimiters()
     {
         $json = new JSON([

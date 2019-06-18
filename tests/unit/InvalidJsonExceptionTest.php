@@ -14,9 +14,6 @@ use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\JSON;
 use MAChitgarha\Exception\JSON\InvalidJsonException;
 
-/**
- * Expect \Exception in all of these tests.
- */
 class InvalidJsonExceptionTest extends TestCase
 {
     /** @var JSON */
@@ -27,17 +24,13 @@ class InvalidJsonExceptionTest extends TestCase
         $this->expectException(InvalidJsonException::class);
     }
 
-    /**
-     * @dataProvider invalidJsonProvider
-     */
+    /** @dataProvider invalidJsonProvider */
     public function testConstructor(string $data)
     {
         new JSON($data, JSON::OPT_TREAT_AS_JSON_STRING);
     }
 
-    /**
-     * @dataProvider invalidJsonProvider
-     */
+    /** @dataProvider invalidJsonProvider */
     public function testReadValidJsonMethod(string $data)
     {
         JSON::readValidJson($data);
