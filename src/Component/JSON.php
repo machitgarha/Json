@@ -670,27 +670,6 @@ class JSON implements \ArrayAccess
     {
         return $this->get($index) !== null;
     }
-    
-    /**
-     * Iterates over an element.
-     *
-     * @param ?string $index The index.
-     * @param int $returnType Specifies the value type in each iteration if the value is
-     * countable. Can be of the JSON::TYPE_* constants, except some.
-     * @return \Generator
-     * @throws UncountableValueException If the element is not iterable (i.e. is not an array).
-     */
-    public function iterate(string $index = null): \Generator
-    {
-        // Get the value of the index in data
-        if (($data = $this->getCountable($index)) === null) {
-            throw new UncountableValueException("'$index' is not iterable");
-        }
-
-        foreach ($data as $key => $value) {
-            yield $key => $this->getValueBasedOnReturnType($value);
-        }
-    }
 
     /**
      * Gets data as JSON string.
@@ -713,15 +692,7 @@ class JSON implements \ArrayAccess
      */
     protected function getCountable(string $index = null)
     {
-        if ($this->isDataScalar()) {
-            throw new ScalarDataException();
-        }
-
-        $value = $this->get($index);
-        if (is_array($value)) {
-            return $value;
-        }
-        return null;
+        return is_array($value = $this->get($index)) ? $value : null;
     }
 
     /**
@@ -730,7 +701,7 @@ class JSON implements \ArrayAccess
      * @param string $index The index.
      * @return bool Is the index countable or not.
      */
-    public function isCountable(string $index): bool
+    public function isCountable(string $index = null): bool
     {
         return $this->getCountable($index) !== null;
     }
@@ -750,6 +721,27 @@ class JSON implements \ArrayAccess
             throw new UncountableValueException("'$index' is not countable");
         }
         return count($countableValue);
+    }
+
+    /**
+     * Iterates over an element.
+     *
+     * @param ?string $index The index.
+     * @param int $returnType Specifies the value type in each iteration if the value is
+     * countable. Can be of the JSON::TYPE_* constants, except some.
+     * @return \Generator
+     * @throws UncountableValueException If the element is not iterable (i.e. is not an array).
+     */
+    public function iterate(string $index = null): \Generator
+    {
+        // Get the value of the index in data
+        if (($data = $this->getCountable($index)) === null) {
+            throw new UncountableValueException("'$index' is not iterable");
+        }
+
+        foreach ($data as $key => $value) {
+            yield $key => $this->getValueBasedOnReturnType($value);
+        }
     }
 
     public function offsetExists($index): bool
@@ -784,9 +776,10 @@ class JSON implements \ArrayAccess
     public function push($value, string $index = null): self
     {
         $value = $this->getOptimalValue($value);
+        $keys = $this->extractIndex($index);
 
         try {
-            $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
+            $this->crawlKeys($keys, $this->data, function (&$data, $key) use ($value) {
                 if (!is_array($data)) {
                     throw new UncountableValueException();
                 }
