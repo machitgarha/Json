@@ -675,55 +675,16 @@ class JSON implements \ArrayAccess
      * countable. Can be of the JSON::TYPE_* constants, except some.
      * @return \Generator
      * @throws UncountableValueException If the element is not iterable (i.e. is not an array).
-     * @throws InvalidArgumentException When passing $returnType a wrong type.
      */
-    public function iterate(string $index = null, int $returnType = self::TYPE_DEFAULT): \Generator
+    public function iterate(string $index = null): \Generator
     {
         // Get the value of the index in data
         if (($data = $this->getCountable($index)) === null) {
             throw new UncountableValueException("'$index' is not iterable");
         }
 
-        if ($returnType === self::TYPE_DEFAULT) {
-            $returnType = $this->defaultDataType;
-        }
-
-        // Define getValue function based on return type
-        switch ($returnType) {
-            case self::TYPE_JSON_STRING:
-                $getValue = function ($val) {
-                    return self::convertCountableToJson($val);
-                };
-                break;
-
-            case self::TYPE_ARRAY:
-                $getValue = function ($val) {
-                    return $val;
-                };
-                break;
-
-            case self::TYPE_OBJECT:
-                $getValue = function ($val) {
-                    return self::convertToObject($val);
-                };
-                break;
-
-            case self::TYPE_FULL_OBJECT:
-                $getValue = function ($val) {
-                    return self::convertToObject($val, true);
-                };
-                break;
-            
-            default:
-                throw new InvalidArgumentException("Unknown return type");
-        }
-
-        foreach ((array)($data) as $key => $val) {
-            if (is_array($val)) {
-                yield $key => $getValue($val);
-            } else {
-                yield $key => $val;
-            }
+        foreach ($data as $key => $value) {
+            yield $key => $this->getValueBasedOnReturnType($value);
         }
     }
 
