@@ -676,6 +676,19 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Replaces data with a new one.
+     *
+     * @param mixed $newData
+     * @return mixed The previous data.
+     */
+    public function exchange($newData)
+    {
+        $prevData = $this->get();
+        $this->__construct($newData, $this->options);
+        return $prevData;
+    }
+
+    /**
      * Returns an element's value, if it is countable; otherwise, returns null.
      *
      * @param ?string $index Pass null if you want to get JSON::$data.
