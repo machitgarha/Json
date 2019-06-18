@@ -43,6 +43,12 @@ class JSON implements \ArrayAccess
     /** @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT. */
     protected $defaultDataType = self::TYPE_JSON_STRING;
 
+    /** @var int In which type a value should be returned. */
+    protected $returnType = self::TYPE_DEFAULT;
+
+    /** @var bool To return all scalar data as scalar or not. */
+    protected $returnScalarAsScalar = true;
+
     /** @var int Options passed to the constructor. */
     protected $options = 0;
 
@@ -51,10 +57,6 @@ class JSON implements \ArrayAccess
 
     /** @var bool {@see self::OPT_PRINT_SCALAR_AS_IS} */
     protected $printScalarAsIs = false;
-
-    protected $returnType = self::TYPE_DEFAULT;
-
-    protected $returnScalarAsScalar = true;
 
     // Data types
     /** @var int The data type which you passed at creating new instance (i.e. constructor). */
