@@ -37,13 +37,15 @@ class PublicMethodTest extends TestCase
      * Tests JSON::getData*() methods.
      * @dataProvider expectedGetDataReturnValuesProvider
      */
-    public function testGetData($data, $asJson, $asArray, $asObject)
+    public function testGetData($data, $asJson, $asArray, $asObject, $asFullObject)
     {
         $json = new JSON($data);
 
         // JSON::getDataAs*() assertions
         $this->assertEquals($asJson, $json->getDataAsJsonString());
         $this->assertEquals($asArray, $json->getDataAsArray());
+        $this->assertEquals($asObject, $json->getDataAsObject());
+        $this->assertEquals($asFullObject, $json->getDataAsFullObject());
     }
 
     /** Provider for JSON::getData*() methods. */
@@ -55,12 +57,14 @@ class PublicMethodTest extends TestCase
                 [[]],
                 "[[]]",
                 [[]],
+                [[]],
                 (object)[(object)[]]
             ],
             [
                 '{"instance":"JSON"}',
                 '{"instance":"JSON"}',
                 ["instance" => "JSON"],
+                (object)["instance" => "JSON"],
                 (object)["instance" => "JSON"]
             ]
         ];

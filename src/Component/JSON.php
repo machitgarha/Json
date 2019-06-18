@@ -335,7 +335,7 @@ class JSON implements \ArrayAccess
      *
      * @param array $data
      * @param bool $forceObject Whether to convert indexed arrays to objects or not.
-     * @return object
+     * @return object|array
      */
     protected static function convertToObject($data, bool $forceObject = false)
     {
@@ -381,7 +381,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns data as an array.
+     * Returns data as a recursive array.
      *
      * @return array
      */
@@ -391,17 +391,17 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns data as an object.
+     * Returns data as a recursive object.
      *
-     * @return object
+     * @return object|array
      */
-    public function getDataAsObject(): object
+    public function getDataAsObject()
     {
         return self::convertToObject($this->data);
     }
 
     /**
-     * Returns data as a recursive object (i.e. even converts indexed arrays to objects).
+     * Returns data as a completely-recursive object (i.e. even converts indexed arrays to objects).
      *
      * @return object
      */
