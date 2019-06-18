@@ -87,8 +87,9 @@ class JSON implements \ArrayAccess
      */
     const OPT_TREAT_AS_STRING = 2;
     /**
-     * @var int Consider data passed into the constructor as a JSON string. Using this option leads
-     * to exceptions if the JSON string is not valid. This option only affects the constructor.
+     * @var int Force data passed into the constructor as a JSON string. Using this option leads
+     * to exceptions if the JSON string is not valid. This option only affects the constructor. Note
+     * that the constructor checks a string data as a JSON string by default.
      */
     const OPT_TREAT_AS_JSON_STRING = 8;
     /**
@@ -124,9 +125,9 @@ class JSON implements \ArrayAccess
         // Check data type
         $isString = is_string($data);
 
-        if (($treatAsJsonString || $treatAsString) && !$isString) {
-            throw new InvalidArgumentException("You must pass data as string when you use one of "
-                . "the JSON::OPT_TREAT_AS_STRING or JSON::OPT_TREAT_AS_JSON_STRING options");
+        if ($treatAsJsonString && !$isString) {
+            throw new InvalidArgumentException("You must pass data as string when you use "
+                . "JSON::OPT_TREAT_AS_JSON_STRING option");
         }
 
         if ($type = self::isArrayOrObject($data)) {
@@ -156,7 +157,7 @@ class JSON implements \ArrayAccess
          * 2. JSON::OPT_TREAT_AS_STRING is not enabled, and data is not a valid JSON string.
          */
         if (is_scalar($data) || $data === null) {
-            $this->setDataTo($data);
+            $this->setDataTo($treatAsString ? (string)($data) : $data);
             return;
         }
 

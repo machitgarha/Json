@@ -42,9 +42,7 @@ class InvalidArgumentExceptionTest extends TestCase
             [fopen(__FILE__, "r")],
 
             // Invalid combination of data and options
-            [false, JSON::OPT_TREAT_AS_STRING],
-            [51004, JSON::OPT_TREAT_AS_JSON_STRING],
-            [4.262, JSON::OPT_TREAT_AS_STRING | JSON::OPT_TREAT_AS_JSON_STRING],
+            [22022, JSON::OPT_TREAT_AS_JSON_STRING],
         ];
     }
 }
