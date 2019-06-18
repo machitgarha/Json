@@ -168,20 +168,22 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Sets data to an array, a scalar data or null.
-     * The recommended way to change JSON::$data property is using this method, as it does prevents
-     * from an invalid data to be replaced in JSON::$data.
+     * Sets data to an array or a scalar value.
+     * The recommended way to change JSON::$data property is using this method, as it prevents from 
+     * an invalid data to be replaced in JSON::$data.
      *
-     * @param array|int|string|float|bool|null $data The data to be replaced in JSON::$data.
-     * @return void
+     * @param array|int|string|float|bool|null $value The value to be replaced in JSON::$data.
+     * @return self
      * @throws InvalidArgumentException Any data that is not array or scalar is invalid.
      */
-    protected function setDataTo($data)
+    protected function setDataTo($value): self
     {
-        if (!(is_array($data) || self::isScalar($data))) {
+        if (!(is_array($value) || self::isScalar($value))) {
             throw new InvalidArgumentException("Invalid data type");
         }
-        $this->data = $data;
+
+        $this->data = $value;
+        return $this;
     }
 
     /**
@@ -230,15 +232,14 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Tells if data is an array or data to be either an array or object
+     * Determines if data is an array or an object, or force it to be one of them.
      *
-     * @param mixed $data The data.
+     * @param mixed $data
      * @param bool $throwException To throw exceptions when data is not either an array or an
      * object or not.
      * @return int 0 if is not any of them, JSON::TYPE_ARRAY if it is an array and JSON::TYPE_OBJECT
      * if it is an object.
-     * @throws InvalidArgumentException When $throwException is set to true and data is not either
-     * an array or an object.
+     * @throws InvalidArgumentException
      */
     protected static function isArrayOrObject($data, bool $throwException = false): int
     {
@@ -255,12 +256,12 @@ class JSON implements \ArrayAccess
 
     /**
      * Tells whether data type is scalar or not.
-     * A scalar type, can be an integer, a string, a float, a boolean, or a null value.
+     * A scalar type, can be an integer, a string, a float, a boolean, or NULL.
      *
-     * @param mixed $data The data.
-     * @param bool $throwException Throw exceptions when data is not scalar?
+     * @param mixed $data
+     * @param bool $throwException To throw exceptions when data is not scalar or not.
      * @return bool
-     * @throws InvalidArgumentException When $throwException is set to true and data is not scalar.
+     * @throws InvalidArgumentException
      */
     protected static function isScalar($data, bool $throwException = false): bool
     {
