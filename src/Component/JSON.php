@@ -281,11 +281,10 @@ class JSON implements \ArrayAccess
         return $isScalar;
     }
 
-
     /**
      * Converts a JSON string to an array.
      *
-     * @param string $data Data as JSON string.
+     * @param string $data
      * @return array
      * @throws UncountableJsonException If JSON string does not contain a data that could be
      * converted to an array.
@@ -302,9 +301,10 @@ class JSON implements \ArrayAccess
     /**
      * Converts a JSON string to an object.
      *
-     * @param string $data Data as JSON string.
+     * @param string $data
      * @return object
-     * @throws UncountableJsonException If the data cannot be converted to an object.
+     * @throws UncountableJsonException If JSON string does not contain a data that could be
+     * converted to an object.
      */
     protected static function convertJsonToObject(string $data): object
     {
@@ -316,9 +316,9 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Converts countable data to JSON string.
+     * Converts an array or an object to a JSON string.
      *
-     * @param array|object $data A countable data, either an array or an object.
+     * @param array|object $data
      * @return string
      */
     protected static function convertCountableToJson($data): string
@@ -328,9 +328,9 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Converts an object to an array completely.
+     * Converts an object or an array to a recursive array.
      *
-     * @param array|object $data Data as an array or an object.
+     * @param array|object $data
      * @return array
      */
     protected static function convertToArray($data): array
@@ -339,9 +339,9 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Converts an array or an object to an object recursively.
+     * Converts an array or an object to a recursive object.
      *
-     * @param array $data Data as array or object.
+     * @param array $data
      * @param bool $forceObject Whether to convert indexed arrays to objects or not.
      * @return object
      */
@@ -351,10 +351,9 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Get the desirable value to be used elsewhere.
-     * It will convert all countable values to full-indexed arrays. All other values than countable
-     * values would be returned exactly the same.
-     * Also, if OPT_JSON_DECODE_ALWAYS option is enabled, then it returns all
+     * Gets value as an array or a scalar.
+     * Converts a countable value to a recursive array, and return a scalar value as is. Also, this
+     * method handles {@see JSON::OPT_JSON_DECODE_ALWAYS} option.
      *
      * @param mixed $value
      * @return mixed
