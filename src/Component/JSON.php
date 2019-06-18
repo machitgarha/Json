@@ -179,7 +179,7 @@ class JSON implements \ArrayAccess
      */
     protected function setDataTo($data)
     {
-        if (!(is_array($data) || is_scalar($data) || is_null($data))) {
+        if (!(is_array($data) || self::isScalar($data))) {
             throw new InvalidArgumentException("Invalid data type");
         }
         $this->data = $data;
@@ -775,18 +775,6 @@ class JSON implements \ArrayAccess
             throw new UncountableValueException("'$index' is not countable");
         }
         return count($countableValue);
-    }
-
-    /**
-     * Replaces data with a new data.
-     *
-     * @param mixed $data The new data to be replaced.
-     * @return self
-     */
-    public function exchange($data): self
-    {
-        $this->__construct($data);
-        return $this;
     }
 
     public function offsetExists($index): bool
