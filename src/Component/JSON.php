@@ -182,10 +182,13 @@ class JSON implements \ArrayAccess
      */
     protected function setDataTo($value): self
     {
-        if (!(is_array($value) || self::isScalar($value))) {
+        $isScalar = self::isScalar($value);
+
+        if (!(is_array($value)) || !$isScalar) {
             throw new InvalidArgumentException("Invalid data type");
         }
 
+        $this->isDataScalar = $isScalar;
         $this->data = $value;
         return $this;
     }
