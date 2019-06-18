@@ -12,16 +12,16 @@ namespace MAChitgarha\UnitTest\JSON;
 
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\JSON;
-use MAChitgarha\Exception\JSON\DataIsScalarException;
+use MAChitgarha\Exception\JSON\ScalarDataException;
 
-class DataIsScalarExceptionTest extends TestCase
+class ScalarDataExceptionTest extends TestCase
 {
     /** @var JSON */
     protected $json;
 
     protected function setUp()
     {
-        $this->expectException(DataIsScalarException::class);
+        $this->expectException(ScalarDataException::class);
 
         // Set up fixtures
         $this->json = new JSON(7);

@@ -7,6 +7,6 @@
 
 namespace MAChitgarha\Exception\JSON;
 
-class DataIsScalarException extends InvalidArgumentException
+class ScalarDataException extends InvalidArgumentException
 {
 }

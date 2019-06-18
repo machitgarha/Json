@@ -14,7 +14,7 @@ use MAChitgarha\Exception\JSON\InvalidArgumentException;
 use MAChitgarha\Exception\JSON\InvalidJsonException;
 use MAChitgarha\Exception\JSON\UncountableJsonException;
 use MAChitgarha\Exception\JSON\UncountableValueException;
-use MAChitgarha\Exception\JSON\DataIsScalarException;
+use MAChitgarha\Exception\JSON\ScalarDataException;
 
 /**
  * Handles JSON data type.
@@ -27,6 +27,7 @@ use MAChitgarha\Exception\JSON\DataIsScalarException;
  * @todo {@see https://stackoverflow.com/questions/29308898/how-do-i-extract-data-from-json-with-php}
  * @todo Add toArray() method for scalar types.
  * @todo Add clear() method to clear an array.
+ * @todo Change default data type when changing data.
  */
 class JSON implements \ArrayAccess
 {
@@ -519,13 +520,13 @@ class JSON implements \ArrayAccess
      * scalar.
      *
      * @see self::crawlKeysRecursive()
-     * @throws DataIsScalarException
+     * @throws ScalarDataException
      * @throws InvalidArgumentException When a non-scalar and non-array data is passed.
      */
     protected function crawlKeys(array $keys, &$data, callable $operation, bool $strictIndexing = false)
     {
         if (self::isScalar($data)) {
-            throw new DataIsScalarException("Cannot use the function on scalar data");
+            throw new ScalarDataException("Cannot use the function on scalar data");
         }
 
         if (!is_array($data)) {
@@ -584,7 +585,7 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index The index.
      * @return mixed The value of the index. Returns null if the index not found.
-     * @throws DataIsScalarException If data is scalar and $index is not null.
+     * @throws ScalarDataException If data is scalar and $index is not null.
      */
     public function get(string $index = null)
     {
@@ -592,7 +593,7 @@ class JSON implements \ArrayAccess
             if ($index === null) {
                 return $this->data;
             } else {
-                throw new DataIsScalarException("Indexing is invalid");
+                throw new ScalarDataException("Indexing is invalid");
             }
         }
 
@@ -611,7 +612,7 @@ class JSON implements \ArrayAccess
      * @param mixed $value The value to be set.
      * @param ?string $index The index. Pass null if data is scalar.
      * @return self
-     * @throws DataIsScalarException If data is scalar and $index is not null.
+     * @throws ScalarDataException If data is scalar and $index is not null.
      */
     public function set($value, string $index = null): self
     {
@@ -622,7 +623,7 @@ class JSON implements \ArrayAccess
                 $this->setDataTo($value);
                 return $this;
             } else {
-                throw new DataIsScalarException("Indexing is invalid");
+                throw new ScalarDataException("Indexing is invalid");
             }
         }
 
@@ -739,7 +740,7 @@ class JSON implements \ArrayAccess
     protected function getCountable(string $index = null)
     {
         if ($this->isDataScalar()) {
-            throw new DataIsScalarException();
+            throw new ScalarDataException();
         }
 
         $value = $this->get($index);
