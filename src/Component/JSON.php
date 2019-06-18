@@ -699,7 +699,7 @@ class JSON implements \ArrayAccess
     /**
      * Determines whether an element is countable or not.
      *
-     * @param string $index The index.
+     * @param ?string $index The index.
      * @return bool Is the index countable or not.
      */
     public function isCountable(string $index = null): bool
@@ -728,8 +728,6 @@ class JSON implements \ArrayAccess
      * Iterates over an element.
      *
      * @param ?string $index The index.
-     * @param int $returnType Specifies the value type in each iteration if the value is
-     * countable. Can be of the JSON::TYPE_* constants, except some.
      * @return \Generator
      * @throws UncountableValueException If the element is not iterable (i.e. is not an array).
      */
