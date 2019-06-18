@@ -51,9 +51,4 @@ class ScalarDataExceptionTest extends TestCase
     {
         $this->json->pop();
     }
-
-    public function testCount()
-    {
-        $this->json->count();
-    }
 }

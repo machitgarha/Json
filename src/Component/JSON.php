@@ -29,6 +29,7 @@ use MAChitgarha\Exception\JSON\ScalarDataException;
  * @todo Add clear() method to clear an array.
  * @todo Change default data type when changing data.
  * @todo JSON::isCountable() should not throw exception when data is scalar, should return false.
+ * @todo Make exceptions more accurate.
  */
 class JSON implements \ArrayAccess
 {
