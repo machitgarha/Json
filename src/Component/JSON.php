@@ -382,17 +382,17 @@ class JSON implements \ArrayAccess
     /**
      * Returns data as an array.
      *
-     * @return array The data as an array.
+     * @return array
      */
     public function getDataAsArray(): array
     {
-        return $this->data;
+        return self::convertToArray($this->data);
     }
 
     /**
      * Returns data as an object.
      *
-     * @return object The data as an object.
+     * @return object
      */
     public function getDataAsObject(): object
     {
@@ -400,7 +400,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns data as a full-converted object (i.e. even converts indexed arrays to objects).
+     * Returns data as a recursive object (i.e. even converts indexed arrays to objects).
      *
      * @return object
      */
@@ -415,7 +415,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Sets the return type used by other methods.
+     * Sets the return type that is used by other returning-value methods.
      *
      * @param int $type The type of returning values. For example, consider that you passed data as
      * an array and you pass this argument as JSON::TYPE_OBJECT; in this case, when you use
@@ -445,6 +445,14 @@ class JSON implements \ArrayAccess
         }
     }
 
+    /**
+     * Gets the value based on the return type.
+     * Based on {@see self::$returnType} and {@see self::$returnScalarAsScalar}, converts the value
+     * to the desired type (if needed) and returns it.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
     protected function getValueBasedOnReturnType($value)
     {
         if (self::isScalar($value) && $this->returnScalarAsScalar) {
