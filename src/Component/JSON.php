@@ -176,7 +176,7 @@ class JSON implements \ArrayAccess
     {
         $isScalar = self::isScalar($value);
 
-        if (!(is_array($value)) || !$isScalar) {
+        if (!(is_array($value)) && !$isScalar) {
             throw new InvalidArgumentException("Invalid data type");
         }
 
@@ -489,7 +489,9 @@ class JSON implements \ArrayAccess
      * @param array $data The data. It must be a recursive array or you may encounter errors.
      * @param callable $operation A set of operations to do with the element. The callable will get
      * the following argument(s):
-     * 1. The specified element. You can pass it by get it by reference.
+     * 1. The specified element. You can get it by reference.
+     * 2. The parent array of the element. You can get it by reference, too.
+     * 3. The last key of the keys. You can access the element using it and the parent array.
      * The value returned by the callable will also be returned by this method.
      * @param bool $strictIndexing To throw exceptions when a key does not exist or create
      * non-exist a key. For example, you can set this to true when you want to get an element's
@@ -513,8 +515,7 @@ class JSON implements \ArrayAccess
                     $data[$lastKey] = null;
                 }
             }
-            $element = &$data[$lastKey];
-            return $operation($element);
+            return $operation($data[$lastKey], $data, $lastKey);
         }
 
         // Crawl keys recursively
@@ -656,8 +657,9 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index): self
     {
-        $this->crawlKeys($this->extractIndex($index), function (&$element) {
-            unset($element);
+        $this->crawlKeys($this->extractIndex($index), function ($e, &$data, $key) {
+            // Unsetting the element directly is impossible
+            unset($data[$key]);
         }, true);
         return $this;
     }
@@ -763,10 +765,9 @@ class JSON implements \ArrayAccess
     public function push($value, string $index = null): self
     {
         $value = $this->getOptimalValue($value);
-        $keys = $this->extractIndex($index);
 
         try {
-            $this->crawlKeys($keys, function (&$element) use ($value) {
+            $this->crawlKeys($this->extractIndex($index), function (&$element) use ($value) {
                 array_push($element, $value);
             }, true);
         } catch (Exception $e) {
