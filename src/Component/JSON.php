@@ -786,7 +786,7 @@ class JSON implements \ArrayAccess
                 }
                 array_push($data[$key], $value);
             }, true);
-        } catch (UncountableValueException $e) {
+        } catch (Exception $e) {
             throw new UncountableValueException("'$index' is not countable");
         }
 
@@ -810,7 +810,7 @@ class JSON implements \ArrayAccess
                 }
                 array_pop($data[$key]);
             }, true);
-        } catch (UncountableValueException $e) {
+        } catch (Exception $e) {
             throw new UncountableValueException("'$index' is not countable");
         }
 

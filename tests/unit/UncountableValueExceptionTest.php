@@ -29,7 +29,21 @@ class UncountableValueExceptionTest extends TestCase
 
     public function testCount()
     {
-        $this->json->count("dead");
+        $this->json->count("0");
     }
 
+    public function testIterate()
+    {
+        foreach ($this->json->iterate("0") as $i);
+    }
+
+    public function testPush()
+    {
+        $this->json->push(7, "0");
+    }
+
+    public function testPop()
+    {
+        $this->json->pop("0");
+    }
 }

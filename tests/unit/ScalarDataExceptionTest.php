@@ -41,14 +41,4 @@ class ScalarDataExceptionTest extends TestCase
     {
         $this->json->unset("");
     }
-
-    public function testPush()
-    {
-        $this->json->push("!");
-    }
-
-    public function testPop()
-    {
-        $this->json->pop();
-    }
 }
