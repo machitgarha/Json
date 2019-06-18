@@ -480,24 +480,23 @@ class JSON implements \ArrayAccess
 
     /**
      * Follows keys to do (a) specific operation(s) with a specific element.
-     * Crawl keys recursively, and find the specified element. Then, by using the closure, do a
-     * specific set of operations on the element.
+     * Crawl keys recursively, and find the specified element. Then, using a callable, do a specific
+     * set of operations on the element.
      *
      * @param array $keys The keys to be crawled recursively. If you pass it an empty array, then
      * the method won't do anything.
      * @param array $data The data. It must be a recursive array or you may encounter errors.
-     * @param callable $operation A set of operations to do with the element, as a closure. The
-     * closure will get two arguments:
-     * 1. The parent array of the element,
-     * 2. The key (as integer or string) to be accessed to that element using the parent array.
-     * The value returned by the closure will also be returned by this method.
-     * @param boolean $strictIndexing To create keys as empty arrays and continue recursion if the
-     * key cannot be found. For example, you can turn this on when you want to get an element's
-     * value and you want to ensure that the element exists.
-     * @return mixed Return the return value of the closure ($operation).
-     * @throws Exception When strict indexing is enabled but a key does not exist.
-     * @throws Exception When a key contains a non-array (i.e. uncountable) data, and thus,
-     * cannot code crawling keys cannot be continued.
+     * @param callable $operation A set of operations to do with the element. The callable will get
+     * the following argument(s):
+     * 1. The specified element. You can pass it by get it by reference.
+     * The value returned by the callable will also be returned by this method.
+     * @param bool $strictIndexing To throw exceptions when a key does not exist or create
+     * non-exist a key. For example, you can set this to true when you want to get an element's
+     * value (i.e. you want to ensure that the element exists).
+     * @return mixed Return the return value of the callable ($operation).
+     * @throws Exception When $strictIndexing is true but a key does not exist.
+     * @throws UncountableValueException When a key contains a non-array (i.e. uncountable) value,
+     * and thus, cannot crawling keys cannot be continued.
      */
     protected function crawlKeysRecursive(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
     {
@@ -538,32 +537,23 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Handles empty keys and scalar data for {@link self::crawlKeysRecursive()}.
-     * Don't allow scalar types, and throw a special exception when data passed to the method is
-     * scalar.
+     * Control special cases before calling {@see self::crawlKeysRecursive()}.
+     * If $keys is an empty array, then pass make operation on the JSON::$data directly. This
+     * method also prevent from passing scalar data by throwing an exception.
      *
      * @see self::crawlKeysRecursive()
      * @throws ScalarDataException
-     * @throws InvalidArgumentException When a non-scalar and non-array data is passed.
      */
     protected function crawlKeys(array $keys, callable $operation, bool $strictIndexing = false)
     {
-        $data = $this->data;
+        $data = &$this->data;
 
         if (self::isScalar($data)) {
             throw new ScalarDataException("Cannot use the function on scalar data");
         }
 
-        if (!is_array($data)) {
-            throw new InvalidArgumentException("Non-array data passed");
-        }
-
         if (count($keys) === 0) {
-            // Don't merge these two lines, to make passing by reference work
-            $data = [$data];
-            $returnValue = $operation($data, 0);
-            $data = $data[0];
-            return $returnValue;
+            return $operation($data);
         }
         return $this->crawlKeysRecursive($keys, $data, $operation, $strictIndexing);
     }
