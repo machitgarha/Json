@@ -40,9 +40,7 @@ class JSON implements \ArrayAccess
      */
     protected $data;
 
-    /**
-     * @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT.
-     */
+    /** @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT. */
     protected $defaultDataType = self::TYPE_JSON_STRING;
 
     /** @var int Options passed to the constructor. */
@@ -454,7 +452,7 @@ class JSON implements \ArrayAccess
             $returnType = $this->defaultDataType;
         }
 
-        switch ($this->returnType) {
+        switch ($returnType) {
             case self::TYPE_JSON_STRING:
                 return json_encode($value);
             case self::TYPE_ARRAY:
@@ -610,9 +608,13 @@ class JSON implements \ArrayAccess
             }
         }
 
-        return $this->crawlKeys($this->extractIndex($index), $this->data, function ($data, $key) {
-            return $this->getValueBasedOnReturnType($data[$key]);
-        }, true);
+        try {
+            return $this->crawlKeys($this->extractIndex($index), $this->data, function ($data, $k) {
+                return $this->getValueBasedOnReturnType($data[$k]);
+            }, true);
+        } catch (Exception $e) {
+            return null;
+        }
     }
 
     /**

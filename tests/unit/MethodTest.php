@@ -44,11 +44,6 @@ class MethodTest extends TestCase
     {
         $json = new JSON($data);
 
-        // JSON::getData() assertions
-        $this->assertEquals(gettype($data), gettype($json->getData(JSON::TYPE_DEFAULT)));
-        $this->assertEquals($asJson, $json->getData(JSON::TYPE_JSON_STRING));
-        $this->assertEquals($asArray, $json->getData(JSON::TYPE_ARRAY));
-
         // JSON::getDataAs*() assertions
         $this->assertEquals($asJson, $json->getDataAsJsonString());
         $this->assertEquals($asArray, $json->getDataAsArray());
@@ -60,7 +55,7 @@ class MethodTest extends TestCase
         // JSON data that we expect
         return [
             [
-                [new \stdClass()],
+                [[]],
                 "[[]]",
                 [[]],
                 (object)[(object)[]]
@@ -155,11 +150,6 @@ class MethodTest extends TestCase
         foreach ($json->iterate("apps.browsers") as $i => $browserName) {
             $this->assertEquals($browserName, $json->get("apps.browsers.$i"));
         }
-
-        // Checking the second argument
-        $this->assertIsArray($json->iterate("apps", JSON::TYPE_ARRAY)->current());
-        $this->assertIsObject($json->iterate("apps", JSON::TYPE_OBJECT)->current());
-        $this->assertTrue(JSON::isValidJson($json->iterate("apps", JSON::TYPE_JSON_STRING)->current()));
     }
 
     /**
@@ -193,7 +183,7 @@ class MethodTest extends TestCase
         $this->assertFalse($json->isSet("0"));
 
         $json->pop();
-        $this->assertFalse($json->isset("test"));
+        $this->assertFalse($json->isSet("test"));
     }
 
     /**

@@ -47,25 +47,4 @@ class InvalidArgumentExceptionTest extends TestCase
             [4.262, JSON::OPT_TREAT_AS_STRING | JSON::OPT_TREAT_AS_JSON_STRING],
         ];
     }
-
-    public function testIterate()
-    {
-        foreach ($this->json->iterate(null, JSON::TYPE_SCALAR) as $value) {}
-    }
-
-    /**
-     * @dataProvider badTypeProvider
-     */
-    public function testGetData(int $type)
-    {
-        $this->json->getData($type);
-    }
-
-    public function badTypeProvider()
-    {
-        return [
-            [JSON::TYPE_JSON_CLASS],
-            [JSON::TYPE_SCALAR],
-        ];
-    }
 }
