@@ -50,13 +50,22 @@ class InvalidArgumentExceptionTest extends TestCase
 
     public function testIterate()
     {
-        foreach ($this->json->iterate(null, JSON::TYPE_JSON_CLASS) as $i) {}
         foreach ($this->json->iterate(null, JSON::TYPE_SCALAR) as $value) {}
     }
 
-    public function testGetData()
+    /**
+     * @dataProvider badTypeProvider
+     */
+    public function testGetData(int $type)
     {
-        $this->json->getData(JSON::TYPE_JSON_CLASS);
-        $this->json->getData(JSON::TYPE_SCALAR);
+        $this->json->getData($type);
+    }
+
+    public function badTypeProvider()
+    {
+        return [
+            [JSON::TYPE_JSON_CLASS],
+            [JSON::TYPE_SCALAR],
+        ];
     }
 }
