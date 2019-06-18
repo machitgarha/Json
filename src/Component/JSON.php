@@ -479,14 +479,13 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Follows keys to do (a) specific operation(s) with the element.
-     * Crawl keys recursively, and find the requested element. Then, by using the closure, do a
-     * specific set of operations with that element.
+     * Follows keys to do (a) specific operation(s) with a specific element.
+     * Crawl keys recursively, and find the specified element. Then, by using the closure, do a
+     * specific set of operations on the element.
      *
      * @param array $keys The keys to be crawled recursively. If you pass it an empty array, then
      * the method won't do anything.
-     * @param array $data The data. It must be completely array (including its sub-elements), or
-     * you may encounter errors.
+     * @param array $data The data. It must be a recursive array or you may encounter errors.
      * @param callable $operation A set of operations to do with the element, as a closure. The
      * closure will get two arguments:
      * 1. The parent array of the element,
@@ -514,7 +513,8 @@ class JSON implements \ArrayAccess
                     $data[$lastKey] = null;
                 }
             }
-            return $operation($data, $lastKey);
+            $element = &$data[$lastKey];
+            return $operation($element);
         }
 
         // Crawl keys recursively
@@ -546,8 +546,10 @@ class JSON implements \ArrayAccess
      * @throws ScalarDataException
      * @throws InvalidArgumentException When a non-scalar and non-array data is passed.
      */
-    protected function crawlKeys(array $keys, &$data, callable $operation, bool $strictIndexing = false)
+    protected function crawlKeys(array $keys, callable $operation, bool $strictIndexing = false)
     {
+        $data = $this->data;
+
         if (self::isScalar($data)) {
             throw new ScalarDataException("Cannot use the function on scalar data");
         }
@@ -621,8 +623,8 @@ class JSON implements \ArrayAccess
         }
 
         try {
-            return $this->crawlKeys($this->extractIndex($index), $this->data, function ($data, $k) {
-                return $this->getValueBasedOnReturnType($data[$k]);
+            return $this->crawlKeys($this->extractIndex($index), function ($element) {
+                return $this->getValueBasedOnReturnType($element);
             }, true);
         } catch (Exception $e) {
             return null;
@@ -650,8 +652,8 @@ class JSON implements \ArrayAccess
             }
         }
 
-        $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) use ($value) {
-            $data[$key] = $value;
+        $this->crawlKeys($this->extractIndex($index), function (&$element) use ($value) {
+            $element = $value;
         });
         return $this;
     }
@@ -664,8 +666,8 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index): self
     {
-        $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) {
-            unset($data[$key]);
+        $this->crawlKeys($this->extractIndex($index), function (&$element) {
+            unset($element);
         }, true);
         return $this;
     }
@@ -774,11 +776,8 @@ class JSON implements \ArrayAccess
         $keys = $this->extractIndex($index);
 
         try {
-            $this->crawlKeys($keys, $this->data, function (&$data, $key) use ($value) {
-                if (!is_array($data)) {
-                    throw new UncountableValueException();
-                }
-                array_push($data[$key], $value);
+            $this->crawlKeys($keys, function (&$element) use ($value) {
+                array_push($element, $value);
             }, true);
         } catch (Exception $e) {
             throw new UncountableValueException("'$index' is not countable");
@@ -798,11 +797,8 @@ class JSON implements \ArrayAccess
     public function pop(string $index = null): self
     {
         try {
-            $this->crawlKeys($this->extractIndex($index), $this->data, function (&$data, $key) {
-                if (!is_array($data)) {
-                    throw new UncountableValueException();
-                }
-                array_pop($data[$key]);
+            $this->crawlKeys($this->extractIndex($index), function (&$element) {
+                array_pop($element);
             }, true);
         } catch (Exception $e) {
             throw new UncountableValueException("'$index' is not countable");
