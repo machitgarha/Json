@@ -30,6 +30,7 @@ use MAChitgarha\Exception\JSON\ScalarDataException;
  * @todo Change default data type when changing data.
  * @todo JSON::isCountable() should not throw exception when data is scalar, should return false.
  * @todo Make exceptions more accurate.
+ * @todo Define JSON::iterateAsJson() with a special generator for its returning value.
  */
 class JSON implements \ArrayAccess
 {
@@ -559,11 +560,11 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Extract keys from an index into an array by the delimiter.
+     * Extract keys from an index into an array by a delimiter.
      *
-     * @param ?string $index The index.
-     * @param string $delimiter The delimiter.
-     * @return array The extracted keys.
+     * @param ?string $index
+     * @param string $delimiter
+     * @return array
      *
      * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping
      * them using a backslash.
@@ -584,7 +585,6 @@ class JSON implements \ArrayAccess
         // Replace the escaped delimiter with a less-using character
         $index = str_replace($escapedDelimiter, $replacement, $index);
 
-        // Explode index parts by $delimiter
         $keys = explode($delimiter, $index);
 
         // Set the escaped delimiters
@@ -596,10 +596,10 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Gets the value of an index in the data.
+     * Gets an element's value.
      *
-     * @param ?string $index The index.
-     * @return mixed The value of the index. Returns null if the index not found.
+     * @param ?string $index Pass null if data is scalar.
+     * @return mixed The value of the specified element. Returns null if the index cannot be found.
      * @throws ScalarDataException If data is scalar and $index is not null.
      */
     public function get(string $index = null)
@@ -622,10 +622,10 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Sets the value to an index in the data.
+     * Sets an element to a value.
      *
-     * @param mixed $value The value to be set.
-     * @param ?string $index The index. Pass null if data is scalar.
+     * @param mixed $value
+     * @param ?string $index Pass null if data is scalar.
      * @return self
      * @throws ScalarDataException If data is scalar and $index is not null.
      */
@@ -649,9 +649,9 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Unset an index in the data.
+     * Unsets an element.
      *
-     * @param string $index The index
+     * @param string $index
      * @return self
      */
     public function unset(string $index): self
@@ -663,10 +663,10 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Determines if an index exists or not.
+     * Determines if an element exists or not.
      *
-     * @param string $index The index.
-     * @return bool Whether the index is set or not. A null value will be considered as not set.
+     * @param string $index
+     * @return bool Whether the element is set or not. A null value will be considered as not set.
      */
     public function isSet(string $index): bool
     {
@@ -674,10 +674,10 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Gets an element value, if it is countable.
+     * Returns an element's value, if it is countable; otherwise, returns null.
      *
-     * @param ?string $index The index. Pass null if you want to get the data itself.
-     * @return array|null If the index is countable, returns it; otherwise, returns null.
+     * @param ?string $index Pass null if you want to get JSON::$data.
+     * @return array|null
      */
     protected function getCountable(string $index = null)
     {
@@ -687,8 +687,9 @@ class JSON implements \ArrayAccess
     /**
      * Determines whether an element is countable or not.
      *
-     * @param ?string $index The index.
-     * @return bool Is the index countable or not.
+     * @param ?string $index Pass null if you want to check the data itself (i.e. you want to check
+     * if data is scalar or not).
+     * @return bool
      */
     public function isCountable(string $index = null): bool
     {
@@ -696,11 +697,11 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Counts all elements in a countable element.
+     * Counts the numbers elements in a countable element.
      *
-     * @param ?string $index The index. Pass null if you want to get number of elements in the data.
-     * @return int The elements number of the index.
-     * @throws UncountableValueException If the element is not countable.
+     * @param ?string $index Pass null if you want to get the number of elements in the data itself.
+     * @return int
+     * @throws UncountableValueException
      */
     public function count(string $index = null): int
     {
@@ -715,9 +716,9 @@ class JSON implements \ArrayAccess
     /**
      * Iterates over an element.
      *
-     * @param ?string $index The index.
+     * @param ?string $index
      * @return \Generator
-     * @throws UncountableValueException If the element is not iterable (i.e. is not an array).
+     * @throws UncountableValueException
      */
     public function iterate(string $index = null): \Generator
     {
@@ -729,11 +730,6 @@ class JSON implements \ArrayAccess
         foreach ($data as $key => $value) {
             yield $key => $this->getValueBasedOnReturnType($value);
         }
-    }
-
-    public function offsetExists($index): bool
-    {
-        return $this->isSet((string)($index));
     }
 
     public function offsetGet($index)
@@ -751,12 +747,16 @@ class JSON implements \ArrayAccess
         $this->unset((string)($index));
     }
 
+    public function offsetExists($index): bool
+    {
+        return $this->isSet((string)($index));
+    }
+
     /**
-     * Pushes a value to the end of a countable element in data.
+     * Pushes a value to the end of a countable element.
      *
-     * @param mixed $value The value to be inserted.
-     * @param ?string $index The index of the countable element to be pushed into. Pass null if you
-     * want to push to the data root.
+     * @param mixed $value
+     * @param ?string $index Pass null if you want to push the value to the data root.
      * @return self
      * @throws UncountableValueException
      */
@@ -779,8 +779,7 @@ class JSON implements \ArrayAccess
     /**
      * Pops the last value of a countable element from data.
      *
-     * @param ?string $index The index of the countable element to be popped from. Pass null if you
-     * want to pop from the data root.
+     * @param ?string $index Pass null if you want to pop from the data root.
      * @return self
      * @throws UncountableValueException
      */
