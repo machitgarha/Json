@@ -177,19 +177,6 @@ class MethodTest extends TestCase
     }
 
     /**
-     * Tests JSON::exchange() method.
-     * @dataProvider dataProvider
-     */
-    public function testExchange($data)
-    {
-        $json = new JSON();
-
-        $json->exchange($data);
-        
-        $this->assertEquals($data, $json->getData());
-    }
-
-    /**
      * Tests JSON::push() and JSON::pop() methods.
      */
     public function testPushPop()
