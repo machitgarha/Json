@@ -35,7 +35,7 @@ use MAChitgarha\Exception\JSON\ScalarDataException;
 class JSON implements \ArrayAccess
 {
     /**
-     * @var array|int|string|float|bool|null JSON data as a complete native PHP array (to be 
+     * @var array|int|string|float|bool|null JSON data as a complete native PHP array (to be
      * handled more easily), or as a scalar type. It is important to note that what we mean from a
      * scalar type can be NULL, also. If the data passed to the constructor is countable, then the
      * data will be saved as an array; otherwise, if it's scalar, it will be saved as is. Also,
@@ -165,7 +165,7 @@ class JSON implements \ArrayAccess
 
     /**
      * Sets data to an array or a scalar value.
-     * The recommended way to change JSON::$data property is using this method, as it prevents from 
+     * The recommended way to change JSON::$data property is using this method, as it prevents from
      * an invalid data to be replaced in JSON::$data.
      *
      * @param array|int|string|float|bool|null $value The value to be replaced in JSON::$data.
