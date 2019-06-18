@@ -34,20 +34,21 @@ use MAChitgarha\Exception\JSON\ScalarDataException;
 class JSON implements \ArrayAccess
 {
     /**
-     * @var array|int|string|float|bool|null Holds JSON data as a complete native PHP array (to be
-     * handled more easily). If the data passed to the constructor is countable, then the data will
-     * be saved as an array; otherwise, if it's scalar, it will be saved exactly as it is. Also,
+     * @var array|int|string|float|bool|null JSON data as a complete native PHP array (to be 
+     * handled more easily), or as a scalar type. It is important to note that what we mean from a
+     * scalar type can be NULL, also. If the data passed to the constructor is countable, then the
+     * data will be saved as an array; otherwise, if it's scalar, it will be saved as is. Also,
      * these allowed types can be in a string that contains a valid JSON data.
      */
     protected $data;
 
-    /** @var int Default data type. Possible values: TYPE_JSON_STRING, TYPE_ARRAY, TYPE_OBJECT. */
+    /** @var int Default data type; can be one of the JSON::TYPE_* constants. */
     protected $defaultDataType = self::TYPE_JSON_STRING;
 
-    /** @var int In which type a value should be returned. */
+    /** @var int {@see self::setReturnType()}. */
     protected $returnType = self::TYPE_DEFAULT;
 
-    /** @var bool To return all scalar data as scalar or not. */
+    /** @var bool {@see self::setReturnType()}. */
     protected $returnScalarAsScalar = true;
 
     /** @var int Options passed to the constructor. */
@@ -64,32 +65,30 @@ class JSON implements \ArrayAccess
     const TYPE_DEFAULT = 0;
     /** @var int JSON string data type. */
     const TYPE_JSON_STRING = 1;
-    /** @var int Object data type (recursive), without converting indexed arrays to objects. */
-    const TYPE_OBJECT = 2;
     /** @var int Array data type (recursive). */
     const TYPE_ARRAY = 3;
+    /** @var int Object data type (recursive), without converting indexed arrays to objects. */
+    const TYPE_OBJECT = 2;
     /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
     const TYPE_FULL_OBJECT = 4;
 
     // Options
     /**
-     * @var int To decode every valid JSON string when setting values or not. This would be so much
-     * useful if you're working with JSON strings a lot. The first thing that this option does is
-     * that checks if a JSON string is a valid one and contains an object; and if it is, then
-     * extract it to an array and make further operations, like setting the new value.
+     * @var int Check every string value to be a valid JSON string, and if it is, decode it and use
+     * the decoded value instead of the string itself. However, if a string does not contain a valid
+     * JSON string, then use the string itself. This option affects performance in some cases, but
+     * it would be so much useful if you work with JSON strings a lot.
      */
     const OPT_JSON_DECODE_ALWAYS = 1;
     /**
      * @var int Consider data passed into the constructor as string, even if it's a valid JSON data;
-     * in other words, don't decode it. This option has effect only in the constructor, and no other
-     * methods will be affected by this. It won't work if you use it in combination with
-     * JSON::OPT_TREAT_AS_JSON_STRING.
+     * in other words, don't decode it. This option only affects the constructor. It won't have any
+     * effects if you use it in combination with JSON::OPT_TREAT_AS_JSON_STRING.
      */
     const OPT_TREAT_AS_STRING = 2;
     /**
      * @var int Consider data passed into the constructor as a JSON string. Using this option leads
-     * to exceptions if the JSON string is not valid. This option has effect only in the
-     * constructor, and no other methods will be affected by this.
+     * to exceptions if the JSON string is not valid. This option only affects the constructor.
      */
     const OPT_TREAT_AS_JSON_STRING = 8;
     /**
@@ -368,8 +367,8 @@ class JSON implements \ArrayAccess
         if ($this->jsonDecodeAlways && is_string($value)) {
             // Validating JSON string
             try {
-                return self::convertJsonToArray($value);
-            } catch (UncountableJsonException $e) {
+                return self::readValidJson($value);
+            } catch (InvalidJsonException $e) {
             }
         }
         
@@ -419,11 +418,16 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Sets the return type used by class methods.
+     * Sets the return type used by other methods.
      *
-     * @param int $type The type, can be one of the JSON::TYPE_* constants.
-     * @param bool $scalarAsIs Whether to return scalar as is (i.e. don't change its type), or
-     * forcefully convert it to $type (e.g. convert scalar to array when returning it).
+     * @param int $type The type of returning values. For example, consider that you passed data as
+     * an array and you pass this argument as JSON::TYPE_OBJECT; in this case, when you use
+     * $json->get() (with no arguments, to get the data itself), then the data will be returned as
+     * an object
+     * @param bool $scalarAsIs To return all scalar data as scalar or not. Sometimes, methods reach
+     * a scalar value, such as JSON::get(); in such cases, this argument determines that should the
+     * returned data be scalar (i.e. as is) or not. If it sets to false, then all scalar data will
+     * be returned as the type of $type (e.g. an array).
      * @return self
      */
     public function setReturnType(int $type = self::TYPE_DEFAULT, bool $scalarAsIs = true): self
