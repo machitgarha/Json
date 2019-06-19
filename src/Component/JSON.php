@@ -15,6 +15,7 @@ use MAChitgarha\Exception\JSON\InvalidJsonException;
 use MAChitgarha\Exception\JSON\UncountableJsonException;
 use MAChitgarha\Exception\JSON\UncountableValueException;
 use MAChitgarha\Exception\JSON\ScalarDataException;
+use MAChitgarha\Exception\JSON\JsonException;
 
 /**
  * Handles JSON data type.
@@ -31,6 +32,7 @@ use MAChitgarha\Exception\JSON\ScalarDataException;
  * @todo JSON::isCountable() should not throw exception when data is scalar, should return false.
  * @todo Make exceptions more accurate.
  * @todo Define JSON::iterateAsJson() with a special generator for its returning value.
+ * @todo Fix getting integer aside string for an index.
  */
 class JSON implements \ArrayAccess
 {
@@ -308,15 +310,19 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Converts an array or an object to a JSON string.
+     * Encodes a data as JSON.
      *
-     * @param array|object $data
+     * @param mixed $data
      * @return string
+     * @throws JsonException
      */
-    protected static function convertCountableToJson($data): string
+    protected static function encodeToJson($data, int $options = 0): string
     {
-        self::isArrayOrObject($data, true);
-        return json_encode($data);
+        $encodedData = json_encode($data, $options);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new JsonException("Cannot encode JSON string");
+        }
+        return $encodedData;
     }
 
     /**
@@ -327,7 +333,7 @@ class JSON implements \ArrayAccess
      */
     protected static function convertToArray($data): array
     {
-        return json_decode(json_encode($data), true);
+        return json_decode(self::encodeToJson($data), true);
     }
 
     /**
@@ -339,7 +345,7 @@ class JSON implements \ArrayAccess
      */
     protected static function convertToObject($data, bool $forceObject = false)
     {
-        return json_decode(json_encode($data, $forceObject ? JSON_FORCE_OBJECT : 0));
+        return json_decode(self::encodeToJson($data, $forceObject ? JSON_FORCE_OBJECT : 0));
     }
 
     /**
@@ -377,7 +383,7 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsJsonString(int $options = 0): string
     {
-        return json_encode($this->data, $options);
+        return self::encodeToJson($this->data, $options);
     }
 
     /**
@@ -467,7 +473,7 @@ class JSON implements \ArrayAccess
 
         switch ($returnType) {
             case self::TYPE_JSON_STRING:
-                return json_encode($value);
+                return self::encodeToJson($value);
             case self::TYPE_ARRAY:
                 return self::convertToArray($value);
             case self::TYPE_OBJECT:

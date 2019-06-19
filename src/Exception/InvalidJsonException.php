@@ -7,6 +7,6 @@
 
 namespace MAChitgarha\Exception\JSON;
 
-class InvalidJsonException extends Exception
+class InvalidJsonException extends JsonException
 {
 }
