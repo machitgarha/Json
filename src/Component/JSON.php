@@ -63,6 +63,9 @@ class JSON implements \ArrayAccess
     /** @var bool {@see self::OPT_JSON_DECODE_ALWAYS} */
     protected $jsonDecodeAlways = false;
 
+    /** @var int {@see self::setJsonRecursionDepth()} */
+    protected $jsonRecursionDepth = 512;
+
     // Data types
     /** @var int The data type which you passed at creating new instance (i.e. constructor). */
     const TYPE_DEFAULT = 0;
@@ -318,7 +321,7 @@ class JSON implements \ArrayAccess
      */
     protected static function encodeToJson($data, int $options = 0): string
     {
-        $encodedData = json_encode($data, $options);
+        $encodedData = json_encode($data, $options, $this->jsonRecursionDepth);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new JsonException("Cannot encode JSON string");
         }
@@ -334,7 +337,7 @@ class JSON implements \ArrayAccess
      */
     protected static function decodeJson(string $data, bool $assoc = false)
     {
-        $decodedData = json_decode($data, $assoc);
+        $decodedData = json_decode($data, $assoc, $this->jsonRecursionDepth);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new JsonException("Cannot decode JSON string");
         }
@@ -833,6 +836,22 @@ class JSON implements \ArrayAccess
             throw new UncountableValueException("'$index' is not countable");
         }
 
+        return $this;
+    }
+
+    /**
+     * Sets recursion depth when using json_*() functions.
+     *
+     * @param int $depth 
+     * @return self
+     */
+    public function setJsonRecursionDepth(int $depth): self
+    {
+        if ($depth < 1) {
+            throw new InvalidArgumentException("Depth must be positive");
+        }
+
+        $this->jsonRecursionDepth = $depth;
         return $this;
     }
 }
