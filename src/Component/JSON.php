@@ -315,8 +315,11 @@ class JSON implements \ArrayAccess
 
     /**
      * Encodes a data as JSON.
+     * See json_encode() documentation for more details.
      *
      * @param mixed $data
+     * @param int $options
+     * @param int $depth
      * @return string
      * @throws JsonException
      */
@@ -331,10 +334,14 @@ class JSON implements \ArrayAccess
 
     /**
      * Decodes a JSON string.
+     * See json_decode() documentation for more details.
      *
      * @param string $data
-     * @param bool $assoc When true, returned objects will be converted into associative arrays.
+     * @param bool $assoc
+     * @param int $depth
+     * @param int $options
      * @return mixed
+     * @throws JsonException
      */
     public static function decodeJson(
         string $data,
@@ -349,12 +356,26 @@ class JSON implements \ArrayAccess
         return $decodedData;
     }
 
-    protected function encodeToJsonUseProps($data, int $options = 0)
+    /**
+     * Uses needed class properties as arguments/options for {@see self::encodeToJson()}.
+     *
+     * @param mixed $data
+     * @param int $options
+     * @return string
+     */
+    protected function encodeToJsonUseProps($data, int $options = 0): string
     {
         return self::encodeToJson($data, $options, $this->jsonRecursionDepth);
     }
 
-    protected function decodeJsonUseProps($data, bool $assoc = false)
+    /**
+     * Uses needed class properties as arguments/options for {@see self::encodeToJson()}.
+     *
+     * @param string $data
+     * @param bool $assoc
+     * @return mixed
+     */
+    protected function decodeJsonUseProps(string $data, bool $assoc = false)
     {
         return self::decodeJson($data, $assoc, $this->jsonRecursionDepth);
     }
