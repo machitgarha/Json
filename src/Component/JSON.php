@@ -445,7 +445,7 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsObject()
     {
-        return $this->convertToArray($this->data);
+        return $this->convertToObject($this->data);
     }
 
     /**
