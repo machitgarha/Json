@@ -192,36 +192,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Checks a string data to be a valid JSON string.
-     *
-     * @param string $data Data to be validated.
-     * @param bool $assoc Return decoded JSON as associative array or not.
-     * @return array An array of two values:
-     * [0]: Is the string a valid JSON or not,
-     * [1]: The decoded JSON string, and it will be null if the string is not a valid JSON.
-     */
-    protected static function validateStringAsJson(string $data, bool $assoc = true): array
-    {
-        try {
-            $decodedData = self::decodeJson($data, $assoc);
-        } catch (JsonException $e) {
-            return [false, null];
-        }
-        return [true, $decodedData];
-    }
-
-    /**
-     * Checks if a string is a valid JSON or not.
-     *
-     * @param string $data Data to be checked.
-     * @return bool
-     */
-    public static function isValidJson(string $data): bool
-    {
-        return self::validateStringAsJson($data)[0];
-    }
-
-    /**
      * Determines if data is an array or an object, or force it to be one of them.
      *
      * @param mixed $data
@@ -339,6 +309,36 @@ class JSON implements \ArrayAccess
             throw new JsonException("Cannot decode JSON string");
         }
         return $decodedData;
+    }
+
+    /**
+     * Checks a string data to be a valid JSON string.
+     *
+     * @param string $data
+     * @param bool $assoc Return decoded JSON as associative array or not.
+     * @return array An array of two values:
+     * [0]: Is the string a valid JSON or not,
+     * [1]: The decoded JSON string, and it will be null if the string is not a valid JSON.
+     */
+    protected static function validateStringAsJson(string $data, bool $assoc = false): array
+    {
+        try {
+            $decodedData = self::decodeJson($data, $assoc);
+        } catch (JsonException $e) {
+            return [false, null];
+        }
+        return [true, $decodedData];
+    }
+
+    /**
+     * Checks if a string is a valid JSON or not.
+     *
+     * @param string $data Data to be checked.
+     * @return bool
+     */
+    public static function isJsonValid(string $data): bool
+    {
+        return self::validateStringAsJson($data)[0];
     }
 
     /**
