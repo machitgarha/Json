@@ -33,6 +33,7 @@ use MAChitgarha\Exception\JSON\JsonException;
  * @todo Make exceptions more accurate.
  * @todo Define JSON::iterateAsJson() with a special generator for its returning value.
  * @todo Fix getting integer aside string for an index.
+ * @todo Improve json_last_error() error handling.
  */
 class JSON implements \ArrayAccess
 {
@@ -319,9 +320,9 @@ class JSON implements \ArrayAccess
      * @return string
      * @throws JsonException
      */
-    protected static function encodeToJson($data, int $options = 0): string
+    public static function encodeToJson($data, int $options = 0, int $depth = 512): string
     {
-        $encodedData = json_encode($data, $options, $this->jsonRecursionDepth);
+        $encodedData = json_encode($data, $options, $depth);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new JsonException("Cannot encode JSON string");
         }
@@ -335,9 +336,13 @@ class JSON implements \ArrayAccess
      * @param bool $assoc When true, returned objects will be converted into associative arrays.
      * @return mixed
      */
-    protected static function decodeJson(string $data, bool $assoc = false)
-    {
-        $decodedData = json_decode($data, $assoc, $this->jsonRecursionDepth);
+    public static function decodeJson(
+        string $data,
+        bool $assoc = false,
+        int $depth = 512,
+        int $options = 0
+    ) {
+        $decodedData = json_decode($data, $assoc, $depth, $options);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new JsonException("Cannot decode JSON string");
         }
@@ -842,7 +847,7 @@ class JSON implements \ArrayAccess
     /**
      * Sets recursion depth when using json_*() functions.
      *
-     * @param int $depth 
+     * @param int $depth
      * @return self
      */
     public function setJsonRecursionDepth(int $depth): self
