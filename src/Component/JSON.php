@@ -25,7 +25,7 @@ use MAChitgarha\Exception\JSON\JsonException;
  * @see https://github.com/MAChitgarha/JSON/wiki
  * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
  * @todo Import all methods from \ArrayObject.
- * @todo {@see https://stackoverflow.com/questions/29308898/how-do-i-extract-data-from-json-with-php}
+ * @todo {@see https://stackoverflow.com/questions/29308898}
  * @todo Add toCountable() method for scalar types.
  * @todo Add clear() method to clear an array.
  * @todo Change default data type when changing data.
@@ -349,7 +349,7 @@ class JSON implements \ArrayAccess
      */
     protected static function convertToArray($data): array
     {
-        return self::decodeJson(self::encodeToJson($data), true);
+        return (array)(self::decodeJson(self::encodeToJson($data), true));
     }
 
     /**
@@ -523,8 +523,12 @@ class JSON implements \ArrayAccess
      * @throws UncountableValueException When a key contains a non-array (i.e. uncountable) value,
      * and thus, cannot crawling keys cannot be continued.
      */
-    protected function crawlKeysRecursive(array $keys, array &$data, callable $operation, bool $strictIndexing = false)
-    {
+    protected function crawlKeysRecursive(
+        array $keys,
+        array &$data,
+        callable $operation,
+        bool $strictIndexing = false
+    ) {
         $keysCount = count($keys);
 
         // End of recursion
