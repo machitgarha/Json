@@ -287,9 +287,9 @@ class JSON implements \ArrayAccess
      * @throws UncountableJsonException If JSON string does not contain a data that could be
      * converted to an array.
      */
-    protected static function convertJsonToArray(string $data): array
+    protected function convertJsonToArray(string $data): array
     {
-        $decodedData = self::decodeJson($data, true);
+        $decodedData = $this->decodeJsonUseProps($data, true);
         if (!is_array($decodedData)) {
             throw new UncountableJsonException();
         }
@@ -304,9 +304,9 @@ class JSON implements \ArrayAccess
      * @throws UncountableJsonException If JSON string does not contain a data that could be
      * converted to an object.
      */
-    protected static function convertJsonToObject(string $data): object
+    protected function convertJsonToObject(string $data): object
     {
-        $decodedData = self::decodeJson($data);
+        $decodedData = $this->decodeJsonUseProps($data);
         if (!is_object($decodedData)) {
             throw new UncountableJsonException();
         }
@@ -349,15 +349,25 @@ class JSON implements \ArrayAccess
         return $decodedData;
     }
 
+    protected function encodeToJsonUseProps($data, int $options = 0)
+    {
+        return self::encodeToJson($data, $options, $this->jsonRecursionDepth);
+    }
+
+    protected function decodeJsonUseProps($data, bool $assoc = false)
+    {
+        return self::decodeJson($data, $assoc, $this->jsonRecursionDepth);
+    }
+
     /**
      * Converts an object or an array to a recursive array.
      *
      * @param array|object $data
      * @return array
      */
-    protected static function convertToArray($data): array
+    protected function convertToArray($data): array
     {
-        return (array)(self::decodeJson(self::encodeToJson($data), true));
+        return (array)($this->decodeJsonUseProps($this->encodeToJsonUseProps($data), true));
     }
 
     /**
@@ -367,9 +377,11 @@ class JSON implements \ArrayAccess
      * @param bool $forceObject Whether to convert indexed arrays to objects or not.
      * @return object|array
      */
-    protected static function convertToObject($data, bool $forceObject = false)
+    protected function convertToObject($data, bool $forceObject = false)
     {
-        return self::decodeJson(self::encodeToJson($data, $forceObject ? JSON_FORCE_OBJECT : 0));
+        return $this->decodeJsonUseProps(
+            $this->encodeToJsonUseProps($data, $forceObject ? JSON_FORCE_OBJECT : 0)
+        );
     }
 
     /**
@@ -383,7 +395,7 @@ class JSON implements \ArrayAccess
     protected function getOptimalValue($value)
     {
         if (self::isArrayOrObject($value)) {
-            return self::convertToArray($value);
+            return $this->convertToArray($value);
         }
 
         // JSON::OPT_JSON_DECODE_ALWAYS handler
@@ -407,7 +419,7 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsJsonString(int $options = 0): string
     {
-        return self::encodeToJson($this->data, $options);
+        return $this->encodeToJsonUseProps($this->data, $options);
     }
 
     /**
@@ -427,7 +439,7 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsObject()
     {
-        return self::convertToObject($this->data);
+        return $this->convertToArray($this->data);
     }
 
     /**
@@ -437,7 +449,7 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsFullObject(): object
     {
-        return self::convertToObject($this->data, true);
+        return $this->convertToObject($this->data, true);
     }
 
     public function __toString(): string
@@ -497,13 +509,13 @@ class JSON implements \ArrayAccess
 
         switch ($returnType) {
             case self::TYPE_JSON_STRING:
-                return self::encodeToJson($value);
+                return $this->encodeToJsonUseProps($value);
             case self::TYPE_ARRAY:
-                return self::convertToArray($value);
+                return $this->convertToArray($value);
             case self::TYPE_OBJECT:
-                return self::convertToObject($value);
+                return $this->convertToObject($value);
             case self::TYPE_FULL_OBJECT:
-                return self::convertToObject($value, true);
+                return $this->convertToObject($value, true);
             default:
                 throw new InvalidArgumentException("Unknown return type");
         }
