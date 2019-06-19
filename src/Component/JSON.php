@@ -198,7 +198,7 @@ class JSON implements \ArrayAccess
      */
     protected static function validateStringAsJson(string $data, bool $assoc = true): array
     {
-        $decodedData = json_decode($data, $assoc);
+        $decodedData = self::decodeJson($data, $assoc);
         if (json_last_error() === JSON_ERROR_NONE) {
             return [true, $decodedData];
         }
@@ -285,7 +285,7 @@ class JSON implements \ArrayAccess
      */
     protected static function convertJsonToArray(string $data): array
     {
-        $decodedData = json_decode($data, true);
+        $decodedData = self::decodeJson($data, true);
         if (!is_array($decodedData)) {
             throw new UncountableJsonException();
         }
@@ -302,7 +302,7 @@ class JSON implements \ArrayAccess
      */
     protected static function convertJsonToObject(string $data): object
     {
-        $decodedData = json_decode($data);
+        $decodedData = self::decodeJson($data);
         if (!is_object($decodedData)) {
             throw new UncountableJsonException();
         }
@@ -326,6 +326,22 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Decodes a JSON string.
+     *
+     * @param string $data
+     * @param bool $assoc When true, returned objects will be converted into associative arrays.
+     * @return mixed
+     */
+    protected static function decodeJson(string $data, bool $assoc = false)
+    {
+        $decodedData = json_decode($data, $assoc);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new JsonException("Cannot decode JSON string");
+        }
+        return $decodedData;
+    }
+
+    /**
      * Converts an object or an array to a recursive array.
      *
      * @param array|object $data
@@ -333,7 +349,7 @@ class JSON implements \ArrayAccess
      */
     protected static function convertToArray($data): array
     {
-        return json_decode(self::encodeToJson($data), true);
+        return self::decodeJson(self::encodeToJson($data), true);
     }
 
     /**
@@ -345,7 +361,7 @@ class JSON implements \ArrayAccess
      */
     protected static function convertToObject($data, bool $forceObject = false)
     {
-        return json_decode(self::encodeToJson($data, $forceObject ? JSON_FORCE_OBJECT : 0));
+        return self::decodeJson(self::encodeToJson($data, $forceObject ? JSON_FORCE_OBJECT : 0));
     }
 
     /**
