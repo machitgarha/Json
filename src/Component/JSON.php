@@ -135,7 +135,7 @@ class JSON implements \ArrayAccess
 
         if ($type = self::isArrayOrObject($data)) {
             $this->defaultDataType = $type;
-            $this->setDataTo(self::convertToArray($data));
+            $this->setDataTo($this->convertToArray($data));
             return;
         }
 
@@ -202,11 +202,12 @@ class JSON implements \ArrayAccess
      */
     protected static function validateStringAsJson(string $data, bool $assoc = true): array
     {
-        $decodedData = self::decodeJson($data, $assoc);
-        if (json_last_error() === JSON_ERROR_NONE) {
-            return [true, $decodedData];
+        try {
+            $decodedData = self::decodeJson($data, $assoc);
+        } catch (JsonException $e) {
+            return [false, null];
         }
-        return [false, $decodedData];
+        return [true, $decodedData];
     }
 
     /**
@@ -218,22 +219,6 @@ class JSON implements \ArrayAccess
     public static function isValidJson(string $data): bool
     {
         return self::validateStringAsJson($data)[0];
-    }
-
-    /**
-     * Reads a valid JSON string, and if it is invalid, throws an exception.
-     *
-     * @param string $data String data to be read.
-     * @return mixed A non-null value.
-     * @throws InvalidJsonException When data is an invalid JSON string.
-     */
-    public static function readValidJson(string $data)
-    {
-        list($isValidJson, $decodedJson) = self::validateStringAsJson($data);
-        if (!$isValidJson) {
-            throw new InvalidJsonException();
-        }
-        return $decodedJson;
     }
 
     /**
@@ -423,8 +408,8 @@ class JSON implements \ArrayAccess
         if ($this->jsonDecodeAlways && is_string($value)) {
             // Validating JSON string
             try {
-                return self::readValidJson($value);
-            } catch (InvalidJsonException $e) {
+                return self::decodeJson($value);
+            } catch (JsonException $e) {
             }
         }
         
@@ -450,7 +435,7 @@ class JSON implements \ArrayAccess
      */
     public function getDataAsArray(): array
     {
-        return self::convertToArray($this->data);
+        return $this->convertToArray($this->data);
     }
 
     /**
