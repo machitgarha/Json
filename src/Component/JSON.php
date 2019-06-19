@@ -235,40 +235,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Converts a JSON string to an array.
-     *
-     * @param string $data
-     * @return array
-     * @throws UncountableJsonException If JSON string does not contain a data that could be
-     * converted to an array.
-     */
-    protected function convertJsonToArray(string $data): array
-    {
-        $decodedData = $this->decodeJsonUseProps($data, true);
-        if (!is_array($decodedData)) {
-            throw new UncountableJsonException();
-        }
-        return $decodedData;
-    }
-
-    /**
-     * Converts a JSON string to an object.
-     *
-     * @param string $data
-     * @return object
-     * @throws UncountableJsonException If JSON string does not contain a data that could be
-     * converted to an object.
-     */
-    protected function convertJsonToObject(string $data): object
-    {
-        $decodedData = $this->decodeJsonUseProps($data);
-        if (!is_object($decodedData)) {
-            throw new UncountableJsonException();
-        }
-        return $decodedData;
-    }
-
-    /**
      * Encodes a data as JSON.
      * See json_encode() documentation for more details.
      *
