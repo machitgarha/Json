@@ -12,7 +12,6 @@ namespace MAChitgarha\Component;
 use MAChitgarha\Exception\JSON\Exception;
 use MAChitgarha\Exception\JSON\InvalidArgumentException;
 use MAChitgarha\Exception\JSON\InvalidJsonException;
-use MAChitgarha\Exception\JSON\UncountableJsonException;
 use MAChitgarha\Exception\JSON\UncountableValueException;
 use MAChitgarha\Exception\JSON\ScalarDataException;
 use MAChitgarha\Exception\JSON\JsonException;
@@ -24,16 +23,6 @@ use MAChitgarha\Exception\JSON\JsonException;
  *
  * @see https://github.com/MAChitgarha/JSON/wiki
  * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
- * @todo Import all methods from \ArrayObject.
- * @todo {@see https://stackoverflow.com/questions/29308898}
- * @todo Add toCountable() method for scalar types.
- * @todo Add clear() method to clear an array.
- * @todo Change default data type when changing data.
- * @todo JSON::isCountable() should not throw exception when data is scalar, should return false.
- * @todo Make exceptions more accurate.
- * @todo Define JSON::iterateAsJson() with a special generator for its returning value.
- * @todo Fix getting integer aside string for an index.
- * @todo Improve json_last_error() error handling.
  */
 class JSON implements \ArrayAccess
 {
@@ -284,7 +273,8 @@ class JSON implements \ArrayAccess
      * @param bool $assoc Return decoded JSON as associative array or not.
      * @return array An array of two values:
      * [0]: Is the string a valid JSON or not,
-     * [1]: The decoded JSON string, and it will be null if the string is not a valid JSON.
+     * [1]: The decoded JSON string, and it will be null if the string is not a valid JSON, or an
+     * error occurred while decoding it.
      */
     protected static function validateStringAsJson(string $data, bool $assoc = false): array
     {
