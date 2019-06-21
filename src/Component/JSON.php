@@ -551,17 +551,22 @@ class JSON implements \ArrayAccess
      * If $keys is an empty array, then pass make operation on the JSON::$data directly. This
      * method also prevent from passing scalar data by throwing an exception.
      *
+     * @param $index Using JSON::extractIndex(), it will extract indexes too.
      * @see self::crawlKeysRecursive()
      * @throws ScalarDataException
      */
-    protected function crawlKeys(array $keys, callable $operation, bool $strictIndexing = false)
-    {
+    protected function crawlKeys(
+        string $index = null,
+        callable $operation,
+        bool $strictIndexing = false
+    ) {
         $data = &$this->data;
 
         if (self::isScalar($data)) {
             throw new ScalarDataException("Cannot use the function on scalar data");
         }
 
+        $keys = $this->extractIndex($index);
         if (count($keys) === 0) {
             return $operation($data);
         }
@@ -622,7 +627,7 @@ class JSON implements \ArrayAccess
         }
 
         try {
-            return $this->crawlKeys($this->extractIndex($index), function ($element) {
+            return $this->crawlKeys($index, function ($element) {
                 return $this->getValueBasedOnReturnType($element);
             }, true);
         } catch (Exception $e) {
@@ -651,7 +656,7 @@ class JSON implements \ArrayAccess
             }
         }
 
-        $this->crawlKeys($this->extractIndex($index), function (&$element) use ($value) {
+        $this->crawlKeys($index, function (&$element) use ($value) {
             $element = $value;
         });
         return $this;
@@ -665,7 +670,7 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index): self
     {
-        $this->crawlKeys($this->extractIndex($index), function ($e, &$data, $key) {
+        $this->crawlKeys($index, function ($e, &$data, $key) {
             // Unsetting the element directly is impossible
             unset($data[$key]);
         }, true);
@@ -788,7 +793,7 @@ class JSON implements \ArrayAccess
         $value = $this->getOptimalValue($value);
 
         try {
-            $this->crawlKeys($this->extractIndex($index), function (&$element) use ($value) {
+            $this->crawlKeys($index, function (&$element) use ($value) {
                 array_push($element, $value);
             }, true);
         } catch (Exception $e) {
@@ -808,7 +813,7 @@ class JSON implements \ArrayAccess
     public function pop(string $index = null): self
     {
         try {
-            $this->crawlKeys($this->extractIndex($index), function (&$element) {
+            $this->crawlKeys($index, function (&$element) {
                 array_pop($element);
             }, true);
         } catch (Exception $e) {
