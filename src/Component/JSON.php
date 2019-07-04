@@ -993,9 +993,8 @@ class JSON implements \ArrayAccess
     /**
      * Merges a countable in data with another countable data.
      *
-     * @param mixed $newData The new data to be merged. It acts as constructor to get data. That
-     * said, the new data can be a valid JSON string to be decoded. It is not recommended, but
-     * valid, to pass a scalar value, as it may have undefined behaviour.
+     * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
+     * and will be treated as an array.
      * @param int $options Can be one of the JSON::MERGE_* constants (not JSON::MERGE_R_* ones).
      * @param string $index
      * @return self
@@ -1020,9 +1019,8 @@ class JSON implements \ArrayAccess
     /**
      * Merges a countable in data with another countable data.
      *
-     * @param mixed $newData The new data to be merged. It acts as constructor to get data. That
-     * said, the new data can be a valid JSON string to be decoded. It is not recommended, but
-     * valid, to pass a scalar value, as it may have undefined behaviour.
+     * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
+     * and will be treated as an array.
      * @param int $options Can be one of the JSON::MERGE_R_* constants.
      * @param string $index
      * @return self
@@ -1032,6 +1030,28 @@ class JSON implements \ArrayAccess
         $newDataAsArray = (new self($newData, $this->options))->getDataAsArray();
         $this->crawlKeys($index, function (&$array) use ($newDataAsArray) {
             $array = array_merge_recursive($array, $newDataAsArray);
+        }, true, true);
+        return $this;
+    }
+
+    /**
+     * Removes intersection of a countable in the data with a new data.
+     *
+     * @param mixed $data The data to be compared with. Any values (except recourses) can be passed
+     * and will be treated as an array.
+     * @param bool $compareKeys To calculate intersection in the keys or not (i.e. in values).
+     * @param string $index
+     * @return self
+     */
+    public function removeIntersectionsWith(
+        $data,
+        bool $compareKeys = false,
+        string $index = null
+    ): self {
+        $dataAsArray = (new self($data, $this->options))->getDataAsArray();
+        $this->crawlKeys($index, function (&$array) use ($dataAsArray, $compareKeys) {
+            $array = $compareKeys ? array_diff_key($array, $dataAsArray)
+                : array_diff($array, $dataAsArray);
         }, true, true);
         return $this;
     }
