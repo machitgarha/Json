@@ -978,7 +978,30 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Merges a countable in data with another countable value.
+     * Merges a countable in data with another countable data.
+     *
+     * @param mixed $newData The new data to be merged. It acts as constructor to get data. That
+     * said, the new data can be a valid JSON string to be decoded. It is not recommended, but
+     * valid, to pass a scalar value, as it may have undefined behaviour.
+     * @param bool $reverseOrder If set to false, the countable elements in the data will be
+     * replaced when reaching duplicate keys; otherwise, the new data elements will be replaced. 
+     * @param string $index
+     * @return self
+     */
+    public function mergeWith($newData, bool $reverseOrder = false, string $index = null): self
+    {
+        $newDataAsArray = (new self($newData, $this->options))->getDataAsArray();
+        $this->crawlKeys($index, function (&$array) use ($newDataAsArray, $reverseOrder) {
+            if ($reverseOrder)
+                $array = array_merge($newDataAsArray, $array);
+            else
+                $array = array_merge($array, $newDataAsArray);
+        }, true, true);
+        return $this;
+    }
+
+    /**
+     * Merges a countable in data with another countable data.
      *
      * @param mixed $newData The new data to be merged. It acts as constructor to get data. That
      * said, the new data can be a valid JSON string to be decoded. It is not recommended, but
@@ -986,11 +1009,11 @@ class JSON implements \ArrayAccess
      * @param string $index
      * @return self
      */
-    public function mergeWith($newData, string $index = null): self
+    public function mergeRecursivelyWith($newData, string $index = null)
     {
         $newDataAsArray = (new self($newData, $this->options))->getDataAsArray();
         $this->crawlKeys($index, function (&$array) use ($newDataAsArray) {
-            $array = array_merge($array, $newDataAsArray);
+            $array = array_merge_recursive($array, $newDataAsArray);
         }, true, true);
         return $this;
     }
