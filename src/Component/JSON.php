@@ -838,4 +838,30 @@ class JSON implements \ArrayAccess
         $this->jsonRecursionDepth = $depth;
         return $this;
     }
+
+    /**
+     * Returns a value from an array in data.
+     *
+     * @param string $index
+     * @return void
+     */
+    public function getRandomValue(string $index = null)
+    {
+        return $this->crawlKeys($index, function ($array) {
+            return array_values($array)[random_int(0, count($array) - 1)];
+        }, true);
+    }
+
+    /**
+     * Returns a random key from an array in data.
+     *
+     * @param string $index
+     * @return int|string
+     */
+    public function getRandomKey(string $index = null)
+    {
+        return $this->crawlKeys($index, function ($array) {
+            return array_keys($array)[random_int(0, count($array) - 1)];
+        }, true);
+    }
 }
