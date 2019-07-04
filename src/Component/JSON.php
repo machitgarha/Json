@@ -508,7 +508,7 @@ class JSON implements \ArrayAccess
      * @param bool $strictIndexing To throw exceptions when a key does not exist or create
      * non-exist a key. For example, you can set this to true when you want to get an element's
      * value (i.e. you want to ensure that the element exists).
-     * @param bool $forceCountableValue Force the value be operated to be a countable one; so the 
+     * @param bool $forceCountableValue Force the value be operated to be a countable one; so the
      * element passing to the function (i.e. callable) will be an array.
      * @return mixed Return the return value of the callable ($operation).
      * @throws Exception When $strictIndexing is true but a key does not exist.
@@ -590,8 +590,13 @@ class JSON implements \ArrayAccess
         if (count($keys) === 0) {
             return $operation($data);
         }
-        return $this->crawlKeysRecursive($keys, $data, $operation, $strictIndexing,
-            $forceCountableValue);
+        return $this->crawlKeysRecursive(
+            $keys,
+            $data,
+            $operation,
+            $strictIndexing,
+            $forceCountableValue
+        );
     }
 
     /**
@@ -1003,10 +1008,11 @@ class JSON implements \ArrayAccess
         $reverseOrder = $options & self::MERGE_PREFER_DEFAULT_DATA;
 
         $this->crawlKeys($index, function (&$array) use ($newDataAsArray, $reverseOrder) {
-            if ($reverseOrder)
+            if ($reverseOrder) {
                 $array = array_merge($newDataAsArray, $array);
-            else
+            } else {
                 $array = array_merge($array, $newDataAsArray);
+            }
         }, true, true);
         return $this;
     }
