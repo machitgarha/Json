@@ -843,7 +843,7 @@ class JSON implements \ArrayAccess
      * Returns a value from an array in data.
      *
      * @param string $index
-     * @return void
+     * @return mixed
      */
     public function getRandomValue(string $index = null)
     {
@@ -862,6 +862,48 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_keys($array)[random_int(0, count($array) - 1)];
+        }, true);
+    }
+
+    /**
+     * Returns one or more random values from an array in data.
+     *
+     * @param int $count
+     * @param string $index
+     * @return array
+     */
+    public function getRandomValues(int $count, string $index = null): array
+    {
+        return $this->crawlKeys($index, function ($array) use ($count) {
+            $arrayValues = array_values($array);
+            $arrayIndexLength = count($array) - 1;
+            $randomValues = [];
+
+            for ($i = 0; $i < $count; $i++) {
+                $randomValues[] = $arrayValues[random_int(0, $arrayIndexLength)];
+            }
+            return $randomValues;
+        }, true);
+    }
+
+    /**
+     * Returns one or more random keys from an array in data.
+     *
+     * @param integer $count
+     * @param string $index
+     * @return array
+     */
+    public function getRandomKeys(int $count, string $index = null): array
+    {
+        return $this->crawlKeys($index, function ($array) use ($count) {
+            $arrayKeys = array_keys($array);
+            $arrayIndexLength = count($array) - 1;
+            $randomKeys = [];
+
+            for ($i = 0; $i < $count; $i++) {
+                $randomKeys[] = $arrayKeys[random_int(0, $arrayIndexLength)];
+            }
+            return $randomKeys;
         }, true);
     }
 }
