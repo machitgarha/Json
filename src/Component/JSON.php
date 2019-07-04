@@ -963,4 +963,17 @@ class JSON implements \ArrayAccess
         }, true, true);
         return $this;
     }
+
+    /**
+     * Shifts an element off the beginning of an array in data.
+     *
+     * @param string $index
+     * @return mixed The shifted element's value.
+     */
+    public function shift(string $index = null)
+    {
+        return $this->crawlKeys($index, function ($array) {
+            return array_shift($array);
+        }, true, true);
+    }
 }
