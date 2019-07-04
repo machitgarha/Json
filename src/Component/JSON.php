@@ -853,7 +853,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns a value from an array in data.
+     * Returns a value from a countable in data.
      *
      * @param string $index
      * @return mixed
@@ -879,7 +879,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns one or more random values from an array in data.
+     * Returns one or more random values from a countable in data.
      *
      * @param int $count
      * @param string $index
@@ -900,7 +900,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns one or more random keys from an array in data.
+     * Returns one or more random keys from a countable in data.
      *
      * @param integer $count
      * @param string $index
@@ -921,7 +921,7 @@ class JSON implements \ArrayAccess
     }
     
     /**
-     * Applies a function to each member of an array in data.
+     * Applies a function to each member of a countable in data.
      *
      * @param callable $function The function to be called on each member, accepts three arguments:
      * 1. The value of the element, might be passed by reference.
@@ -943,7 +943,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Applies a function to each member of an array in data, recursively.
+     * Applies a function to each member of a countable in data, recursively.
      *
      * @param callable $function The function to be called on each member, accepts three arguments:
      * 1. The value of the element, might be passed by reference.
@@ -975,5 +975,23 @@ class JSON implements \ArrayAccess
         return $this->crawlKeys($index, function ($array) {
             return array_shift($array);
         }, true, true);
+    }
+
+    /**
+     * Merges a countable in data with another countable value.
+     *
+     * @param mixed $newData The new data to be merged. It acts as constructor to get data. That
+     * said, the new data can be a valid JSON string to be decoded. It is not recommended, but
+     * valid, to pass a scalar value, as it may have undefined behaviour.
+     * @param string $index
+     * @return self
+     */
+    public function mergeWith($newData, string $index = null): self
+    {
+        $newDataAsArray = (new self($newData, $this->options))->getDataAsArray();
+        $this->crawlKeys($index, function (&$array) use ($newDataAsArray) {
+            $array = array_merge($array, $newDataAsArray);
+        }, true, true);
+        return $this;
     }
 }
