@@ -68,6 +68,14 @@ class JSON implements \ArrayAccess
     /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
     const TYPE_FULL_OBJECT = 4;
 
+    // Merge options
+    /**
+     * @var int If it is set, when reaching duplicate keys, the new data keys will be replaced
+     * instead of the countable in the (default) data. The default behaviour is to use the new data
+     * values in these kinds of situations.
+     */
+    const MERGE_PREFER_DEFAULT_DATA = 1;
+
     // Options
     /**
      * @var int Check every string value to be a valid JSON string, and if it is, decode it and use
@@ -983,14 +991,17 @@ class JSON implements \ArrayAccess
      * @param mixed $newData The new data to be merged. It acts as constructor to get data. That
      * said, the new data can be a valid JSON string to be decoded. It is not recommended, but
      * valid, to pass a scalar value, as it may have undefined behaviour.
-     * @param bool $reverseOrder If set to false, the countable elements in the data will be
-     * replaced when reaching duplicate keys; otherwise, the new data elements will be replaced. 
+     * @param int $options Can be one of the JSON::MERGE_* constants (not JSON::MERGE_R_* ones).
      * @param string $index
      * @return self
      */
-    public function mergeWith($newData, bool $reverseOrder = false, string $index = null): self
+    public function mergeWith($newData, int $options = 0, string $index = null): self
     {
         $newDataAsArray = (new self($newData, $this->options))->getDataAsArray();
+
+        // Extracting options
+        $reverseOrder = $options & self::MERGE_PREFER_DEFAULT_DATA;
+
         $this->crawlKeys($index, function (&$array) use ($newDataAsArray, $reverseOrder) {
             if ($reverseOrder)
                 $array = array_merge($newDataAsArray, $array);
@@ -1006,10 +1017,11 @@ class JSON implements \ArrayAccess
      * @param mixed $newData The new data to be merged. It acts as constructor to get data. That
      * said, the new data can be a valid JSON string to be decoded. It is not recommended, but
      * valid, to pass a scalar value, as it may have undefined behaviour.
+     * @param int $options Can be one of the JSON::MERGE_R_* constants.
      * @param string $index
      * @return self
      */
-    public function mergeRecursivelyWith($newData, string $index = null)
+    public function mergeRecursivelyWith($newData, int $options = 0, string $index = null): self
     {
         $newDataAsArray = (new self($newData, $this->options))->getDataAsArray();
         $this->crawlKeys($index, function (&$array) use ($newDataAsArray) {
