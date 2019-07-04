@@ -500,16 +500,21 @@ class JSON implements \ArrayAccess
      * @param bool $strictIndexing To throw exceptions when a key does not exist or create
      * non-exist a key. For example, you can set this to true when you want to get an element's
      * value (i.e. you want to ensure that the element exists).
+     * @param bool $forceCountableValue Force the value be operated to be a countable one; so the 
+     * element passing to the function (i.e. callable) will be an array.
      * @return mixed Return the return value of the callable ($operation).
      * @throws Exception When $strictIndexing is true but a key does not exist.
      * @throws UncountableValueException When a key contains a non-array (i.e. uncountable) value,
      * and thus, cannot crawling keys cannot be continued.
+     * @throws UncountableValueException When $forceCountableValue is set to true but the reached
+     * value is uncountable.
      */
     protected function crawlKeysRecursive(
         array $keys,
         array &$data,
         callable $operation,
-        bool $strictIndexing = false
+        bool $strictIndexing = false,
+        bool $forceCountableValue = false
     ) {
         $keysCount = count($keys);
 
@@ -523,6 +528,12 @@ class JSON implements \ArrayAccess
                     $data[$lastKey] = null;
                 }
             }
+            $value = $data[$lastKey];
+
+            if (is_array($value) && $forceCountableValue) {
+                throw new UncountableValueException("Expected countable, reached uncountable");
+            }
+
             return $operation($data[$lastKey], $data, $lastKey);
         }
 
@@ -558,7 +569,8 @@ class JSON implements \ArrayAccess
     protected function crawlKeys(
         string $index = null,
         callable $operation,
-        bool $strictIndexing = false
+        bool $strictIndexing = false,
+        bool $forceCountableValue = false
     ) {
         $data = &$this->data;
 
@@ -570,7 +582,8 @@ class JSON implements \ArrayAccess
         if (count($keys) === 0) {
             return $operation($data);
         }
-        return $this->crawlKeysRecursive($keys, $data, $operation, $strictIndexing);
+        return $this->crawlKeysRecursive($keys, $data, $operation, $strictIndexing,
+            $forceCountableValue);
     }
 
     /**
@@ -849,7 +862,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_values($array)[random_int(0, count($array) - 1)];
-        }, true);
+        }, true, true);
     }
 
     /**
@@ -862,7 +875,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_keys($array)[random_int(0, count($array) - 1)];
-        }, true);
+        }, true, true);
     }
 
     /**
@@ -883,7 +896,7 @@ class JSON implements \ArrayAccess
                 $randomValues[] = $arrayValues[random_int(0, $arrayIndexLength)];
             }
             return $randomValues;
-        }, true);
+        }, true, true);
     }
 
     /**
@@ -904,6 +917,50 @@ class JSON implements \ArrayAccess
                 $randomKeys[] = $arrayKeys[random_int(0, $arrayIndexLength)];
             }
             return $randomKeys;
-        }, true);
+        }, true, true);
+    }
+    
+    /**
+     * Applies a function to each member of an array in data.
+     *
+     * @param callable $function The function to be called on each member, accepts three arguments:
+     * 1. The value of the element, might be passed by reference.
+     * 2. The key of the element.
+     * 3. $extraValue, if passed.
+     * @param string $index
+     * @param mixed $extraData Extra data to be passed as third function argument.
+     * @return self
+     */
+    public function walk(callable $function, string $index = null, $extraData = null): self
+    {
+        $this->crawlKeys($index, function ($array) use ($function, $extraData) {
+            $result = @array_walk($array, $function, $extraData);
+            if (!$result) {
+                throw new Exception("Cannot walk through the array");
+            }
+        }, true, true);
+        return $this;
+    }
+
+    /**
+     * Applies a function to each member of an array in data, recursively.
+     *
+     * @param callable $function The function to be called on each member, accepts three arguments:
+     * 1. The value of the element, might be passed by reference.
+     * 2. The key of the element.
+     * 3. $extraValue, if passed.
+     * @param string $index
+     * @param mixed $extraData Extra data to be passed as third function argument.
+     * @return self
+     */
+    public function walkRecursive(callable $function, string $index = null, $extraData = null): self
+    {
+        $this->crawlKeys($index, function ($array) use ($function, $extraData) {
+            $result = @array_walk_recursive($array, $function, $extraData);
+            if (!$result) {
+                throw new Exception("Cannot walk through the array recursively");
+            }
+        }, true, true);
+        return $this;
     }
 }
