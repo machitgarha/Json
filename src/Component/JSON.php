@@ -932,28 +932,6 @@ class JSON implements \ArrayAccess
             return $randomKeys;
         }, true, true);
     }
-    
-    /**
-     * Applies a function to each member of a countable in data.
-     *
-     * @param callable $function The function to be called on each member, accepts three arguments:
-     * 1. The value of the element, might be passed by reference.
-     * 2. The key of the element.
-     * 3. $extraValue, if passed.
-     * @param string $index
-     * @param mixed $extraData Extra data to be passed as third function argument.
-     * @return self
-     */
-    public function walk(callable $function, string $index = null, $extraData = null): self
-    {
-        $this->crawlKeys($index, function ($array) use ($function, $extraData) {
-            $result = @array_walk($array, $function, $extraData);
-            if (!$result) {
-                throw new Exception("Cannot walk through the array");
-            }
-        }, true, true);
-        return $this;
-    }
 
     /**
      * Applies a function to each member of a countable in data, recursively.
