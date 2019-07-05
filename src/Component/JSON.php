@@ -492,7 +492,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Follows keys to do (a) specific operation(s) with a specific element.
+     * Finds a specific element using the keys and does (a) specific operation(s) on it.
      * Crawl keys recursively, and find the specified element. Then, using a callable, do a specific
      * set of operations on the element.
      *
@@ -569,17 +569,16 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Control special cases before calling {@see self::crawlKeysRecursive()}.
-     * If $keys is an empty array, then pass make operation on the JSON::$data directly. This
-     * method also prevent from passing scalar data by throwing an exception.
+     * Calls {@see self::crawlKeysRecursive()}, but with more features.
+     * If $index is null, then the $function will be called on JSON::$data itself. This method also
+     * prevent from passing scalar data by throwing an exception.
      *
      * @param $index Using JSON::extractIndex(), it will extract indexes too.
-     * @see self::crawlKeysRecursive()
      * @throws ScalarDataException
      */
-    protected function crawlKeys(
+    protected function crawlKeysGenerator(
         string $index = null,
-        callable $operation,
+        callable $function,
         bool $strictIndexing = false,
         bool $forceCountableValue = false
     ): \Generator {
@@ -591,19 +590,41 @@ class JSON implements \ArrayAccess
 
         $keys = $this->extractIndex($index);
         if (count($keys) === 0) {
-            return $operation($data);
+            return $function($data);
         }
 
         $gen = $this->crawlKeysRecursive(
             $keys,
             $data,
-            $operation,
+            $function,
             $strictIndexing,
             $forceCountableValue
         );
 
         yield from $gen;
         return $gen->getReturn();
+    }
+
+    /**
+     * Calls {@see JSON::crawlKeysGenerator()} and returns its return value without yielding.
+     * In many cases, to call the callable (i.e. $function) inside {@see JSON::crawlKeysRecursive()}
+     * method, because of using generators, it is needed to return its value by calling
+     * \Generator::getReturn().
+     *
+     * @return mixed
+     */
+    protected function crawlKeys(
+        string $index = null,
+        callable $function,
+        bool $strictIndexing = false,
+        bool $forceCountableValue = false
+    ) {
+        return $this->crawlKeysGenerator(
+            $index,
+            $function,
+            $strictIndexing,
+            $forceCountableValue
+        )->getReturn();
     }
 
     /**
@@ -662,7 +683,7 @@ class JSON implements \ArrayAccess
         try {
             return $this->crawlKeys($index, function ($element) {
                 return $this->getValueBasedOnReturnType($element);
-            }, true)->getReturn();
+            }, true);
         } catch (Exception $e) {
             return null;
         }
@@ -826,7 +847,7 @@ class JSON implements \ArrayAccess
         $value = $this->getOptimalValue($value);
 
         $this->crawlKeys($index, function (&$element) use ($value) {
-            $element[] = $value;
+            array_push($element, $value);
         }, true, true);
         return $this;
     }
@@ -842,7 +863,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function (&$element) {
             return array_pop($element);
-        }, true, true)->getReturn();
+        }, true, true);
     }
 
     /**
@@ -871,7 +892,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_values($array)[random_int(0, count($array) - 1)];
-        }, true, true)->getReturn();
+        }, true, true);
     }
 
     /**
@@ -884,7 +905,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_keys($array)[random_int(0, count($array) - 1)];
-        }, true, true)->getReturn();
+        }, true, true);
     }
 
     /**
@@ -905,7 +926,7 @@ class JSON implements \ArrayAccess
                 $randomValues[] = $arrayValues[random_int(0, $arrayIndexLength)];
             }
             return $randomValues;
-        }, true, true)->getReturn();
+        }, true, true);
     }
 
     /**
@@ -926,7 +947,7 @@ class JSON implements \ArrayAccess
                 $randomKeys[] = $arrayKeys[random_int(0, $arrayIndexLength)];
             }
             return $randomKeys;
-        }, true, true)->getReturn();
+        }, true, true);
     }
 
     /**
@@ -961,7 +982,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_shift($array);
-        }, true, true)->getReturn();
+        }, true, true);
     }
 
     /**
