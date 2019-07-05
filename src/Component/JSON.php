@@ -770,17 +770,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns an element's value, if it is countable; otherwise, returns null.
-     *
-     * @param ?string $index Pass null if you want to get JSON::$data.
-     * @return array|null
-     */
-    protected function getCountable(string $index = null)
-    {
-        return is_array($value = $this->get($index)) ? $value : null;
-    }
-
-    /**
      * Determines whether an element is countable or not.
      *
      * @param ?string $index Pass null if you want to check the data itself (i.e. you want to check
