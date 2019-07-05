@@ -501,9 +501,10 @@ class JSON implements \ArrayAccess
      * @param array $data The data. It must be a recursive array or you may encounter errors.
      * @param callable $function A set of operations to do with the element. The callable (that can
      * be a closure) accepts the following argument(s):
-     * 1. The specified element; it can be gotten by reference.
-     * 2. The parent array of the element; it can be gotten by reference.
-     * 3. The last key of the keys; you can access the element using it and the parent array.
+     * 1. The element's value; might be gotten by-reference.
+     * 2. The parent element (that is an array); might be gotten by-reference.
+     * 3. The last crawled key; the element might be accessed using it and the parent element
+     * indirectly.
      * From within the callable, you can yield as many values as you want, and/or return some value.
      * @param bool $strictIndexing To throw exceptions when a key does not exist or create
      * non-exist a key. For example, you can set this to true when you want to get an element's
@@ -633,8 +634,9 @@ class JSON implements \ArrayAccess
                 $strictIndexing,
                 $forceCountableValue
             )->getReturn();
+        }
         // We don't want to catch all exceptions, though
-        } catch (Exception $e) {
+        catch (Exception $e) {
             throw $e;
         } catch (\Exception $e) {
             return null;
@@ -825,6 +827,28 @@ class JSON implements \ArrayAccess
         }
     }
 
+    /**
+     * Calls a function on each member of a countable and returns its first non-null return value.
+     *
+     * @param callable $function The function to be called and accepts the following arguments:
+     * 1. The element's value; might be gotten by-reference.
+     * 2. The element's key.
+     * 3. The parent element; might be gotten by-reference.
+     * @param string $index
+     * @return mixed
+     */
+    public function forEach(callable $function, string $index = null)
+    {
+        return $this->crawlKeys($index, function (array &$data) use ($function) {
+            foreach ($data as $key => &$value) {
+                $result = $function($value, $key, $data);
+                if ($result !== null) {
+                    return $result;
+                }
+            }
+        }, true, true);
+    }
+
     public function offsetGet($index)
     {
         return $this->get((string)($index));
@@ -846,7 +870,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Pushes a value to the end of a countable element.
+     * Pushes a value to the end of a countable.
      *
      * @param mixed $value
      * @param ?string $index Pass null if you want to push the value to the data root.
@@ -864,7 +888,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Pops the last value of a countable from the data and returns it.
+     * Pops the last value of a countable and returns it.
      *
      * @param ?string $index Pass null if you want to pop from the data root.
      * @return self
@@ -965,8 +989,8 @@ class JSON implements \ArrayAccess
      * Applies a function to each member of a countable in data, recursively.
      *
      * @param callable $function The function to be called on each member, accepts three arguments:
-     * 1. The value of the element, might be passed by reference.
-     * 2. The key of the element.
+     * 1. The element's value, might be gotten by-reference.
+     * 2. The element's key.
      * 3. $extraValue, if passed.
      * @param string $index
      * @param mixed $extraData Extra data to be passed as third function argument.
@@ -1041,7 +1065,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Removes intersection of a countable in the data with a new data.
+     * Removes intersection of a countable with a new data.
      *
      * @param mixed $data The data to be compared with. Any values (except recourses) can be passed
      * and will be treated as an array.
