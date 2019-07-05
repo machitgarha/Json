@@ -517,7 +517,7 @@ class JSON implements \ArrayAccess
      * @throws UncountableValueException When $forceCountableValue is set to true but the reached
      * value is uncountable.
      */
-    protected function crawlKeysRecursive(
+    protected function &crawlKeysRecursive(
         array $keys,
         array &$data,
         callable $function,
@@ -538,14 +538,20 @@ class JSON implements \ArrayAccess
             }
             $value = $data[$lastKey];
 
-            if (is_array($value) && $forceCountableValue) {
+            if (!is_array($value) && $forceCountableValue) {
                 throw new UncountableValueException("Expected countable, reached uncountable");
             }
 
-            return $function($data[$lastKey], $data, $lastKey);
+            $result = $function($data[$lastKey], $data, $lastKey);
+            if ($result instanceof \Generator) {
+                foreach ($result as $key => &$value) {
+                    yield $key => $value;
+                }
+                return $result->getReturn();
+            }
 
-            // Just for yielding something, if nothing is yielded before
-            yield from [];
+            yield;
+            return $result;
         }
 
         // Crawl keys recursively
@@ -570,13 +576,13 @@ class JSON implements \ArrayAccess
 
     /**
      * Calls {@see self::crawlKeysRecursive()}, but with more features.
-     * If $index is null, then the $function will be called on JSON::$data itself. This method also
-     * prevent from passing scalar data by throwing an exception.
+     * This method also prevent from passing scalar data by throwing an exception.
      *
-     * @param $index Using JSON::extractIndex(), it will extract indexes too.
+     * @param $index Using JSON::extractIndex(), it will extract indexes too. Note that, If $index
+     * is null, then $function gets only one argument, that is JSON::$data.
      * @throws ScalarDataException
      */
-    protected function crawlKeysGenerator(
+    protected function &crawlKeysGenerator(
         string $index = null,
         callable $function,
         bool $strictIndexing = false,
@@ -590,26 +596,26 @@ class JSON implements \ArrayAccess
 
         $keys = $this->extractIndex($index);
         if (count($keys) === 0) {
-            return $function($data);
+            $generator = $function($data);
+        } else {
+            $generator = $this->crawlKeysRecursive(
+                $keys,
+                $data,
+                $function,
+                $strictIndexing,
+                $forceCountableValue
+            );
         }
 
-        $gen = $this->crawlKeysRecursive(
-            $keys,
-            $data,
-            $function,
-            $strictIndexing,
-            $forceCountableValue
-        );
-
-        yield from $gen;
-        return $gen->getReturn();
+        // Returning the generator itself
+        return $generator;
     }
 
     /**
      * Calls {@see JSON::crawlKeysGenerator()} and returns its return value without yielding.
      * In many cases, to call the callable (i.e. $function) inside {@see JSON::crawlKeysRecursive()}
      * method, because of using generators, it is needed to return its value by calling
-     * \Generator::getReturn().
+     * \Generator::getReturn(). Also, if the generator didn't return any values, null is returned.
      *
      * @return mixed
      */
@@ -619,12 +625,20 @@ class JSON implements \ArrayAccess
         bool $strictIndexing = false,
         bool $forceCountableValue = false
     ) {
-        return $this->crawlKeysGenerator(
-            $index,
-            $function,
-            $strictIndexing,
-            $forceCountableValue
-        )->getReturn();
+        // Using try-catch for dealing with non-returning generator
+        try {
+            return $this->crawlKeysGenerator(
+                $index,
+                $function,
+                $strictIndexing,
+                $forceCountableValue
+            )->getReturn();
+        // We don't want to catch all exceptions, though
+        } catch (Exception $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**
@@ -796,21 +810,26 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Iterates over an element.
+     * Iterates over a countable.
      *
      * @param ?string $index
      * @return \Generator
      * @throws UncountableValueException
      */
-    public function iterate(string $index = null): \Generator
+    public function &iterate(string $index = null): \Generator
     {
-        // Get the value of the index in data
-        if (($data = $this->getCountable($index)) === null) {
-            throw new UncountableValueException("'$index' is not iterable");
-        }
+        $generator = $this->crawlKeysGenerator($index, function &(&$data) {
+            foreach ($data as $key => &$value) {
+                yield $key => $value;
 
-        foreach ($data as $key => $value) {
-            yield $key => $this->getValueBasedOnReturnType($value);
+                // Convert the value to an optimal one, e.g. convert objects to arrays
+                $value = $this->getOptimalValue($value);
+            }
+        }, true, true);
+
+        // Only yield from the generator, and don't allow the returning value to be returned
+        foreach ($generator as $key => &$value) {
+            yield $key => $value;
         }
     }
 
