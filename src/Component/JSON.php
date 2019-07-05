@@ -1085,4 +1085,30 @@ class JSON implements \ArrayAccess
         }, true, true);
         return $this;
     }
+
+    /**
+     * Filters a countable using a callable.
+     *
+     * @param callable $function The function to be called on each member of the countable. It
+     * should return a boolean, or any non-false values is considered as true (i.e. any value
+     * that loosely equals false is considered as false, such as 0); it accepts two arguments:
+     * 1. The element's value.
+     * 2. The element's key.
+     * Keep in mind, the given value by the callable is safe from overwriting; so getting it
+     * by-reference or not does not matter.
+     * @param string $index
+     * @return array
+     */
+    public function filter(callable $function, string $index = null): array
+    {
+        return $this->crawlKeys($index, function (array $data) use ($function) {
+            $filteredArray = [];
+            foreach ($data as $key => $value) {
+                if ($function($value, $key)) {
+                    $filteredArray[$key] = $value;
+                }
+            }
+            return $filteredArray;
+        }, true, true);
+    }
 }
