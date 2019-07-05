@@ -499,18 +499,18 @@ class JSON implements \ArrayAccess
      * @param array $keys The keys to be crawled recursively. If you pass it an empty array, then
      * the method won't do anything.
      * @param array $data The data. It must be a recursive array or you may encounter errors.
-     * @param callable $operation A set of operations to do with the element. The callable will get
-     * the following argument(s):
-     * 1. The specified element. You can get it by reference.
-     * 2. The parent array of the element. You can get it by reference, too.
-     * 3. The last key of the keys. You can access the element using it and the parent array.
-     * The value returned by the callable will also be returned by this method.
+     * @param callable $function A set of operations to do with the element. The callable (that can
+     * be a closure) accepts the following argument(s):
+     * 1. The specified element; it can be gotten by reference.
+     * 2. The parent array of the element; it can be gotten by reference.
+     * 3. The last key of the keys; you can access the element using it and the parent array.
+     * From within the callable, you can yield as many values as you want, and/or return some value.
      * @param bool $strictIndexing To throw exceptions when a key does not exist or create
      * non-exist a key. For example, you can set this to true when you want to get an element's
      * value (i.e. you want to ensure that the element exists).
      * @param bool $forceCountableValue Force the value be operated to be a countable one; so the
      * element passing to the function (i.e. callable) will be an array.
-     * @return mixed Return the return value of the callable ($operation).
+     * @return \Generator Return the return value of the callable ($operation).
      * @throws Exception When $strictIndexing is true but a key does not exist.
      * @throws UncountableValueException When a key contains a non-array (i.e. uncountable) value,
      * and thus, cannot crawling keys cannot be continued.
@@ -520,10 +520,10 @@ class JSON implements \ArrayAccess
     protected function crawlKeysRecursive(
         array $keys,
         array &$data,
-        callable $operation,
+        callable $function,
         bool $strictIndexing = false,
         bool $forceCountableValue = false
-    ) {
+    ): \Generator {
         $keysCount = count($keys);
 
         // End of recursion
@@ -542,7 +542,10 @@ class JSON implements \ArrayAccess
                 throw new UncountableValueException("Expected countable, reached uncountable");
             }
 
-            return $operation($data[$lastKey], $data, $lastKey);
+            return $function($data[$lastKey], $data, $lastKey);
+
+            // Just for yielding something, if nothing is yielded before
+            yield from [];
         }
 
         // Crawl keys recursively
@@ -561,7 +564,7 @@ class JSON implements \ArrayAccess
             }
 
             // Recursion
-            return $this->crawlKeysRecursive($keys, $data[$curKey], $operation, $strictIndexing);
+            return $this->crawlKeysRecursive($keys, $data[$curKey], $function, $strictIndexing);
         }
     }
 
@@ -579,7 +582,7 @@ class JSON implements \ArrayAccess
         callable $operation,
         bool $strictIndexing = false,
         bool $forceCountableValue = false
-    ) {
+    ): \Generator {
         $data = &$this->data;
 
         if (self::isScalar($data)) {
@@ -590,13 +593,17 @@ class JSON implements \ArrayAccess
         if (count($keys) === 0) {
             return $operation($data);
         }
-        return $this->crawlKeysRecursive(
+
+        $gen = $this->crawlKeysRecursive(
             $keys,
             $data,
             $operation,
             $strictIndexing,
             $forceCountableValue
         );
+
+        yield from $gen;
+        return $gen->getReturn();
     }
 
     /**
@@ -655,7 +662,7 @@ class JSON implements \ArrayAccess
         try {
             return $this->crawlKeys($index, function ($element) {
                 return $this->getValueBasedOnReturnType($element);
-            }, true);
+            }, true)->getReturn();
         } catch (Exception $e) {
             return null;
         }
@@ -697,7 +704,7 @@ class JSON implements \ArrayAccess
     public function unset(string $index): self
     {
         $this->crawlKeys($index, function ($e, &$data, $key) {
-            // Unsetting the element directly is impossible
+            // Un-setting the element directly is impossible
             unset($data[$key]);
         }, true);
         return $this;
@@ -818,35 +825,24 @@ class JSON implements \ArrayAccess
     {
         $value = $this->getOptimalValue($value);
 
-        try {
-            $this->crawlKeys($index, function (&$element) use ($value) {
-                array_push($element, $value);
-            }, true);
-        } catch (Exception $e) {
-            throw new UncountableValueException("'$index' is not countable");
-        }
-
+        $this->crawlKeys($index, function (&$element) use ($value) {
+            $element[] = $value;
+        }, true, true);
         return $this;
     }
 
     /**
-     * Pops the last value of a countable element from data.
+     * Pops the last value of a countable from the data and returns it.
      *
      * @param ?string $index Pass null if you want to pop from the data root.
      * @return self
      * @throws UncountableValueException
      */
-    public function pop(string $index = null): self
+    public function pop(string $index = null)
     {
-        try {
-            $this->crawlKeys($index, function (&$element) {
-                array_pop($element);
-            }, true);
-        } catch (Exception $e) {
-            throw new UncountableValueException("'$index' is not countable");
-        }
-
-        return $this;
+        return $this->crawlKeys($index, function (&$element) {
+            return array_pop($element);
+        }, true, true)->getReturn();
     }
 
     /**
@@ -875,7 +871,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_values($array)[random_int(0, count($array) - 1)];
-        }, true, true);
+        }, true, true)->getReturn();
     }
 
     /**
@@ -888,7 +884,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_keys($array)[random_int(0, count($array) - 1)];
-        }, true, true);
+        }, true, true)->getReturn();
     }
 
     /**
@@ -909,7 +905,7 @@ class JSON implements \ArrayAccess
                 $randomValues[] = $arrayValues[random_int(0, $arrayIndexLength)];
             }
             return $randomValues;
-        }, true, true);
+        }, true, true)->getReturn();
     }
 
     /**
@@ -930,7 +926,7 @@ class JSON implements \ArrayAccess
                 $randomKeys[] = $arrayKeys[random_int(0, $arrayIndexLength)];
             }
             return $randomKeys;
-        }, true, true);
+        }, true, true)->getReturn();
     }
 
     /**
@@ -965,7 +961,7 @@ class JSON implements \ArrayAccess
     {
         return $this->crawlKeys($index, function ($array) {
             return array_shift($array);
-        }, true, true);
+        }, true, true)->getReturn();
     }
 
     /**
@@ -1021,7 +1017,7 @@ class JSON implements \ArrayAccess
      * @param string $index
      * @return self
      */
-    public function removeIntersectionsWith(
+    public function removeIntersectionWith(
         $data,
         bool $compareKeys = false,
         string $index = null
