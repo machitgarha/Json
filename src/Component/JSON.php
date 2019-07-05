@@ -1063,7 +1063,7 @@ class JSON implements \ArrayAccess
      */
     public function mergeWith($newData, int $options = 0, string $index = null): self
     {
-        $newDataAsArray = (new self($newData, $this->options))->getDataAsArray();
+        $newDataAsArray = (array)($this->getOptimalValue($newData));
 
         // Extracting options
         $reverseOrder = $options & self::MERGE_PREFER_DEFAULT_DATA;
@@ -1089,7 +1089,8 @@ class JSON implements \ArrayAccess
      */
     public function mergeRecursivelyWith($newData, int $options = 0, string $index = null): self
     {
-        $newDataAsArray = (new self($newData, $this->options))->getDataAsArray();
+        $newDataAsArray = (array)($this->getOptimalValue($newData));
+
         $this->crawlKeys($index, function (&$array) use ($newDataAsArray) {
             $array = array_merge_recursive($array, $newDataAsArray);
         }, true, true);
@@ -1110,7 +1111,8 @@ class JSON implements \ArrayAccess
         bool $compareKeys = false,
         string $index = null
     ): self {
-        $dataAsArray = (new self($data, $this->options))->getDataAsArray();
+        $dataAsArray = (array)($this->getOptimalValue($data));
+
         $this->crawlKeys($index, function (&$array) use ($dataAsArray, $compareKeys) {
             $array = $compareKeys ? array_diff_key($array, $dataAsArray)
                 : array_diff($array, $dataAsArray);
