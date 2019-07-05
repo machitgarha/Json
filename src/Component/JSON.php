@@ -789,7 +789,13 @@ class JSON implements \ArrayAccess
      */
     public function isCountable(string $index = null): bool
     {
-        return $this->getCountable($index) !== null;
+        try {
+            return $this->crawlKeys($index, function () {
+                return true;
+            }, true, true);
+        } catch (UncountableValueException $e) {
+            return false;
+        }
     }
 
     /**
