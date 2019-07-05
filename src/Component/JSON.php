@@ -801,12 +801,9 @@ class JSON implements \ArrayAccess
      */
     public function count(string $index = null): int
     {
-        // Get the number of keys in the specified index
-        $countableValue = $this->getCountable($index);
-        if ($countableValue === null) {
-            throw new UncountableValueException("'$index' is not countable");
-        }
-        return count($countableValue);
+        return $this->crawlKeys($index, function ($element) {
+            return count($element);
+        }, true, true);
     }
 
     /**
