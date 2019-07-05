@@ -551,8 +551,8 @@ class JSON implements \ArrayAccess
                 return $result->getReturn();
             }
 
-            yield;
             return $result;
+            yield;
         }
 
         // Crawl keys recursively
@@ -597,7 +597,12 @@ class JSON implements \ArrayAccess
 
         $keys = $this->extractIndex($index);
         if (count($keys) === 0) {
-            $generator = $function($data);
+            // Forcing the function to be a generator to prevent errors
+            $generatorFunction = function () use ($function) {
+                return $function;
+                yield;
+            };
+            $generator = $generatorFunction();
         } else {
             $generator = $this->crawlKeysRecursive(
                 $keys,
@@ -830,7 +835,8 @@ class JSON implements \ArrayAccess
     /**
      * Calls a function on each member of a countable and returns its first non-null return value.
      *
-     * @param callable $function The function to be called and accepts the following arguments:
+     * @param callable $function The function to be called on each member until returning any
+     * non-null values. It accepts the following arguments:
      * 1. The element's value; might be gotten by-reference.
      * 2. The element's key.
      * 3. The parent element; might be gotten by-reference.
@@ -1110,5 +1116,19 @@ class JSON implements \ArrayAccess
             }
             return $filteredArray;
         }, true, true);
+    }
+
+    /**
+     * Flips values and keys in a countable.
+     *
+     * @param string $index
+     * @return self
+     */
+    public function flipValuesAndKeys(string $index = null): self
+    {
+        $this->crawlKeys($index, function (array &$data) {
+            $data = array_flip($data);
+        }, true, true);
+        return $this;
     }
 }
