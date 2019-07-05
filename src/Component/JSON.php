@@ -598,8 +598,8 @@ class JSON implements \ArrayAccess
         $keys = $this->extractIndex($index);
         if (count($keys) === 0) {
             // Forcing the function to be a generator to prevent errors
-            $generatorFunction = function () use ($function) {
-                return $function;
+            $generatorFunction = function () use ($function, $data) {
+                return $function($data);
                 yield;
             };
             $generator = $generatorFunction();
@@ -921,6 +921,32 @@ class JSON implements \ArrayAccess
 
         $this->jsonRecursionDepth = $depth;
         return $this;
+    }
+
+    /**
+     * Returns all values of a countable.
+     *
+     * @param string $index
+     * @return array
+     */
+    public function getValues(string $index = null): array
+    {
+        return $this->crawlKeys($index, function (array $data) {
+            return array_values($data);
+        }, true, true);
+    }
+
+    /**
+     * Returns all keys of a countable.
+     *
+     * @param string $index
+     * @return array
+     */
+    public function getKeys(string $index = null): array
+    {
+        return $this->crawlKeys($index, function (array $data) {
+            return array_keys($data);
+        }, true, true);
     }
 
     /**
