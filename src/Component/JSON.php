@@ -254,9 +254,7 @@ class JSON implements \ArrayAccess
     public static function encodeToJson($data, int $options = 0, int $depth = 512): string
     {
         $encodedData = json_encode($data, $options, $depth);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new JsonException("Cannot encode JSON string");
-        }
+        $this->handleJsonErrors(json_last_error());
         return $encodedData;
     }
 
@@ -278,10 +276,56 @@ class JSON implements \ArrayAccess
         int $options = 0
     ) {
         $decodedData = json_decode($data, $assoc, $depth, $options);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new JsonException("Cannot decode JSON string");
-        }
+        $this->handleJsonErrors(json_last_error());
         return $decodedData;
+    }
+
+    /**
+     * Handles JSON errors and throw exceptions, if needed.
+     *
+     * @param integer $jsonErrorStat The return value of json_last_error().
+     * @return void
+     */
+    protected function handleJsonErrors(int $jsonErrorStat)
+    {
+        switch ($jsonErrorStat) {
+            case JSON_ERROR_NONE:
+                return;
+                break;
+            
+            case JSON_ERROR_DEPTH:
+                $message = "Maximum stack depth exceeded";
+                break;
+
+            case JSON_ERROR_STATE_MISMATCH:
+            case JSON_ERROR_SYNTAX:
+                $message = "Invalid or malformed JSON";
+                break;
+            
+            case JSON_ERROR_CTRL_CHAR:
+            case JSON_ERROR_UTF8:
+            case JSON_ERROR_UTF16:
+                $message = "Malformed characters, possibly incorrectly encoded JSON";
+                break;
+
+            case JSON_ERROR_INF_OR_NAN:
+                $message = "NAN and INF cannot be encoded";
+                break;
+            
+            case JSON_ERROR_INVALID_PROPERTY_NAME:
+                $message = "Found an invalid property name";
+                break;
+            
+            case JSON_ERROR_UNSUPPORTED_TYPE:
+                $message = "A value cannot be encoded, possibly is a resource";
+                break;
+            
+            default:
+                $message = "Unknown JSON error";
+                break;
+        }
+
+        throw new JsonException($message);
     }
 
     /**
