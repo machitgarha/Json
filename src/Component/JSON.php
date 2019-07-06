@@ -897,6 +897,33 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Removes the first element of a countable.
+     *
+     * @param string $index
+     * @return mixed The removed element's value.
+     */
+    public function shift(string $index = null)
+    {
+        return $this->doAndReturn($index, function ($array) {
+            return array_shift($array);
+        }, true, true);
+    }
+
+    /**
+     * Prepends an element to a countable.
+     *
+     * @param string $index
+     * @return self
+     */
+    public function unshift($value, string $index = null): self
+    {
+        $this->doAndReturn($index, function ($array) {
+            array_unshift($array);
+        }, true, true);
+        return $this;
+    }
+
+    /**
      * Sets recursion depth when using json_*() functions.
      *
      * @param int $depth
@@ -1026,19 +1053,6 @@ class JSON implements \ArrayAccess
             }
         }, true, true);
         return $this;
-    }
-
-    /**
-     * Shifts an element off the beginning of an array in data.
-     *
-     * @param string $index
-     * @return mixed The shifted element's value.
-     */
-    public function shift(string $index = null)
-    {
-        return $this->doAndReturn($index, function ($array) {
-            return array_shift($array);
-        }, true, true);
     }
 
     /**
