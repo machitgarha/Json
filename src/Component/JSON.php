@@ -828,6 +828,14 @@ class JSON implements \ArrayAccess
      */
     public function isCountable(string $index = null): bool
     {
+        if ($this->isDataScalar) {
+            if ($index === null) {
+                return false;
+            } else {
+                throw new ScalarDataException("Indexing is invalid");
+            }
+        }
+
         try {
             return $this->doAndReturn($index, function () {
                 return true;
