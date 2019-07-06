@@ -598,7 +598,7 @@ class JSON implements \ArrayAccess
         $keys = $this->extractIndex($index);
         if (count($keys) === 0) {
             // Forcing the function to be a generator to prevent errors
-            $generatorFunction = function () use ($function, $data) {
+            $generatorFunction = function () use ($function, &$data) {
                 return $function($data);
                 yield;
             };
@@ -1161,7 +1161,7 @@ class JSON implements \ArrayAccess
     public function flipValuesAndKeys(string $index = null): self
     {
         $this->crawlKeys($index, function (array &$data) {
-            $data = array_flip($data);
+            $data = @array_flip($data);
         }, true, true);
         return $this;
     }
