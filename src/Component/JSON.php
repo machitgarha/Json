@@ -1106,7 +1106,7 @@ class JSON implements \ArrayAccess
      * @param string $index
      * @return self
      */
-    public function removeIntersectionWith(
+    public function difference(
         $data,
         bool $compareKeys = false,
         string $index = null
