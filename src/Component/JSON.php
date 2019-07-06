@@ -886,7 +886,7 @@ class JSON implements \ArrayAccess
      * Pops the last value of a countable and returns it.
      *
      * @param ?string $index Pass null if you want to pop from the data root.
-     * @return self
+     * @return mixed The removed element's value.
      * @throws UncountableValueException
      */
     public function pop(string $index = null)
@@ -899,7 +899,7 @@ class JSON implements \ArrayAccess
     /**
      * Removes the first element of a countable.
      *
-     * @param string $index
+     * @param string $index Pass null if you want to remove an element from the data root.
      * @return mixed The removed element's value.
      */
     public function shift(string $index = null)
@@ -912,7 +912,7 @@ class JSON implements \ArrayAccess
     /**
      * Prepends an element to a countable.
      *
-     * @param string $index
+     * @param string $index Pass null if you want to prepend an element to the data root.
      * @return self
      */
     public function unshift($value, string $index = null): self
@@ -1134,9 +1134,9 @@ class JSON implements \ArrayAccess
      * Keep in mind, the given value by the callable is safe from overwriting; so getting it
      * by-reference or not does not matter. The default function removes all null values.
      * @param string $index
-     * @return array
+     * @return self
      */
-    public function filter(callable $function = null, string $index = null): array
+    public function filter(callable $function = null, string $index = null): self
     {
         if ($function === null) {
             $function = function ($value) {
@@ -1144,15 +1144,16 @@ class JSON implements \ArrayAccess
             };
         }
 
-        return $this->doAndReturn($index, function (array $data) use ($function) {
+        $this->doAndReturn($index, function (array &$data) use ($function) {
             $filteredArray = [];
             foreach ($data as $key => $value) {
                 if ($function($value, $key)) {
                     $filteredArray[$key] = $value;
                 }
             }
-            return $filteredArray;
+            $data = $filteredArray;
         }, true, true);
+        return $this;
     }
 
     /**
