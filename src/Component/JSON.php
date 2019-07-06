@@ -1183,4 +1183,18 @@ class JSON implements \ArrayAccess
             return array_reduce($data, $function);
         }, true, true);
     }
+
+    /**
+     * Shuffles a countable.
+     *
+     * @param string $index
+     * @return self
+     */
+    public function shuffle(string $index = null): self
+    {
+        $this->doAndReturn($index, function (array &$data) {
+            shuffle($data);
+        }, true, true);
+        return $this;
+    }
 }
