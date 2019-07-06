@@ -647,12 +647,7 @@ class JSON implements \ArrayAccess
 
         $keys = $this->extractIndex($index);
         if (count($keys) === 0) {
-            // Forcing the function to be a generator to prevent errors
-            $generatorFunction = function &() use ($function, &$data) {
-                return $function($data);
-                yield;
-            };
-            $generator = $generatorFunction();
+            $generator = $function($data);
         } else {
             $generator = $this->crawlKeysRecursive(
                 $keys,
@@ -868,7 +863,7 @@ class JSON implements \ArrayAccess
      */
     public function &iterate(string $index = null): \Generator
     {
-        $generator = $this->do($index, function &(array &$data) {
+        $generator = $this->do($index, function &(&$data) {
             foreach ($data as $key => &$value) {
                 yield $key => $value;
 
