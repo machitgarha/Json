@@ -167,6 +167,16 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Creates a new instance of the class.
+     *
+     * @return self
+     */
+    public static function new($data = [], int $options = 0): self
+    {
+        return new self($data, $options);
+    }
+
+    /**
      * Sets data to an array or a scalar value.
      * The recommended way to change JSON::$data property is using this method, as it prevents from
      * an invalid data to be replaced in JSON::$data.
