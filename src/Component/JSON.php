@@ -254,7 +254,7 @@ class JSON implements \ArrayAccess
     public static function encodeToJson($data, int $options = 0, int $depth = 512): string
     {
         $encodedData = json_encode($data, $options, $depth);
-        $this->handleJsonErrors(json_last_error());
+        self::handleJsonErrors(json_last_error());
         return $encodedData;
     }
 
@@ -276,7 +276,7 @@ class JSON implements \ArrayAccess
         int $options = 0
     ) {
         $decodedData = json_decode($data, $assoc, $depth, $options);
-        $this->handleJsonErrors(json_last_error());
+        self::handleJsonErrors(json_last_error());
         return $decodedData;
     }
 
@@ -286,7 +286,7 @@ class JSON implements \ArrayAccess
      * @param integer $jsonErrorStat The return value of json_last_error().
      * @return void
      */
-    protected function handleJsonErrors(int $jsonErrorStat)
+    protected static function handleJsonErrors(int $jsonErrorStat)
     {
         switch ($jsonErrorStat) {
             case JSON_ERROR_NONE:
@@ -648,7 +648,7 @@ class JSON implements \ArrayAccess
         $keys = $this->extractIndex($index);
         if (count($keys) === 0) {
             // Forcing the function to be a generator to prevent errors
-            $generatorFunction = function () use ($function, &$data) {
+            $generatorFunction = function &() use ($function, &$data) {
                 return $function($data);
                 yield;
             };
@@ -868,12 +868,12 @@ class JSON implements \ArrayAccess
      */
     public function &iterate(string $index = null): \Generator
     {
-        $generator = $this->do($index, function &(&$data) {
+        $generator = $this->do($index, function &(array &$data) {
             foreach ($data as $key => &$value) {
                 yield $key => $value;
 
                 // Convert the value to an optimal one, e.g. convert objects to arrays
-                $value = $this->getOptimalValue($value);
+                //$value = $this->getOptimalValue($value);
             }
         }, true, true);
 
@@ -1257,6 +1257,17 @@ class JSON implements \ArrayAccess
         $this->doAndReturn($index, function (array &$data) {
             shuffle($data);
         }, true, true);
+        return $this;
+    }
+
+    /**
+     * Converts the data to an array, if it is scalar.
+     *
+     * @return self
+     */
+    public function toCountable(): self
+    {
+        $this->data = (array)($this->data);
         return $this;
     }
 }
