@@ -548,18 +548,16 @@ class JSON implements \ArrayAccess
     /**
      * Finds a specific element using $keys and calls a function on it.
      *
-     * @param array $keys The keys to be crawled recursively. If you pass it an empty array, then
-     * the method won't do anything.
+     * @param array $keys The keys to be followed recursively.
      * @param array $data The data. It must be a recursive array or you may encounter errors.
      * @see JSON::do()
      */
-    protected function &crawlKeysRecursive(
+    protected function &findElementRecursive(
         array $keys,
         array &$data,
-        callable $function,
         bool $strictIndexing = false,
         bool $forceCountableValue = false
-    ): \Generator {
+    ): array {
         $keysCount = count($keys);
 
         // End of recursion
@@ -572,25 +570,18 @@ class JSON implements \ArrayAccess
                     $data[$lastKey] = null;
                 }
             }
-            $value = $data[$lastKey];
 
-            if (!is_array($value) && $forceCountableValue) {
+            if (!is_array($data[$lastKey]) && $forceCountableValue) {
                 throw new UncountableValueException("Expected countable, reached uncountable");
             }
 
-            $result = $function($data[$lastKey], $data, $lastKey);
-            if ($result instanceof \Generator) {
-                foreach ($result as $key => &$value) {
-                    yield $key => $value;
-                }
-                return $result->getReturn();
-            }
-
-            return $result;
-            yield;
+            $returnValue = [
+                &$data[$lastKey],
+                &$data,
+                &$lastKey,
+            ];
         }
 
-        // Crawl keys recursively
         if ($keysCount > 1) {
             // Get the current key, and remove it from keys array
             $curKey = array_shift($keys);
@@ -606,18 +597,24 @@ class JSON implements \ArrayAccess
             }
 
             // Recursion
-            $generator = $this->crawlKeysRecursive(
+            return $this->findElementRecursive(
                 $keys,
                 $data[$curKey],
-                $function,
                 $strictIndexing,
                 $forceCountableValue
             );
-            foreach ($generator as $key => &$value) {
-                yield $key => $value;
-            }
-            return $generator->getReturn();
         }
+
+        if ($keysCount === 0) {
+            $returnValue = [
+                &$data,
+                null,
+                null
+            ];
+        }
+
+        // The code will reach here if $keysCount is 0 or 1
+        return $returnValue;
     }
 
     /**
@@ -630,7 +627,8 @@ class JSON implements \ArrayAccess
      * 2. The parent element (that is an array); might be gotten by-reference.
      * 3. The last key in the index; might be used to access the element (using the parent element).
      * From within the callable, you can yield as many values as you want, and/or return a value.
-     * Note that if $index is null, the first argument will be the only passing argument.
+     * The return type of the method will be exactly the return type of this callable. Note that if
+     * $index is null, the first argument will be the only passing argument.
      * @param bool $strictIndexing To throw exceptions when a key does not exist, or to create
      * every non-exist key. For example, you can set this to true when you want to get an element's
      * value.
@@ -648,56 +646,20 @@ class JSON implements \ArrayAccess
         callable $function,
         bool $strictIndexing = false,
         bool $forceCountableValue = false
-    ): \Generator {
+    ) {
         $data = &$this->data;
 
         if ($forceCountableValue && self::isScalar($data)) {
             throw new ScalarDataException("Cannot use the function on scalar data");
         }
 
-        $keys = $this->extractIndex($index);
-        if (count($keys) === 0) {
-            $generator = $function($data);
-        } else {
-            $generator = $this->crawlKeysRecursive(
-                $keys,
-                $data,
-                $function,
-                $strictIndexing,
-                $forceCountableValue
-            );
-        }
-
-        if ($generator !== null) {
-            foreach ($generator as $key => &$value) {
-                yield $key => $value;
-            }
-            return $generator->getReturn();
-        }
-    }
-
-    /**
-     * Calls {@see JSON::do()} and returns its resulting value without yielding anything.
-     *
-     * @see JSON::do()
-     * @return mixed
-     */
-    public function doAndReturn(
-        string $index = null,
-        callable $function,
-        bool $strictIndexing = false,
-        bool $forceCountableValue = false
-    ) {
-        // Using try-catch for dealing with non-returning generator
-        try {
-            return $this->do($index, $function, $strictIndexing, $forceCountableValue)->getReturn();
-        }
-        // We don't want to catch all exceptions, though
-        catch (Exception $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            return null;
-        }
+        $result = $function(...$this->findElementRecursive(
+            $this->extractIndex($index),
+            $data,
+            $strictIndexing,
+            $forceCountableValue
+        ));
+        return $result;
     }
 
     /**
@@ -754,7 +716,7 @@ class JSON implements \ArrayAccess
         }
 
         try {
-            return $this->doAndReturn($index, function ($element) {
+            return $this->do($index, function ($element) {
                 return $this->getValueBasedOnReturnType($element);
             }, true);
         } catch (Exception $e) {
@@ -783,7 +745,7 @@ class JSON implements \ArrayAccess
             }
         }
 
-        $this->doAndReturn($index, function (&$element) use ($value) {
+        $this->do($index, function (&$element) use ($value) {
             $element = $value;
         });
         return $this;
@@ -797,7 +759,7 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index): self
     {
-        $this->doAndReturn($index, function ($element, &$data, $key) {
+        $this->do($index, function ($element, &$data, $key) {
             // Un-setting the element directly is impossible
             unset($data[$key]);
         }, true);
@@ -846,7 +808,7 @@ class JSON implements \ArrayAccess
         }
 
         try {
-            return $this->doAndReturn($index, function () {
+            return $this->do($index, function () {
                 return true;
             }, true, true);
         } catch (UncountableValueException $e) {
@@ -863,7 +825,7 @@ class JSON implements \ArrayAccess
      */
     public function count(string $index = null): int
     {
-        return $this->doAndReturn($index, function ($element) {
+        return $this->do($index, function ($element) {
             return count($element);
         }, true, true);
     }
@@ -877,7 +839,7 @@ class JSON implements \ArrayAccess
      */
     public function &iterate(string $index = null): \Generator
     {
-        $generator = $this->do($index, function &(array &$data) {
+        return $this->do($index, function &(array &$data) {
             foreach ($data as $key => &$value) {
                 yield $key => $value;
 
@@ -885,11 +847,6 @@ class JSON implements \ArrayAccess
                 //$value = $this->getOptimalValue($value);
             }
         }, true, true);
-
-        // Only yield from the generator, and don't allow the returning value to be returned
-        foreach ($generator as $key => &$value) {
-            yield $key => $value;
-        }
     }
 
     /**
@@ -905,7 +862,7 @@ class JSON implements \ArrayAccess
      */
     public function forEach(callable $function, string $index = null)
     {
-        return $this->doAndReturn($index, function (array &$data) use ($function) {
+        return $this->do($index, function (array &$data) use ($function) {
             foreach ($data as $key => &$value) {
                 $result = $function($value, $key, $data);
                 if ($result !== null) {
@@ -947,7 +904,7 @@ class JSON implements \ArrayAccess
     {
         $value = $this->getOptimalValue($value);
 
-        $this->doAndReturn($index, function (&$element) use ($value) {
+        $this->do($index, function (&$element) use ($value) {
             array_push($element, $value);
         }, true, true);
         return $this;
@@ -962,7 +919,7 @@ class JSON implements \ArrayAccess
      */
     public function pop(string $index = null)
     {
-        return $this->doAndReturn($index, function (&$element) {
+        return $this->do($index, function (&$element) {
             return array_pop($element);
         }, true, true);
     }
@@ -975,7 +932,7 @@ class JSON implements \ArrayAccess
      */
     public function shift(string $index = null)
     {
-        return $this->doAndReturn($index, function ($array) {
+        return $this->do($index, function ($array) {
             return array_shift($array);
         }, true, true);
     }
@@ -988,7 +945,7 @@ class JSON implements \ArrayAccess
      */
     public function unshift($value, string $index = null): self
     {
-        $this->doAndReturn($index, function ($array) {
+        $this->do($index, function ($array) {
             array_unshift($array);
         }, true, true);
         return $this;
@@ -1018,7 +975,7 @@ class JSON implements \ArrayAccess
      */
     public function getValues(string $index = null): array
     {
-        return $this->doAndReturn($index, function (array $data) {
+        return $this->do($index, function (array $data) {
             return array_values($data);
         }, true, true);
     }
@@ -1031,7 +988,7 @@ class JSON implements \ArrayAccess
      */
     public function getKeys(string $index = null): array
     {
-        return $this->doAndReturn($index, function (array $data) {
+        return $this->do($index, function (array $data) {
             return array_keys($data);
         }, true, true);
     }
@@ -1044,7 +1001,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomValue(string $index = null)
     {
-        return $this->doAndReturn($index, function ($array) {
+        return $this->do($index, function ($array) {
             return array_values($array)[random_int(0, count($array) - 1)];
         }, true, true);
     }
@@ -1057,7 +1014,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomKey(string $index = null)
     {
-        return $this->doAndReturn($index, function ($array) {
+        return $this->do($index, function ($array) {
             return array_keys($array)[random_int(0, count($array) - 1)];
         }, true, true);
     }
@@ -1071,7 +1028,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomValues(int $count, string $index = null): array
     {
-        return $this->doAndReturn($index, function ($array) use ($count) {
+        return $this->do($index, function ($array) use ($count) {
             $arrayValues = array_values($array);
             $arrayIndexLength = count($array) - 1;
             $randomValues = [];
@@ -1092,7 +1049,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomKeys(int $count, string $index = null): array
     {
-        return $this->doAndReturn($index, function ($array) use ($count) {
+        return $this->do($index, function ($array) use ($count) {
             $arrayKeys = array_keys($array);
             $arrayIndexLength = count($array) - 1;
             $randomKeys = [];
@@ -1117,7 +1074,7 @@ class JSON implements \ArrayAccess
      */
     public function walkRecursive(callable $function, string $index = null, $extraData = null): self
     {
-        $this->doAndReturn($index, function ($array) use ($function, $extraData) {
+        $this->do($index, function ($array) use ($function, $extraData) {
             $result = @array_walk_recursive($array, $function, $extraData);
             if (!$result) {
                 throw new Exception("Cannot walk through the array recursively");
@@ -1142,7 +1099,7 @@ class JSON implements \ArrayAccess
         // Extracting options
         $reverseOrder = $options & self::MERGE_PREFER_DEFAULT_DATA;
 
-        $this->doAndReturn($index, function (&$array) use ($newDataAsArray, $reverseOrder) {
+        $this->do($index, function (&$array) use ($newDataAsArray, $reverseOrder) {
             if ($reverseOrder) {
                 $array = array_merge($newDataAsArray, $array);
             } else {
@@ -1165,7 +1122,7 @@ class JSON implements \ArrayAccess
     {
         $newDataAsArray = (array)($this->getOptimalValue($newData));
 
-        $this->doAndReturn($index, function (&$array) use ($newDataAsArray) {
+        $this->do($index, function (&$array) use ($newDataAsArray) {
             $array = array_merge_recursive($array, $newDataAsArray);
         }, true, true);
         return $this;
@@ -1187,7 +1144,7 @@ class JSON implements \ArrayAccess
     ): self {
         $dataAsArray = (array)($this->getOptimalValue($data));
 
-        $this->doAndReturn($index, function (&$array) use ($dataAsArray, $compareKeys) {
+        $this->do($index, function (&$array) use ($dataAsArray, $compareKeys) {
             $array = $compareKeys ? array_diff_key($array, $dataAsArray)
                 : array_diff($array, $dataAsArray);
         }, true, true);
@@ -1215,7 +1172,8 @@ class JSON implements \ArrayAccess
             };
         }
 
-        $this->doAndReturn($index, function (array &$data) use ($function) {
+        $this->do($index, function (array &$data) use ($function) {
+            echo "Called";
             $filteredArray = [];
             foreach ($data as $key => $value) {
                 if ($function($value, $key)) {
@@ -1236,7 +1194,7 @@ class JSON implements \ArrayAccess
      */
     public function flipValuesAndKeys(string $index = null): self
     {
-        $this->doAndReturn($index, function (array &$data) {
+        $this->do($index, function (array &$data) {
             $data = @array_flip($data);
         }, true, true);
         return $this;
@@ -1251,7 +1209,7 @@ class JSON implements \ArrayAccess
      */
     public function reduce(callable $function, string $index = null)
     {
-        return $this->doAndReturn($index, function (array $data) use ($function) {
+        return $this->do($index, function (array $data) use ($function) {
             return array_reduce($data, $function);
         }, true, true);
     }
@@ -1264,7 +1222,7 @@ class JSON implements \ArrayAccess
      */
     public function shuffle(string $index = null): self
     {
-        $this->doAndReturn($index, function (array &$data) {
+        $this->do($index, function (array &$data) {
             shuffle($data);
         }, true, true);
         return $this;
