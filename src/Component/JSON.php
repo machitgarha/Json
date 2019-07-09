@@ -606,7 +606,17 @@ class JSON implements \ArrayAccess
             }
 
             // Recursion
-            return $this->crawlKeysRecursive($keys, $data[$curKey], $function, $strictIndexing);
+            $generator = $this->crawlKeysRecursive(
+                $keys,
+                $data[$curKey],
+                $function,
+                $strictIndexing,
+                $forceCountableValue
+            );
+            foreach ($generator as $key => &$value) {
+                yield $key => $value;
+            }
+            return $generator->getReturn();
         }
     }
 
@@ -619,7 +629,7 @@ class JSON implements \ArrayAccess
      * 1. The element's value; might be gotten by-reference.
      * 2. The parent element (that is an array); might be gotten by-reference.
      * 3. The last key in the index; might be used to access the element (using the parent element).
-     * From within the callable, you can yield as many values as you want, and/or return a value. 
+     * From within the callable, you can yield as many values as you want, and/or return a value.
      * Note that if $index is null, the first argument will be the only passing argument.
      * @param bool $strictIndexing To throw exceptions when a key does not exist, or to create
      * every non-exist key. For example, you can set this to true when you want to get an element's
@@ -629,7 +639,7 @@ class JSON implements \ArrayAccess
      * @return \Generator Returns and yields all values from $function, as is.
      * @throws Exception When reaching a key that does not exist and $strictIndexing is true.
      * @throws UncountableValueException If reaching a key that contains an uncountable value.
-     * @throws UncountableValueException When reaching an uncountable element and 
+     * @throws UncountableValueException When reaching an uncountable element and
      * $forceCountableValue is set to true.
      * @throws ScalarDataException If data is scalar and $forceCountableValue is set to true.
      */
@@ -658,8 +668,12 @@ class JSON implements \ArrayAccess
             );
         }
 
-        // Returning the generator itself
-        return $generator;
+        if ($generator !== null) {
+            foreach ($generator as $key => &$value) {
+                yield $key => $value;
+            }
+            return $generator->getReturn();
+        }
     }
 
     /**
@@ -863,7 +877,7 @@ class JSON implements \ArrayAccess
      */
     public function &iterate(string $index = null): \Generator
     {
-        $generator = $this->do($index, function &(&$data) {
+        $generator = $this->do($index, function &(array &$data) {
             foreach ($data as $key => &$value) {
                 yield $key => $value;
 
@@ -1208,6 +1222,7 @@ class JSON implements \ArrayAccess
                     $filteredArray[$key] = $value;
                 }
             }
+            var_dump($filteredArray);
             $data = $filteredArray;
         }, true, true);
         return $this;
