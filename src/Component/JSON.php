@@ -841,7 +841,6 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index Pass null if you want to get the number of elements in the data root.
      * @return int
-     * @throws UncountableValueException
      */
     public function count(string $index = null): int
     {
@@ -855,7 +854,6 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index
      * @return \Generator
-     * @throws UncountableValueException
      */
     public function &iterate(string $index = null): \Generator
     {
@@ -919,7 +917,6 @@ class JSON implements \ArrayAccess
      * @param mixed $value
      * @param ?string $index Pass null if you want to push the value to the data root.
      * @return self
-     * @throws UncountableValueException
      */
     public function push($value, string $index = null): self
     {
@@ -936,7 +933,6 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index Pass null if you want to pop from the data root.
      * @return mixed The removed element's value.
-     * @throws UncountableValueException
      */
     public function pop(string $index = null)
     {
