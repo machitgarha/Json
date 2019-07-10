@@ -161,7 +161,7 @@ class PublicMethodTest extends TestCase
 
     /**
      * Tests JSON::getValues(), JSON::getKeys(), JSON::getRandomValue(), getRandomKey(),
-     * JSON::getRandomValues() and JSON::getRandomKeys() methods.
+     * JSON::getRandomValues() and JSON::getRandomKeys().
      */
     public function testGettingRandomValuesAndKeys()
     {
@@ -185,9 +185,15 @@ class PublicMethodTest extends TestCase
         $this->assertArraySubset($randomSubset, $expectedArray);
     }
 
+    /** Tests JSON::getValues() and JSON::getKeys(). */
     public function testGetValuesAndKeys()
     {
-        //$this->assertEquals($expectedArrayValues, $json->getValues($index));
-        //$this->assertEquals($expectedArrayKeys, $json->getKeys($index));
+        $json = clone $this->sampleJson;
+
+        $index = "apps.others";
+        $expectedArray = $this->sampleData["apps"]["others"];
+
+        $this->assertEquals(array_values($expectedArray), $json->getValues($index));
+        $this->assertEquals(array_keys($expectedArray), $json->getKeys($index));
     }
 }
