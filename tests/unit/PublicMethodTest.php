@@ -142,19 +142,13 @@ class PublicMethodTest extends TestCase
 
     public function testPushPopShiftUnshift()
     {
-        $json = new JSON([
-            "test" => "pass"
-        ]);
+        $json = clone $this->sampleJson;
 
-        $var = ["!"];
-        $json->push($var);
-        $this->assertEquals($var, $json->get("0"));
+        $index = "apps.ides.JetBrains";
+        $value = "CLion";
 
-        $json->pop();
-        $this->assertFalse($json->isSet("0"));
-
-        $json->pop();
-        $this->assertFalse($json->isSet("test"));
+        $this->assertEquals($value, $json->push($value, $index)->pop($index));
+        $this->assertEquals($value, $json->unshift($value, $index)->shift($index));
     }
 
     public function testExchange()

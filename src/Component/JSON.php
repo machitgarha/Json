@@ -965,8 +965,8 @@ class JSON implements \ArrayAccess
      */
     public function unshift($value, string $index = null): self
     {
-        $this->do($index, function ($array) use ($value) {
-            array_unshift($array, $value);
+        $this->do($index, function (array &$data) use ($value) {
+            array_unshift($data, $value);
         }, true);
         return $this;
     }
