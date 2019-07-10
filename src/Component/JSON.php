@@ -68,6 +68,24 @@ class JSON implements \ArrayAccess
     /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
     const TYPE_FULL_OBJECT = 4;
 
+    // Indexing types
+    /**
+     * @var int If a key cannot be found, create it. If a key contains an uncountable value,
+     * override it (i.e. remove its value and convert it to a countable value), This indexing type
+     * could be dangerous; as it removes everything.
+     */
+    const INDEXING_FREE = 0;
+    /**
+     * @var int If a key cannot be found, create it. If a key contains an uncountable value,
+     * throw a new exception and don't continue.
+     */
+    const INDEXING_SAFE = 1;
+    /**
+     * @var int If a key cannot be found or a key contains an uncountable value, throw an exception.
+     * This indexing type is really useful when you want to get the element's value, for example.
+     */
+    const INDEXING_STRICT = 2;
+
     // Merge options
     /**
      * @var int If it is set, when reaching duplicate keys, the new data keys will be replaced
@@ -555,22 +573,18 @@ class JSON implements \ArrayAccess
     protected function &findElementRecursive(
         array $keys,
         array &$data,
-        bool $strictIndexing = false,
-        bool $forceCountableValue = false
+        bool $forceCountableValue = false,
+        int $indexingType = 2
     ): array {
         $keysCount = count($keys);
 
         // End of recursion
         if ($keysCount === 1) {
             $lastKey = $keys[0];
-            if (!array_key_exists($lastKey, $data)) {
-                if ($strictIndexing) {
-                    throw new Exception("The key '$lastKey' does not exist");
-                } else {
-                    $data[$lastKey] = null;
-                }
-            }
 
+            if ($indexingType === self::INDEXING_STRICT && !array_key_exists($lastKey, $data)) {
+                throw new Exception("The key '$lastKey' does not exist");
+            }
             if (!is_array($data[$lastKey]) && $forceCountableValue) {
                 throw new UncountableValueException("Expected countable, reached uncountable");
             }
@@ -586,22 +600,28 @@ class JSON implements \ArrayAccess
             // Get the current key, and remove it from keys array
             $curKey = array_shift($keys);
 
-            if (!array_key_exists($curKey, $data)) {
-                if ($strictIndexing) {
+            if (array_key_exists($curKey, $data)) {
+                if (!is_array($data[$curKey])) {
+                    if ($indexingType >= self::INDEXING_SAFE) {
+                        throw new UncountableValueException("The key '$curKey' contains uncountable value");
+                    } else {
+                        $data[$curKey] = [];
+                    }
+                }
+            } else {
+                if ($indexingType === self::INDEXING_STRICT) {
                     throw new Exception("The key '$curKey' does not exist");
                 } else {
                     $data[$curKey] = [];
                 }
-            } elseif (!is_array($data[$curKey])) {
-                throw new UncountableValueException("The key '$curKey' contains uncountable value");
             }
 
             // Recursion
             return $this->findElementRecursive(
                 $keys,
                 $data[$curKey],
-                $strictIndexing,
-                $forceCountableValue
+                $forceCountableValue,
+                $indexingType
             );
         }
 
@@ -629,12 +649,10 @@ class JSON implements \ArrayAccess
      * From within the callable, you can yield as many values as you want, and/or return a value.
      * The return type of the method will be exactly the return type of this callable. Note that if
      * $index is null, the first argument will be the only passing argument.
-     * @param bool $strictIndexing To throw exceptions when a key does not exist, or to create
-     * every non-exist key. For example, you can set this to true when you want to get an element's
-     * value.
-     * @param bool $forceCountableValue Force the value be operated to be a countable one; so the
-     * element passing to $function will be an array.
-     * @return \Generator Returns and yields all values from $function, as is.
+     * @param bool $forceCountableValue Force the value be operated to be a countable one, so, the
+     * element (i.e. first argument) passing to $function will be an array.
+     * @param int $indexingType Can be one of the JSON::INDEXING_* constants.
+     * @return mixed The return value of $function, whether is a generator or not.F
      * @throws Exception When reaching a key that does not exist and $strictIndexing is true.
      * @throws UncountableValueException If reaching a key that contains an uncountable value.
      * @throws UncountableValueException When reaching an uncountable element and
@@ -644,8 +662,8 @@ class JSON implements \ArrayAccess
     public function &do(
         string $index = null,
         callable $function,
-        bool $strictIndexing = false,
-        bool $forceCountableValue = false
+        bool $forceCountableValue = false,
+        int $indexingType = 2
     ) {
         $data = &$this->data;
 
@@ -656,7 +674,7 @@ class JSON implements \ArrayAccess
         $result = $function(...$this->findElementRecursive(
             $this->extractIndex($index),
             $data,
-            $strictIndexing,
+            $indexingType,
             $forceCountableValue
         ));
         return $result;
