@@ -574,27 +574,9 @@ class JSON implements \ArrayAccess
         array $keys,
         array &$data,
         bool $forceCountableValue = false,
-        int $indexingType = 2
+        int $indexingType = self::INDEXING_STRICT
     ): array {
         $keysCount = count($keys);
-
-        // End of recursion
-        if ($keysCount === 1) {
-            $lastKey = $keys[0];
-
-            if ($indexingType === self::INDEXING_STRICT && !array_key_exists($lastKey, $data)) {
-                throw new Exception("The key '$lastKey' does not exist");
-            }
-            if (!is_array($data[$lastKey]) && $forceCountableValue) {
-                throw new UncountableValueException("Expected countable, reached uncountable");
-            }
-
-            $returnValue = [
-                &$data[$lastKey],
-                &$data,
-                &$lastKey,
-            ];
-        }
 
         if ($keysCount > 1) {
             // Get the current key, and remove it from keys array
@@ -625,6 +607,23 @@ class JSON implements \ArrayAccess
             );
         }
 
+        if ($keysCount === 1) {
+            $lastKey = $keys[0];
+
+            if ($indexingType === self::INDEXING_STRICT && !array_key_exists($lastKey, $data)) {
+                throw new Exception("The key '$lastKey' does not exist");
+            }
+            if (!is_array($data[$lastKey]) && $forceCountableValue) {
+                throw new UncountableValueException("Expected countable, reached uncountable");
+            }
+
+            $returnValue = [
+                &$data[$lastKey],
+                &$data,
+                &$lastKey,
+            ];
+        }
+
         if ($keysCount === 0) {
             $returnValue = [
                 &$data,
@@ -633,6 +632,7 @@ class JSON implements \ArrayAccess
             ];
         }
 
+        // End of recursion
         // The code will reach here if $keysCount is 0 or 1
         return $returnValue;
     }
@@ -663,7 +663,7 @@ class JSON implements \ArrayAccess
         string $index = null,
         callable $function,
         bool $forceCountableValue = false,
-        int $indexingType = 2
+        int $indexingType = self::INDEXING_STRICT
     ) {
         $data = &$this->data;
 
@@ -674,8 +674,8 @@ class JSON implements \ArrayAccess
         $result = $function(...$this->findElementRecursive(
             $this->extractIndex($index),
             $data,
-            $indexingType,
-            $forceCountableValue
+            $forceCountableValue,
+            $indexingType
         ));
         return $result;
     }
@@ -736,7 +736,7 @@ class JSON implements \ArrayAccess
         try {
             return $this->do($index, function ($element) {
                 return $this->getValueBasedOnReturnType($element);
-            }, true);
+            });
         } catch (Exception $e) {
             return null;
         }
@@ -765,7 +765,7 @@ class JSON implements \ArrayAccess
 
         $this->do($index, function (&$element) use ($value) {
             $element = $value;
-        });
+        }, false, self::INDEXING_FREE);
         return $this;
     }
 
@@ -780,7 +780,7 @@ class JSON implements \ArrayAccess
         $this->do($index, function ($element, &$data, $key) {
             // Un-setting the element directly is impossible
             unset($data[$key]);
-        }, true);
+        });
         return $this;
     }
 
@@ -828,7 +828,7 @@ class JSON implements \ArrayAccess
         try {
             return $this->do($index, function () {
                 return true;
-            }, true, true);
+            }, true);
         } catch (UncountableValueException $e) {
             return false;
         }
@@ -845,7 +845,7 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function ($element) {
             return count($element);
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -862,9 +862,9 @@ class JSON implements \ArrayAccess
                 yield $key => $value;
 
                 // Convert the value to an optimal one, e.g. convert objects to arrays
-                //$value = $this->getOptimalValue($value);
+                $value = $this->getOptimalValue($value);
             }
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -887,7 +887,7 @@ class JSON implements \ArrayAccess
                     return $result;
                 }
             }
-        }, true, true);
+        }, true);
     }
 
     public function offsetGet($index)
@@ -924,7 +924,7 @@ class JSON implements \ArrayAccess
 
         $this->do($index, function (&$element) use ($value) {
             array_push($element, $value);
-        }, true, true);
+        }, true);
         return $this;
     }
 
@@ -939,7 +939,7 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function (&$element) {
             return array_pop($element);
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -952,7 +952,7 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function ($array) {
             return array_shift($array);
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -965,7 +965,7 @@ class JSON implements \ArrayAccess
     {
         $this->do($index, function ($array) {
             array_unshift($array);
-        }, true, true);
+        }, true);
         return $this;
     }
 
@@ -995,7 +995,7 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function (array $data) {
             return array_values($data);
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -1008,7 +1008,7 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function (array $data) {
             return array_keys($data);
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -1021,7 +1021,7 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function ($array) {
             return array_values($array)[random_int(0, count($array) - 1)];
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -1034,7 +1034,7 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function ($array) {
             return array_keys($array)[random_int(0, count($array) - 1)];
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -1055,7 +1055,7 @@ class JSON implements \ArrayAccess
                 $randomValues[] = $arrayValues[random_int(0, $arrayIndexLength)];
             }
             return $randomValues;
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -1076,7 +1076,7 @@ class JSON implements \ArrayAccess
                 $randomKeys[] = $arrayKeys[random_int(0, $arrayIndexLength)];
             }
             return $randomKeys;
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -1097,7 +1097,7 @@ class JSON implements \ArrayAccess
             if (!$result) {
                 throw new Exception("Cannot walk through the array recursively");
             }
-        }, true, true);
+        }, true);
         return $this;
     }
 
@@ -1123,7 +1123,7 @@ class JSON implements \ArrayAccess
             } else {
                 $array = array_merge($array, $newDataAsArray);
             }
-        }, true, true);
+        }, true);
         return $this;
     }
 
@@ -1142,7 +1142,7 @@ class JSON implements \ArrayAccess
 
         $this->do($index, function (&$array) use ($newDataAsArray) {
             $array = array_merge_recursive($array, $newDataAsArray);
-        }, true, true);
+        }, true);
         return $this;
     }
 
@@ -1165,7 +1165,7 @@ class JSON implements \ArrayAccess
         $this->do($index, function (&$array) use ($dataAsArray, $compareKeys) {
             $array = $compareKeys ? array_diff_key($array, $dataAsArray)
                 : array_diff($array, $dataAsArray);
-        }, true, true);
+        }, true);
         return $this;
     }
 
@@ -1200,7 +1200,7 @@ class JSON implements \ArrayAccess
             }
             var_dump($filteredArray);
             $data = $filteredArray;
-        }, true, true);
+        }, true);
         return $this;
     }
 
@@ -1214,7 +1214,7 @@ class JSON implements \ArrayAccess
     {
         $this->do($index, function (array &$data) {
             $data = @array_flip($data);
-        }, true, true);
+        }, true);
         return $this;
     }
 
@@ -1229,7 +1229,7 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function (array $data) use ($function) {
             return array_reduce($data, $function);
-        }, true, true);
+        }, true);
     }
 
     /**
@@ -1242,7 +1242,7 @@ class JSON implements \ArrayAccess
     {
         $this->do($index, function (array &$data) {
             shuffle($data);
-        }, true, true);
+        }, true);
         return $this;
     }
 
