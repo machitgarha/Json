@@ -42,7 +42,7 @@ class JSON implements \ArrayAccess
     protected $defaultDataType = self::TYPE_JSON_STRING;
 
     /** @var int {@see self::setReturnType()}. */
-    protected $returnType = self::TYPE_DEFAULT;
+    protected $returnType = self::TYPE_ARRAY;
 
     /** @var bool {@see self::setReturnType()}. */
     protected $returnScalarAsScalar = true;
@@ -512,7 +512,7 @@ class JSON implements \ArrayAccess
      * be returned as the type of $type (e.g. an array).
      * @return self
      */
-    public function setReturnType(int $type = self::TYPE_DEFAULT, bool $scalarAsIs = true): self
+    public function setReturnType(int $type = self::TYPE_ARRAY, bool $scalarAsIs = true): self
     {
         switch ($type) {
             case self::TYPE_DEFAULT:
@@ -1014,7 +1014,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns a value from a countable in data.
+     * Returns a random value from a countable.
      *
      * @param ?string $index
      * @return mixed
@@ -1027,7 +1027,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Returns a random key from an array in data.
+     * Returns a random key from a countable.
      *
      * @param ?string $index
      * @return int|string
@@ -1036,6 +1036,26 @@ class JSON implements \ArrayAccess
     {
         return $this->do($index, function ($array) {
             return array_keys($array)[random_int(0, count($array) - 1)];
+        }, true);
+    }
+
+    /**
+     * Returns a random key/value pair from a countable
+     *
+     * @param ?string $index
+     * @return array{0:string|int,1:mixed} An array that contains the element's key and the
+     * element's value, respectively. You can get it as a list: list($key, $value). You can
+     * also get the value by-reference.
+     */
+    public function getRandomElement(string $index = null): array
+    {
+        return $this->do($index, function (&$array) {
+            $randomKey = array_keys($array)[random_int(0, count($array) - 1)];
+            $returnValue = [
+                $randomKey,
+                &$array[$randomKey]
+            ];
+            return $returnValue;
         }, true);
     }
 
