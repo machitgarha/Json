@@ -48,6 +48,9 @@ class JSON implements \ArrayAccess
     /** @var bool {@see self::setReturnType()}. */
     protected $returnScalarAsScalar = true;
 
+    /** @var callable {@see self::setRandomizationFunction()}. */
+    protected $randomizationFunction = "mt_rand";
+
     /** @var int Options passed to the constructor. */
     protected $options = 0;
 
@@ -1012,6 +1015,43 @@ class JSON implements \ArrayAccess
         return $this->do($index, function (array $data) {
             return array_keys($data);
         }, true);
+    }
+
+    /**
+     * Sets the randomization function, used when a random integer is needed.
+     *
+     * @param callable $function It accepts two arguments:
+     * 1. The minimum value to be returned,
+     * 2. The maximum value to be returned;
+     * It must return an integer. You can also use built-in functions like mt_rand().
+     * @return self
+     */
+    public function setRandomizationFunction(callable $function): self
+    {
+        $this->randomizationFunction = $function;
+        if (!function_exists($function)) {
+            throw new InvalidArgumentException("\$function does not exists");
+        }
+
+        $randomValue = $function(0, 1);
+        if ($randomValue !== 0 && $randomValue !== 1) {
+            throw new InvalidArgumentException("Return value of \$function is invalid");
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns a random value by calling {@see self::$randomizationFunction}.
+     *
+     * @param int $min
+     * @param int $max
+     * @return int
+     * @see self::setRandomizationFunction()
+     */
+    protected function randomInt(int $min, int $max): int
+    {
+        return ($this->randomizationFunction)($min, $max);
     }
 
     /**
