@@ -887,15 +887,52 @@ class JSON implements \ArrayAccess
      */
     public function forEach(callable $function, string $index = null)
     {
-        return $this->do($index, function (array &$data) use ($function) {
-            foreach ($data as $key => &$value) {
-                $result = $function($value, $key, $data);
+        return $this->do($index, function (array &$array) use ($function) {
+            foreach ($array as $key => &$value) {
+                $result = $function($value, $key, $array);
                 // Returning the first non-null value
                 if ($result !== null) {
                     return $result;
                 }
             }
         }, true);
+    }
+
+    /**
+     * Applies a function recursively to every member of a countable.
+     *
+     * @param callable $function The function to be called on each member, accepts three arguments:
+     * 1. The element's value, might be gotten by-reference.
+     * 2. The element's key.
+     * @param ?string $index
+     * @return self
+     */
+    public function forEachRecursive(callable $function, string $index = null): self
+    {
+        $this->do($index, function (array &$array) use ($function) {
+            $this->iterateRecursive($array, $function);
+        }, true);
+        return $this;
+    }
+
+    /**
+     * Iterates a countable recursively and applies a function on its each member.
+     *
+     * @param array $array
+     * @param callable $function {@see self::forEachRecursive()}
+     * @return self
+     */
+    protected function iterateRecursive(array &$array, callable $function): self
+    {
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+                // Recursion
+                $this->iterateRecursive($value, $function);
+            } else {
+                $function($value, $key);
+            }
+        }
+        return $this;
     }
 
     public function offsetGet($index)
@@ -1178,28 +1215,6 @@ class JSON implements \ArrayAccess
         
             return $randomSubset;
         }, true);
-    }
-
-    /**
-     * Applies a function to each member of a countable in data, recursively.
-     *
-     * @param callable $function The function to be called on each member, accepts three arguments:
-     * 1. The element's value, might be gotten by-reference.
-     * 2. The element's key.
-     * 3. $extraValue, if passed.
-     * @param ?string $index
-     * @param mixed $extraData Extra data to be passed as third function argument.
-     * @return self
-     */
-    public function walkRecursive(callable $function, string $index = null, $extraData = null): self
-    {
-        $this->do($index, function ($array) use ($function, $extraData) {
-            $result = @array_walk_recursive($array, $function, $extraData);
-            if (!$result) {
-                throw new Exception("Cannot walk through the array recursively");
-            }
-        }, true);
-        return $this;
     }
 
     /**
