@@ -1258,4 +1258,18 @@ class JSON implements \ArrayAccess
         $this->isDataScalar = false;
         return $this;
     }
+
+    /**
+     * Reverses a countable.
+     *
+     * @param ?string $index
+     * @return self
+     */
+    public function reverse(string $index = null): self
+    {
+        $this->do($index, function (array &$data) {
+            $data = array_reverse($data);
+        }, true);
+        return $this;
+    }
 }
