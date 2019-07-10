@@ -24,26 +24,23 @@ class UncountableValueExceptionTest extends TestCase
         $this->expectException(UncountableValueException::class);
 
         // Set up fixtures
-        $this->json = new JSON();
+        $this->json = new JSON(file_get_contents(__DIR__ . "/../json/apps.json"));
     }
 
-    public function testCount()
+    /**
+     * @dataProvider methodsWithNonExistentIndexProvider
+     */
+    public function testCallMethodsOnUncountableIndex(string $funcName, ...$params)
     {
-        $this->json->count("0");
+        $this->json->$funcName(...$params);
     }
 
-    public function testIterate()
+    public function methodsWithUncountableIndexProvider()
     {
-        foreach ($this->json->iterate("0") as $i);
-    }
-
-    public function testPush()
-    {
-        $this->json->push(7, "0");
-    }
-
-    public function testPop()
-    {
-        $this->json->pop("0");
+        return [
+            ["count", "apps.others.0"],
+            ["pop", "apps.ides.Microsoft.1"],
+            ["shift", "apps.others.2"],
+        ];
     }
 }
