@@ -15,16 +15,16 @@ use MAChitgarha\Component\JSON;
 
 class PublicMethodTest extends TestCase
 {
-    /** @var array Sample data to be used as JSON data. */
-    public $sampleData;
-    /** @var JSON Instance of JSON using $this->sampleData. */
+    /** @var JSON The sample JSON which loads from a file. */
     public $sampleJson;
+    /** @var array The data of the sample JSON as an array. */
+    public $sampleData;
 
     protected function setUp()
     {
         $this->sampleJson = new JSON(file_get_contents(__DIR__ . "/../json/apps.json"));
         $this->sampleData = $this->sampleJson->getDataAsArray();
-    } 
+    }
 
     /**
      * Tests JSON::getData*() methods.
@@ -121,7 +121,7 @@ class PublicMethodTest extends TestCase
 
     public function testIterate()
     {
-        $json = new JSON($this->sampleData);
+        $json = clone $this->sampleJson;
 
         foreach ($json->iterate("apps.browsers") as $i => $browserName) {
             $this->assertEquals($browserName, $json->get("apps.browsers.$i"));
@@ -131,7 +131,7 @@ class PublicMethodTest extends TestCase
     /** Tests JSON::isCountable() and JSON::count() methods. */
     public function testCountableElements()
     {
-        $json = new JSON($this->sampleData);
+        $json = clone $this->sampleJson;
 
         $this->assertTrue($json->isCountable("apps.browsers"));
         $this->assertEquals(
@@ -153,9 +153,41 @@ class PublicMethodTest extends TestCase
 
     public function testExchange()
     {
-        $json = new JSON($this->sampleData);
+        $json = clone $this->sampleJson;
 
         $this->assertEquals($this->sampleData, $json->exchange([]));
         $this->assertEquals([], $json->get());
+    }
+
+    /**
+     * Tests JSON::getValues(), JSON::getKeys(), JSON::getRandomValue(), getRandomKey(),
+     * JSON::getRandomValues() and JSON::getRandomKeys() methods.
+     */
+    public function testGettingRandomValuesAndKeys()
+    {
+        $json = clone $this->sampleJson;
+
+        $index = "apps.others";
+        $randomCount = 2;
+        $expectedArray = $this->sampleData["apps"]["others"];
+        $expectedArrayValues = array_values($expectedArray);
+        $expectedArrayKeys = array_keys($expectedArray);
+
+        $this->assertTrue(in_array($json->getRandomValue($index), $expectedArray));
+        $this->assertArrayHasKey($json->getRandomKey($index), $expectedArray);
+
+        $randomValues = $json->getRandomValues($randomCount, $index);
+        $randomKeys = $json->getRandomKeys($randomCount, $index);
+        $randomSubset = $json->getRandomSubset($randomCount, $index);
+
+        $this->assertEmpty(array_diff($randomValues, $expectedArrayValues));
+        $this->assertEmpty(array_diff($randomKeys, $expectedArrayKeys));
+        $this->assertArraySubset($randomSubset, $expectedArray);
+    }
+
+    public function testGetValuesAndKeys()
+    {
+        //$this->assertEquals($expectedArrayValues, $json->getValues($index));
+        //$this->assertEquals($expectedArrayKeys, $json->getKeys($index));
     }
 }
