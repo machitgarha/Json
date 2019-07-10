@@ -1074,7 +1074,7 @@ class JSON implements \ArrayAccess
             $arrayIndexLength = count($array) - 1;
 
             if ($count > $arrayIndexLength) {
-                throw new OverflowException("The number of random values must not be bigger than countable size");
+                throw new OverflowException("Count of random values must not reach countable size");
             }
 
             $randomValues = [];
@@ -1101,7 +1101,7 @@ class JSON implements \ArrayAccess
             $arrayIndexLength = count($array) - 1;
 
             if ($count > $arrayIndexLength) {
-                throw new OverflowException("The number of random keys must not be bigger than countable size");
+                throw new OverflowException("Count of random keys must not reach countable size");
             }
 
             $randomKeys = [];
@@ -1121,7 +1121,7 @@ class JSON implements \ArrayAccess
             $arrayIndexLength = count($array) - 1;
 
             if ($size > $arrayIndexLength) {
-                throw new OverflowException("The subset cannot be bigger than countable size");
+                throw new OverflowException("The subset must be smaller than the countable");
             }
 
             $randomElements = [];
