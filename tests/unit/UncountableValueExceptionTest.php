@@ -23,13 +23,10 @@ class UncountableValueExceptionTest extends TestCase
     {
         $this->expectException(UncountableValueException::class);
 
-        // Set up fixtures
         $this->json = new JSON(file_get_contents(__DIR__ . "/../json/apps.json"));
     }
 
-    /**
-     * @dataProvider methodsWithUncountableIndexProvider
-     */
+    /** @dataProvider methodsWithUncountableIndexProvider */
     public function testCallMethodsOnUncountableIndex(string $funcName, ...$params)
     {
         $this->json->$funcName(...$params);

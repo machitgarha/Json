@@ -15,23 +15,16 @@ use MAChitgarha\Component\JSON;
 
 class PublicMethodTest extends TestCase
 {
-    /** @var array A simple sample data to be used as JSON data. */
-    public static $sampleData = [
-        "apps" => [
-            "ides" => [
-                "PhpStorm",
-                "WebStorm",
-                "Visual Studio Code"
-            ],
-            "browsers" => [
-                "Firefox",
-                "Chrome",
-                "Safari",
-                "Opera",
-                "Edge"
-            ]
-        ]
-    ];
+    /** @var array Sample data to be used as JSON data. */
+    public $sampleData;
+    /** @var JSON Instance of JSON using $this->sampleData. */
+    public $sampleJson;
+
+    protected function setUp()
+    {
+        $this->sampleJson = new JSON(file_get_contents(__DIR__ . "/../json/apps.json"));
+        $this->sampleData = $this->sampleJson->getDataAsArray();
+    } 
 
     /**
      * Tests JSON::getData*() methods.
@@ -128,7 +121,7 @@ class PublicMethodTest extends TestCase
 
     public function testIterate()
     {
-        $json = new JSON(self::$sampleData);
+        $json = new JSON($this->sampleData);
 
         foreach ($json->iterate("apps.browsers") as $i => $browserName) {
             $this->assertEquals($browserName, $json->get("apps.browsers.$i"));
@@ -138,16 +131,16 @@ class PublicMethodTest extends TestCase
     /** Tests JSON::isCountable() and JSON::count() methods. */
     public function testCountableElements()
     {
-        $json = new JSON(self::$sampleData);
+        $json = new JSON($this->sampleData);
 
         $this->assertTrue($json->isCountable("apps.browsers"));
         $this->assertEquals(
-            count(self::$sampleData["apps"]["browsers"]),
+            count($this->sampleData["apps"]["browsers"]),
             $json->count("apps.browsers")
         );
     }
 
-    public function testPushAndPop()
+    public function testPushPopShiftUnshift()
     {
         $json = new JSON([
             "test" => "pass"
@@ -166,9 +159,9 @@ class PublicMethodTest extends TestCase
 
     public function testExchange()
     {
-        $json = new JSON(self::$sampleData);
+        $json = new JSON($this->sampleData);
 
-        $this->assertEquals(self::$sampleData, $json->exchange([]));
+        $this->assertEquals($this->sampleData, $json->exchange([]));
         $this->assertEquals([], $json->get());
     }
 }
