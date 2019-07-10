@@ -1255,6 +1255,7 @@ class JSON implements \ArrayAccess
     public function toCountable(): self
     {
         $this->data = (array)($this->data);
+        $this->isDataScalar = false;
         return $this;
     }
 }
