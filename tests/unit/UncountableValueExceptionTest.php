@@ -28,7 +28,7 @@ class UncountableValueExceptionTest extends TestCase
     }
 
     /**
-     * @dataProvider methodsWithNonExistentIndexProvider
+     * @dataProvider methodsWithUncountableIndexProvider
      */
     public function testCallMethodsOnUncountableIndex(string $funcName, ...$params)
     {
@@ -40,7 +40,7 @@ class UncountableValueExceptionTest extends TestCase
         return [
             ["count", "apps.others.0"],
             ["pop", "apps.ides.Microsoft.1"],
-            ["shift", "apps.others.2"],
+            ["shift", "apps.others.2.0"],
         ];
     }
 }

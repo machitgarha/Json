@@ -613,13 +613,18 @@ class JSON implements \ArrayAccess
             if ($keysCount === 1) {
                 $lastKey = $keys[0];
 
-                if ($indexingType === self::INDEXING_STRICT && !array_key_exists($lastKey, $data)) {
-                    throw new Exception("The key '$lastKey' does not exist");
+                if (array_key_exists($lastKey, $data)) {
+                    if (!is_array($data[$lastKey]) && $forceCountableValue) {
+                        throw new UncountableValueException("Expected countable, reached uncountable");
+                    }
+                } else {
+                    if ($indexingType === self::INDEXING_STRICT) {
+                        throw new Exception("The key '$lastKey' does not exist");
+                    } else {
+                        $data[$lastKey] = null;
+                    }
                 }
-                if (!is_array($data[$lastKey]) && $forceCountableValue) {
-                    throw new UncountableValueException("Expected countable, reached uncountable");
-                }
-
+    
                 $returnValue = [
                     &$data[$lastKey],
                     &$data,
