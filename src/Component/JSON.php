@@ -667,15 +667,13 @@ class JSON implements \ArrayAccess
         bool $forceCountableValue = false,
         int $indexingType = self::INDEXING_STRICT
     ) {
-        $data = &$this->data;
-
-        if ($forceCountableValue && self::isScalar($data)) {
+        if ($this->isDataScalar) {
             throw new ScalarDataException("Cannot use the function on scalar data");
         }
 
         $result = $function(...$this->findElementRecursive(
             $this->extractIndex($index),
-            $data,
+            $this->data,
             $forceCountableValue,
             $indexingType
         ));
