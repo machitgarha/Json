@@ -15,6 +15,7 @@ use MAChitgarha\Exception\JSON\InvalidJsonException;
 use MAChitgarha\Exception\JSON\UncountableValueException;
 use MAChitgarha\Exception\JSON\ScalarDataException;
 use MAChitgarha\Exception\JSON\JsonException;
+use MAChitgarha\Exception\JSON\OverflowException;
 
 /**
  * Handles JSON data type.
@@ -1021,7 +1022,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomValue(string $index = null)
     {
-        return $this->do($index, function ($array) {
+        return $this->do($index, function (array $array) {
             return array_values($array)[random_int(0, count($array) - 1)];
         }, true);
     }
@@ -1034,7 +1035,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomKey(string $index = null)
     {
-        return $this->do($index, function ($array) {
+        return $this->do($index, function (array $array) {
             return array_keys($array)[random_int(0, count($array) - 1)];
         }, true);
     }
@@ -1049,7 +1050,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomElement(string $index = null): array
     {
-        return $this->do($index, function (&$array) {
+        return $this->do($index, function (array &$array) {
             $randomKey = array_keys($array)[random_int(0, count($array) - 1)];
             $returnValue = [
                 $randomKey,
@@ -1068,13 +1069,19 @@ class JSON implements \ArrayAccess
      */
     public function getRandomValues(int $count, string $index = null): array
     {
-        return $this->do($index, function ($array) use ($count) {
+        return $this->do($index, function (array $array) use ($count) {
             $arrayValues = array_values($array);
             $arrayIndexLength = count($array) - 1;
-            $randomValues = [];
 
+            if ($count > $arrayIndexLength) {
+                throw new OverflowException("The number of random values must not be bigger than countable size");
+            }
+
+            $randomValues = [];
             for ($i = 0; $i < $count; $i++) {
-                $randomValues[] = $arrayValues[random_int(0, $arrayIndexLength)];
+                $randomIndex = random_int(0, $arrayIndexLength--);
+                $randomValues[] = $arrayValues[$randomIndex];
+                unset($arrayValues[$randomIndex]);
             }
             return $randomValues;
         }, true);
@@ -1089,15 +1096,41 @@ class JSON implements \ArrayAccess
      */
     public function getRandomKeys(int $count, string $index = null): array
     {
-        return $this->do($index, function ($array) use ($count) {
+        return $this->do($index, function (array $array) use ($count) {
             $arrayKeys = array_keys($array);
             $arrayIndexLength = count($array) - 1;
-            $randomKeys = [];
 
+            if ($count > $arrayIndexLength) {
+                throw new OverflowException("The number of random keys must not be bigger than countable size");
+            }
+
+            $randomKeys = [];
             for ($i = 0; $i < $count; $i++) {
-                $randomKeys[] = $arrayKeys[random_int(0, $arrayIndexLength)];
+                $randomIndex = random_int(0, $arrayIndexLength--);
+                $randomKeys[] = $arrayKeys[$randomIndex];
+                unset($arrayKeys[$randomIndex]);
             }
             return $randomKeys;
+        }, true);
+    }
+
+    public function getRandomSubset(int $size, string $index = null)
+    {
+        return $this->do($index, function (array &$array) use ($size) {
+            $arrayKeys = array_keys($array);
+            $arrayIndexLength = count($array) - 1;
+
+            if ($size > $arrayIndexLength) {
+                throw new OverflowException("The subset cannot be bigger than countable size");
+            }
+
+            $randomElements = [];
+            for ($i = 0; $i < $size; $i++) {
+                $randomKey = $arrayKeys[random_int(0, $arrayIndexLength--)];
+                $randomElements[$randomKey] = $array[$randomKey];
+                unset($arrayKeys[$randomKey]);
+            }
+            return $randomElements;
         }, true);
     }
 
