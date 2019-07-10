@@ -568,6 +568,7 @@ class JSON implements \ArrayAccess
      *
      * @param array $keys The keys to be followed recursively.
      * @param array $data The data. It must be a recursive array or you may encounter errors.
+     * @return array{0:array|mixed,1:array|array[],2:mixed}|array{0:array|array[],1:null,2:null}
      * @see JSON::do()
      */
     protected function &findElementRecursive(
@@ -607,34 +608,35 @@ class JSON implements \ArrayAccess
             );
         }
 
-        if ($keysCount === 1) {
-            $lastKey = $keys[0];
-
-            if ($indexingType === self::INDEXING_STRICT && !array_key_exists($lastKey, $data)) {
-                throw new Exception("The key '$lastKey' does not exist");
-            }
-            if (!is_array($data[$lastKey]) && $forceCountableValue) {
-                throw new UncountableValueException("Expected countable, reached uncountable");
-            }
-
-            $returnValue = [
-                &$data[$lastKey],
-                &$data,
-                &$lastKey,
-            ];
-        }
-
-        if ($keysCount === 0) {
-            $returnValue = [
-                &$data,
-                null,
-                null
-            ];
-        }
-
         // End of recursion
-        // The code will reach here if $keysCount is 0 or 1
-        return $returnValue;
+        else {
+            if ($keysCount === 1) {
+                $lastKey = $keys[0];
+
+                if ($indexingType === self::INDEXING_STRICT && !array_key_exists($lastKey, $data)) {
+                    throw new Exception("The key '$lastKey' does not exist");
+                }
+                if (!is_array($data[$lastKey]) && $forceCountableValue) {
+                    throw new UncountableValueException("Expected countable, reached uncountable");
+                }
+
+                $returnValue = [
+                    &$data[$lastKey],
+                    &$data,
+                    &$lastKey,
+                ];
+            } 
+            // If $keysCount is 0
+            else {
+                $returnValue = [
+                    &$data,
+                    null,
+                    null
+                ];
+            }
+
+            return $returnValue;
+        }
     }
 
     /**
@@ -642,7 +644,7 @@ class JSON implements \ArrayAccess
      *
      * @param $index The index of the element to be found, and it's extracted as keys. Pass null if
      * you want to get the data root.
-     * @param callable $function It accepts the following argument(s):
+     * @param ?callable $function It accepts the following argument(s):
      * 1. The element's value; might be gotten by-reference.
      * 2. The parent element (that is an array); might be gotten by-reference.
      * 3. The last key in the index; might be used to access the element (using the parent element).
@@ -661,7 +663,7 @@ class JSON implements \ArrayAccess
      */
     public function &do(
         string $index = null,
-        callable $function,
+        callable $function = null,
         bool $forceCountableValue = false,
         int $indexingType = self::INDEXING_STRICT
     ) {
@@ -875,7 +877,7 @@ class JSON implements \ArrayAccess
      * 1. The element's value; might be gotten by-reference.
      * 2. The element's key.
      * 3. The parent element; might be gotten by-reference.
-     * @param string $index
+     * @param ?string $index
      * @return mixed
      */
     public function forEach(callable $function, string $index = null)
@@ -883,6 +885,7 @@ class JSON implements \ArrayAccess
         return $this->do($index, function (array &$data) use ($function) {
             foreach ($data as $key => &$value) {
                 $result = $function($value, $key, $data);
+                // Returning the first non-null value
                 if ($result !== null) {
                     return $result;
                 }
@@ -945,7 +948,7 @@ class JSON implements \ArrayAccess
     /**
      * Removes the first element of a countable.
      *
-     * @param string $index Pass null if you want to remove an element from the data root.
+     * @param ?string $index Pass null if you want to remove an element from the data root.
      * @return mixed The removed element's value.
      */
     public function shift(string $index = null)
@@ -958,13 +961,13 @@ class JSON implements \ArrayAccess
     /**
      * Prepends an element to a countable.
      *
-     * @param string $index Pass null if you want to prepend an element to the data root.
+     * @param ?string $index Pass null if you want to prepend an element to the data root.
      * @return self
      */
     public function unshift($value, string $index = null): self
     {
-        $this->do($index, function ($array) {
-            array_unshift($array);
+        $this->do($index, function ($array) use ($value) {
+            array_unshift($array, $value);
         }, true);
         return $this;
     }
@@ -988,7 +991,7 @@ class JSON implements \ArrayAccess
     /**
      * Returns all values of a countable.
      *
-     * @param string $index
+     * @param ?string $index
      * @return array
      */
     public function getValues(string $index = null): array
@@ -1001,7 +1004,7 @@ class JSON implements \ArrayAccess
     /**
      * Returns all keys of a countable.
      *
-     * @param string $index
+     * @param ?string $index
      * @return array
      */
     public function getKeys(string $index = null): array
@@ -1014,7 +1017,7 @@ class JSON implements \ArrayAccess
     /**
      * Returns a value from a countable in data.
      *
-     * @param string $index
+     * @param ?string $index
      * @return mixed
      */
     public function getRandomValue(string $index = null)
@@ -1027,7 +1030,7 @@ class JSON implements \ArrayAccess
     /**
      * Returns a random key from an array in data.
      *
-     * @param string $index
+     * @param ?string $index
      * @return int|string
      */
     public function getRandomKey(string $index = null)
@@ -1041,7 +1044,7 @@ class JSON implements \ArrayAccess
      * Returns one or more random values from a countable in data.
      *
      * @param int $count
-     * @param string $index
+     * @param ?string $index
      * @return array
      */
     public function getRandomValues(int $count, string $index = null): array
@@ -1062,7 +1065,7 @@ class JSON implements \ArrayAccess
      * Returns one or more random keys from a countable in data.
      *
      * @param integer $count
-     * @param string $index
+     * @param ?string $index
      * @return array
      */
     public function getRandomKeys(int $count, string $index = null): array
@@ -1086,7 +1089,7 @@ class JSON implements \ArrayAccess
      * 1. The element's value, might be gotten by-reference.
      * 2. The element's key.
      * 3. $extraValue, if passed.
-     * @param string $index
+     * @param ?string $index
      * @param mixed $extraData Extra data to be passed as third function argument.
      * @return self
      */
@@ -1107,7 +1110,7 @@ class JSON implements \ArrayAccess
      * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
      * and will be treated as an array.
      * @param int $options Can be one of the JSON::MERGE_* constants (not JSON::MERGE_R_* ones).
-     * @param string $index
+     * @param ?string $index
      * @return self
      */
     public function mergeWith($newData, int $options = 0, string $index = null): self
@@ -1133,7 +1136,7 @@ class JSON implements \ArrayAccess
      * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
      * and will be treated as an array.
      * @param int $options Can be one of the JSON::MERGE_R_* constants.
-     * @param string $index
+     * @param ?string $index
      * @return self
      */
     public function mergeRecursivelyWith($newData, int $options = 0, string $index = null): self
@@ -1152,7 +1155,7 @@ class JSON implements \ArrayAccess
      * @param mixed $data The data to be compared with. Any values (except recourses) can be passed
      * and will be treated as an array.
      * @param bool $compareKeys To calculate intersection in the keys or not (i.e. in values).
-     * @param string $index
+     * @param ?string $index
      * @return self
      */
     public function difference(
@@ -1172,14 +1175,14 @@ class JSON implements \ArrayAccess
     /**
      * Filters a countable using a callable.
      *
-     * @param callable ?$function The function to be called on each member of the countable. It
+     * @param ?callable $function The function to be called on each member of the countable. It
      * should return a boolean, or any non-false values is considered as true (i.e. any value
      * that loosely equals false is considered as false, such as 0); it accepts two arguments:
      * 1. The element's value.
      * 2. The element's key.
      * Keep in mind, the given value by the callable is safe from overwriting; so getting it
      * by-reference or not does not matter. The default function removes all null values.
-     * @param string $index
+     * @param ?string $index
      * @return self
      */
     public function filter(callable $function = null, string $index = null): self
@@ -1191,14 +1194,12 @@ class JSON implements \ArrayAccess
         }
 
         $this->do($index, function (array &$data) use ($function) {
-            echo "Called";
             $filteredArray = [];
             foreach ($data as $key => $value) {
-                if ($function($value, $key)) {
+                if ($function($value, $key)) { // @phan-suppress-current-line PhanParamTooMany
                     $filteredArray[$key] = $value;
                 }
             }
-            var_dump($filteredArray);
             $data = $filteredArray;
         }, true);
         return $this;
@@ -1207,7 +1208,7 @@ class JSON implements \ArrayAccess
     /**
      * Flips values and keys in a countable.
      *
-     * @param string $index
+     * @param ?string $index
      * @return self
      */
     public function flipValuesAndKeys(string $index = null): self
@@ -1222,7 +1223,7 @@ class JSON implements \ArrayAccess
      * Reduces a countable to a single value.
      *
      * @param callable $function Read array_reduce() documentation for more information.
-     * @param string $index
+     * @param ?string $index
      * @return mixed
      */
     public function reduce(callable $function, string $index = null)
@@ -1235,7 +1236,7 @@ class JSON implements \ArrayAccess
     /**
      * Shuffles a countable.
      *
-     * @param string $index
+     * @param ?string $index
      * @return self
      */
     public function shuffle(string $index = null): self
