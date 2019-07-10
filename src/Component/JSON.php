@@ -1028,10 +1028,8 @@ class JSON implements \ArrayAccess
      */
     public function setRandomizationFunction(callable $function): self
     {
+        // For sure, the function is callable, because it is defined as callable
         $this->randomizationFunction = $function;
-        if (!function_exists($function)) {
-            throw new InvalidArgumentException("\$function does not exists");
-        }
 
         $randomValue = $function(0, 1);
         if ($randomValue !== 0 && $randomValue !== 1) {
@@ -1154,13 +1152,20 @@ class JSON implements \ArrayAccess
         }, true);
     }
 
-    public function getRandomSubset(int $size, string $index = null)
+    /**
+     * Returns a random subset of a countable.
+     *
+     * @param integer $size Subset's length.
+     * @param ?string $index
+     * @return array
+     */
+    public function getRandomSubset(int $size, string $index = null): array
     {
         return $this->do($index, function (array &$array) use ($size) {
             $maxArrayIndex = count($array) - 1;
 
             if ($size > $maxArrayIndex) {
-                throw new OverflowException("The subset must be smaller than the countable");
+                throw new OverflowException("Subset size must be lower than countable size");
             }
 
             $arrayKeys = array_keys($array);
