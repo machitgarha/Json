@@ -671,8 +671,8 @@ class JSON implements \ArrayAccess
      * @throws ScalarDataException If data is scalar and $forceCountableValue is set to true.
      */
     public function &do(
-        string $index = null,
         callable $function = null,
+        string $index = null,
         bool $forceCountableValue = false,
         int $indexingType = self::INDEXING_STRICT
     ) {
@@ -743,9 +743,9 @@ class JSON implements \ArrayAccess
         }
 
         try {
-            return $this->do($index, function ($element) {
+            return $this->do(function ($element) {
                 return $this->getValueBasedOnReturnType($element);
-            });
+            }, $index);
         } catch (Exception $e) {
             return null;
         }
@@ -772,9 +772,9 @@ class JSON implements \ArrayAccess
             }
         }
 
-        $this->do($index, function (&$element) use ($value) {
+        $this->do(function (&$element) use ($value) {
             $element = $value;
-        }, false, self::INDEXING_FREE);
+        }, $index, false, self::INDEXING_FREE);
         return $this;
     }
 
@@ -786,10 +786,10 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index): self
     {
-        $this->do($index, function ($element, &$data, $key) {
+        $this->do(function ($element, &$data, $key) {
             // Un-setting the element directly is impossible
             unset($data[$key]);
-        });
+        }, $index);
         return $this;
     }
 
@@ -835,9 +835,9 @@ class JSON implements \ArrayAccess
         }
 
         try {
-            return $this->do($index, function () {
+            return $this->do(function () {
                 return true;
-            }, true);
+            }, $index, true);
         } catch (UncountableValueException $e) {
             return false;
         }
@@ -851,9 +851,9 @@ class JSON implements \ArrayAccess
      */
     public function count(string $index = null): int
     {
-        return $this->do($index, function ($element) {
+        return $this->do(function ($element) {
             return count($element);
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -864,14 +864,14 @@ class JSON implements \ArrayAccess
      */
     public function &iterate(string $index = null): \Generator
     {
-        return $this->do($index, function &(array &$data) {
+        return $this->do(function &(array &$data) {
             foreach ($data as $key => &$value) {
                 yield $key => $value;
 
                 // Convert the value to an optimal one, e.g. convert objects to arrays
                 $value = $this->getOptimalValue($value);
             }
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -887,7 +887,7 @@ class JSON implements \ArrayAccess
      */
     public function forEach(callable $function, string $index = null)
     {
-        return $this->do($index, function (array &$array) use ($function) {
+        return $this->do(function (array &$array) use ($function) {
             foreach ($array as $key => &$value) {
                 $result = $function($value, $key, $array);
                 // Returning the first non-null value
@@ -895,7 +895,7 @@ class JSON implements \ArrayAccess
                     return $result;
                 }
             }
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -909,9 +909,9 @@ class JSON implements \ArrayAccess
      */
     public function forEachRecursive(callable $function, string $index = null): self
     {
-        $this->do($index, function (array &$array) use ($function) {
+        $this->do(function (array &$array) use ($function) {
             $this->iterateRecursive($array, $function);
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -966,9 +966,9 @@ class JSON implements \ArrayAccess
     {
         $value = $this->getOptimalValue($value);
 
-        $this->do($index, function (&$element) use ($value) {
+        $this->do(function (&$element) use ($value) {
             array_push($element, $value);
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -980,9 +980,9 @@ class JSON implements \ArrayAccess
      */
     public function pop(string $index = null)
     {
-        return $this->do($index, function (&$element) {
+        return $this->do(function (&$element) {
             return array_pop($element);
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -993,9 +993,9 @@ class JSON implements \ArrayAccess
      */
     public function shift(string $index = null)
     {
-        return $this->do($index, function ($array) {
+        return $this->do(function ($array) {
             return array_shift($array);
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1006,9 +1006,9 @@ class JSON implements \ArrayAccess
      */
     public function unshift($value, string $index = null): self
     {
-        $this->do($index, function (array &$data) use ($value) {
+        $this->do(function (array &$data) use ($value) {
             array_unshift($data, $value);
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -1036,9 +1036,9 @@ class JSON implements \ArrayAccess
      */
     public function getValues(string $index = null): array
     {
-        return $this->do($index, function (array $data) {
+        return $this->do(function (array $data) {
             return array_values($data);
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1049,9 +1049,9 @@ class JSON implements \ArrayAccess
      */
     public function getKeys(string $index = null): array
     {
-        return $this->do($index, function (array $data) {
+        return $this->do(function (array $data) {
             return array_keys($data);
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1097,9 +1097,9 @@ class JSON implements \ArrayAccess
      */
     public function getRandomValue(string $index = null)
     {
-        return $this->do($index, function (array $array) {
+        return $this->do(function (array $array) {
             return array_values($array)[$this->randomInt(0, count($array) - 1)];
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1110,9 +1110,9 @@ class JSON implements \ArrayAccess
      */
     public function getRandomKey(string $index = null)
     {
-        return $this->do($index, function (array $array) {
+        return $this->do(function (array $array) {
             return array_keys($array)[$this->randomInt(0, count($array) - 1)];
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1125,14 +1125,14 @@ class JSON implements \ArrayAccess
      */
     public function getRandomElement(string $index = null): array
     {
-        return $this->do($index, function (array &$array) {
+        return $this->do(function (array &$array) {
             $randomKey = array_keys($array)[$this->randomInt(0, count($array) - 1)];
             $returnValue = [
                 $randomKey,
                 &$array[$randomKey]
             ];
             return $returnValue;
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1144,7 +1144,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomValues(int $count, string $index = null): array
     {
-        return $this->do($index, function (array $array) use ($count) {
+        return $this->do(function (array $array) use ($count) {
             $maxArrayIndex = count($array) - 1;
 
             if ($count > $maxArrayIndex) {
@@ -1159,7 +1159,7 @@ class JSON implements \ArrayAccess
             }
         
             return $randomValues;
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1171,7 +1171,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomKeys(int $count, string $index = null): array
     {
-        return $this->do($index, function (array $array) use ($count) {
+        return $this->do(function (array $array) use ($count) {
             $maxArrayIndex = count($array) - 1;
 
             if ($count > $maxArrayIndex) {
@@ -1186,7 +1186,7 @@ class JSON implements \ArrayAccess
             }
         
             return $randomKeys;
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1198,7 +1198,7 @@ class JSON implements \ArrayAccess
      */
     public function getRandomSubset(int $size, string $index = null): array
     {
-        return $this->do($index, function (array &$array) use ($size) {
+        return $this->do(function (array &$array) use ($size) {
             $maxArrayIndex = count($array) - 1;
 
             if ($size > $maxArrayIndex) {
@@ -1214,7 +1214,7 @@ class JSON implements \ArrayAccess
             }
         
             return $randomSubset;
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1233,13 +1233,13 @@ class JSON implements \ArrayAccess
         // Extracting options
         $reverseOrder = $options & self::MERGE_PREFER_DEFAULT_DATA;
 
-        $this->do($index, function (&$array) use ($newDataAsArray, $reverseOrder) {
+        $this->do(function (&$array) use ($newDataAsArray, $reverseOrder) {
             if ($reverseOrder) {
                 $array = array_merge($newDataAsArray, $array);
             } else {
                 $array = array_merge($array, $newDataAsArray);
             }
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -1256,9 +1256,9 @@ class JSON implements \ArrayAccess
     {
         $newDataAsArray = (array)($this->getOptimalValue($newData));
 
-        $this->do($index, function (&$array) use ($newDataAsArray) {
+        $this->do(function (&$array) use ($newDataAsArray) {
             $array = array_merge_recursive($array, $newDataAsArray);
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -1305,9 +1305,9 @@ class JSON implements \ArrayAccess
             return $diff;
         };
 
-        $this->do($index, function (array &$array) use ($compareKeys, $diff, $diffKey) {
+        $this->do(function (array &$array) use ($compareKeys, $diff, $diffKey) {
             $array = $compareKeys ? $diff($array) : $diffKey($array);
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -1332,7 +1332,7 @@ class JSON implements \ArrayAccess
             };
         }
 
-        $this->do($index, function (array &$data) use ($function) {
+        $this->do(function (array &$data) use ($function) {
             $filteredArray = [];
             foreach ($data as $key => $value) {
                 if ($function($value, $key)) { // @phan-suppress-current-line PhanParamTooMany
@@ -1340,7 +1340,7 @@ class JSON implements \ArrayAccess
                 }
             }
             $data = $filteredArray;
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -1352,9 +1352,9 @@ class JSON implements \ArrayAccess
      */
     public function flipValuesAndKeys(string $index = null): self
     {
-        $this->do($index, function (array &$data) {
+        $this->do(function (array &$data) {
             $data = @array_flip($data);
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -1367,9 +1367,9 @@ class JSON implements \ArrayAccess
      */
     public function reduce(callable $function, string $index = null)
     {
-        return $this->do($index, function (array $data) use ($function) {
+        return $this->do(function (array $data) use ($function) {
             return array_reduce($data, $function);
-        }, true);
+        }, $index, true);
     }
 
     /**
@@ -1380,9 +1380,9 @@ class JSON implements \ArrayAccess
      */
     public function shuffle(string $index = null): self
     {
-        $this->do($index, function (array &$data) {
+        $this->do(function (array &$data) {
             shuffle($data);
-        }, true);
+        }, $index, true);
         return $this;
     }
 
@@ -1406,9 +1406,9 @@ class JSON implements \ArrayAccess
      */
     public function reverse(string $index = null): self
     {
-        $this->do($index, function (array &$data) {
+        $this->do(function (array &$data) {
             $data = array_reverse($data);
-        }, true);
+        }, $index, true);
         return $this;
     }
 }
