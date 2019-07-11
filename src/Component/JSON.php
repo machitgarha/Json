@@ -1263,10 +1263,10 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Removes intersection of a countable with a new data.
+     * Removes intersection of a countable with a another countable.
      *
-     * @param mixed $data The data to be compared with. Any values (except recourses) can be passed
-     * and will be treated as an array.
+     * @param mixed $data The data to be compared with. Any values (except recourses)
+     * can be passed and will be treated as an array.
      * @param bool $compareKeys To calculate intersection in the keys or not (i.e. in values).
      * @param ?string $index
      * @return self
