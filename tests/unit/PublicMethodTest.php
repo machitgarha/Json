@@ -122,17 +122,6 @@ class PublicMethodTest extends TestCase
         $this->assertFalse(isset($json[$index]));
     }
 
-    /** Provides index and values pairs. */
-    public function indexValuePairsProvider()
-    {
-        return [
-            [0, []],
-            ["id", 14],
-            ["error.type", "Exception"],
-            ["", "An empty key (index)"]
-        ];
-    }
-
     public function testIterate()
     {
         $json = clone self::$sampleJson;
@@ -225,12 +214,23 @@ class PublicMethodTest extends TestCase
         })->get());
     }
 
+    /** Provides index and values pairs. */
+    public function indexValuePairsProvider()
+    {
+        return [
+            [0, []],
+            ["id", 14],
+            ["error.type", "Exception"],
+            ["", "An empty key (index)"]
+        ];
+    }    
+
     public function arrayAndJsonProvider()
     {
-        list($json, $data) = self::getSampleJsonAndData();
+        list($json, $array) = self::getSampleJsonAndData();
 
         return [
-            [$json, "apps.others", $data["apps"]["others"]]
+            [$json, "apps.others", $array["apps"]["others"]]
         ];
     }
 }

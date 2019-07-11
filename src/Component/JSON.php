@@ -1411,4 +1411,21 @@ class JSON implements \ArrayAccess
         }, $index, true);
         return $this;
     }
+
+    /**
+     * Fills an element with a value.
+     *
+     * @param int $startIndex
+     * @param int $length
+     * @param mixed $value
+     * @param string $index
+     * @return self
+     */
+    public function fill(int $startIndex, int $length, $value, string $index = null): self
+    {
+        $this->do(function (array &$array) use ($startIndex, $length, $value) {
+            $array = array_fill($startIndex, $length, $value);
+        });
+        return $this;
+    }
 }
