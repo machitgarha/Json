@@ -212,6 +212,19 @@ class PublicMethodTest extends TestCase
         $this->assertEmpty($json->difference($diff, true, $index)->get($index));
     }
 
+    public function testFilter()
+    {
+        $json = new JSON([
+            220,
+            4,
+            24
+        ]);
+
+        $this->assertEmpty($json->filter(function ($value) {
+            return $value % 2 !== 0;
+        })->get());
+    }
+
     public function arrayAndJsonProvider()
     {
         list($json, $data) = self::getSampleJsonAndData();
