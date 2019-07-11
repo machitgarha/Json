@@ -1270,6 +1270,7 @@ class JSON implements \ArrayAccess
      * @param bool $compareKeys To calculate intersection in the keys or not (i.e. in values).
      * @param ?string $index
      * @return self
+     * @see https://gist.github.com/nunoveloso/1992851 Thanks to this.
      */
     public function difference(
         $data,
@@ -1278,9 +1279,34 @@ class JSON implements \ArrayAccess
     ): self {
         $dataAsArray = (array)($this->getOptimalValue($data));
 
-        $this->do($index, function (&$array) use ($dataAsArray, $compareKeys) {
-            $array = $compareKeys ? array_diff_key($array, $dataAsArray)
-                : array_diff($array, $dataAsArray);
+        $diff = function (array $array) use ($dataAsArray) {
+            $diff = array();
+  
+            foreach ($array as $value) {
+                $diff[$value] = 1;
+            }
+            foreach ($dataAsArray as $value) {
+                unset($diff[$value]);
+            }
+          
+            return array_keys($diff);        
+        };
+
+        $diffKey = function (array $array) use ($dataAsArray) {
+            $diff = array();
+
+            foreach ($array as $key => $value) {
+                $diff[$key] = $value;
+            }
+            foreach ($dataAsArray as $key => $value) {
+                unset($diff[$key]);
+            }
+          
+            return $diff;
+        };
+
+        $this->do($index, function (array &$array) use ($compareKeys, $diff, $diffKey) {
+            $array = $compareKeys ? $diff($array) : $diffKey($array);
         }, true);
         return $this;
     }
