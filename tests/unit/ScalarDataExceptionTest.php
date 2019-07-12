@@ -16,29 +16,43 @@ use MAChitgarha\Exception\JSON\ScalarDataException;
 
 class ScalarDataExceptionTest extends TestCase
 {
-    /** @var JSON */
-    protected $json;
-
     protected function setUp()
     {
         $this->expectException(ScalarDataException::class);
-
-        // Set up fixtures
-        $this->json = new JSON(7);
     }
 
-    public function testGet()
+    /** @dataProvider callMethodsWithIndexesProvider */
+    public function testCallingValidMethodsWithIndexes(JSON $json, string $funcName, array $args)
     {
-        $this->json->get("apps");
+        $json->$funcName(...$args);
     }
 
-    public function testSet()
+    /** @dataProvider methodsForCountableDataProvider */
+    public function testMethodsDependOnCountableData(JSON $json, string $funcName, array $args)
     {
-        $this->json->set([], "apps");
+        $json->$funcName(...$args);
     }
 
-    public function testUnset()
+    public function callMethodsWithIndexesProvider()
     {
-        $this->json->unset("");
+        $json = clone new JSON("Ubuntu");
+        $sampleIndex = "appName";
+        $sampleValue = "Terminal";
+
+        return [
+            [$json, "get", [$sampleIndex]],
+            [$json, "set", [$sampleValue, $sampleIndex]],
+            [$json, "unset", [$sampleIndex]],
+        ];
+    }
+
+    public function methodsForCountableDataProvider()
+    {
+        $json = clone new JSON(1400);
+        $sampleIndex = "year";
+        $sampleValue = 1398;
+
+        return [
+        ];     
     }
 }
