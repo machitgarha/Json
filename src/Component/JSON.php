@@ -420,7 +420,7 @@ class JSON implements \ArrayAccess
      */
     protected function convertToArray($data): array
     {
-        return (array)($this->decodeJsonUseProps($this->encodeToJsonUseProps($data), true));
+        return (new \ArrayObject($data))->getArrayCopy();
     }
 
     /**
