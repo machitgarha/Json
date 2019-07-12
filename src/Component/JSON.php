@@ -555,10 +555,12 @@ class JSON implements \ArrayAccess
         if ($this->returnType === self::TYPE_FAST) {
             return $value;
         }
+
         if (self::isScalar($value) && $this->returnScalarAsScalar) {
             return $value;
         }
 
+        $returnType = $this->returnType;
         if ($returnType === self::TYPE_DEFAULT) {
             $returnType = $this->defaultDataType;
         }
