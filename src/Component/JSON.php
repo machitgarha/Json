@@ -61,7 +61,7 @@ class JSON implements \ArrayAccess
     protected $jsonRecursionDepth = 512;
 
     // Data types
-    /** @var int The data type which you passed at creating new instance (i.e. constructor). */
+    /** @var int Type of data passed to the constructor. */
     const TYPE_DEFAULT = 0;
     /** @var int JSON string data type. */
     const TYPE_JSON_STRING = 1;
@@ -71,6 +71,13 @@ class JSON implements \ArrayAccess
     const TYPE_OBJECT = 2;
     /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
     const TYPE_FULL_OBJECT = 4;
+    /**
+     * @var int Array data type (recursive) when data is countable, and scalar values will remain
+     * unchanged, with no, even if you enabled scalarAsScalar option (in JSON::setReturnType()).
+     * This data type makes operation as fast as possible, because of almost minimum type checks and
+     * type conversions.
+     */
+    const TYPE_FAST = 5;
 
     // Indexing types
     /**
@@ -513,7 +520,8 @@ class JSON implements \ArrayAccess
      * @param bool $scalarAsIs To return all scalar data as scalar or not. Sometimes, methods reach
      * a scalar value, such as JSON::get(); in such cases, this argument determines that should the
      * returned data be scalar (i.e. as is) or not. If it sets to false, then all scalar data will
-     * be returned as the type of $type (e.g. an array).
+     * be returned as the type of $type (e.g. an array). This option does not have any effects if
+     * you set $type to JSON::TYPE_FAST.
      * @return self
      */
     public function setReturnType(int $type = self::TYPE_ARRAY, bool $scalarAsIs = true): self
@@ -544,11 +552,13 @@ class JSON implements \ArrayAccess
      */
     protected function getValueBasedOnReturnType($value)
     {
+        if ($this->returnType === self::TYPE_FAST) {
+            return $value;
+        }
         if (self::isScalar($value) && $this->returnScalarAsScalar) {
             return $value;
         }
 
-        $returnType = $this->returnType;
         if ($returnType === self::TYPE_DEFAULT) {
             $returnType = $this->defaultDataType;
         }
@@ -743,8 +753,8 @@ class JSON implements \ArrayAccess
         }
 
         try {
-            return $this->do(function ($element) {
-                return $this->getValueBasedOnReturnType($element);
+            return $this->do(function ($value) {
+                return $this->getValueBasedOnReturnType($value);
             }, $index);
         } catch (Exception $e) {
             return null;
@@ -866,9 +876,12 @@ class JSON implements \ArrayAccess
     {
         return $this->do(function &(array &$data) {
             foreach ($data as $key => &$value) {
+                // E.g. convert arrays to objects
+                $value = $this->getValueBasedOnReturnType($value);
+
                 yield $key => $value;
 
-                // Convert the value to an optimal one, e.g. convert objects to arrays
+                // E.g. convert objects to arrays
                 $value = $this->getOptimalValue($value);
             }
         }, $index, true);
