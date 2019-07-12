@@ -699,8 +699,6 @@ class JSON implements \ArrayAccess
     /**
      * Finds a specific element using $index and calls a function on it.
      *
-     * @param $index The index of the element to be found, and it's extracted as keys. Pass null if
-     * you want to get the data root.
      * @param ?callable $function It accepts the following argument(s):
      * 1. The element's value; might be gotten by-reference.
      * 2. The parent element (that is an array); might be gotten by-reference.
@@ -708,6 +706,8 @@ class JSON implements \ArrayAccess
      * From within the callable, you can yield as many values as you want, and/or return a value.
      * The return type of the method will be exactly the return type of this callable. Note that if
      * $index is null, the first argument will be the only passing argument.
+     * @param ?string $index The index of the element to be found, and it's extracted as keys. Pass
+     * null if you want to get the data root inside the callback.
      * @param bool $forceCountableValue Force the value be operated to be a countable one, so, the
      * element (i.e. first argument) passing to $function will be an array.
      * @param int $indexingType Can be one of the JSON::INDEXING_* constants.
