@@ -214,6 +214,20 @@ class PublicMethodTest extends TestCase
         })->get());
     }
 
+    public function testFlip()
+    {
+        $json = new JSON();
+        $this->assertEquals(1, $json->fill(0, 1000, 1)->flipValuesAndKeys()->count());
+    }
+
+    public function testReduce()
+    {
+        var_dump(self::$sampleJson->get("apps.others"));
+        $this->assertIsString(self::$sampleJson->reduce(function ($carry, $value) {
+            return $value;
+        }, "apps.others"));
+    }
+
     /** Provides index and values pairs. */
     public function indexValuePairsProvider()
     {
