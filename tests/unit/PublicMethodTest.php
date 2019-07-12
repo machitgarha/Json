@@ -202,6 +202,12 @@ class PublicMethodTest extends TestCase
         }, "apps.others"));
     }
 
+    public function testFill()
+    {
+        $json = new JSON();
+        $this->assertEquals(1000, $json->fill(0, 1000, 4)->count());
+    }
+
     /** Provides index and values pairs. */
     public function indexValuePairsProvider()
     {
