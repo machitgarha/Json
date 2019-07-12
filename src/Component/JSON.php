@@ -1418,7 +1418,7 @@ class JSON implements \ArrayAccess
      * @param int $startIndex
      * @param int $length
      * @param mixed $value
-     * @param string $index
+     * @param ?string $index
      * @return self
      */
     public function fill(int $startIndex, int $length, $value, string $index = null): self
@@ -1427,5 +1427,34 @@ class JSON implements \ArrayAccess
             $element = array_fill($startIndex, $length, $value);
         }, $index);
         return $this;
+    }
+
+    /**
+     * Returns the first key of a countable.
+     *
+     * @param ?string $index
+     * @return string|int
+     */
+    public function getFirstKey(string $index = null)
+    {
+        return $this->do(function (array $array) {
+            foreach ($array as $key => $value) {
+                return $key;
+            }
+        }, $index, true);
+    }
+
+    /**
+     * Returns the last key of a countable.
+     *
+     * @param ?string $index
+     * @return string|int
+     * @see https://stackoverflow.com/a/7478419/4215651 Thanks to this.
+     */
+    public function getLastKey(string $index = null)
+    {
+        return $this->do(function (array $array) {
+            return key(array_slice($array, -1, 1, true));
+        }, $index, true);
     }
 }
