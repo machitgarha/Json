@@ -48,33 +48,10 @@ class PublicMethodTest extends TestCase
     {
         $json = new JSON($data);
 
-        // JSON::getDataAs*() assertions
         $this->assertEquals($asJson, $json->getDataAsJsonString());
         $this->assertEquals($asArray, $json->getDataAsArray());
         $this->assertEquals($asObject, $json->getDataAsObject());
         $this->assertEquals($asFullObject, $json->getDataAsFullObject());
-    }
-
-    /** Provider for JSON::getData*() methods. */
-    public function expectedGetDataReturnValuesProvider()
-    {
-        // JSON data that we expect
-        return [
-            [
-                [[]],
-                "[[]]",
-                [[]],
-                [[]],
-                (object)[(object)[]]
-            ],
-            [
-                '{"instance":"JSON"}',
-                '{"instance":"JSON"}',
-                ["instance" => "JSON"],
-                (object)["instance" => "JSON"],
-                (object)["instance" => "JSON"]
-            ]
-        ];
     }
 
     /** @dataProvider indexValuePairsProvider */
@@ -244,4 +221,26 @@ class PublicMethodTest extends TestCase
             [$json, "apps.others", $array["apps"]["others"]]
         ];
     }
+
+    /** Provider for JSON::getData*() methods. */
+    public function expectedGetDataReturnValuesProvider()
+    {
+        // JSON data that we expect
+        return [
+            [
+                [[]],
+                "[[]]",
+                [[]],
+                [[]],
+                (object)[(object)[]]
+            ],
+            [
+                '{"instance":"JSON"}',
+                '{"instance":"JSON"}',
+                ["instance" => "JSON"],
+                (object)["instance" => "JSON"],
+                (object)["instance" => "JSON"]
+            ]
+        ];
+    }    
 }
