@@ -30,14 +30,14 @@ class PublicMethodTest extends TestCase
         }
 
         return [
-            $sampleJson,
+            clone $sampleJson,
             $sampleData,
         ];
     }
 
     public static function setUpBeforeClass()
     {
-        list(self::$sampleJson, self::$sampleData) = self::getSampleJsonAndData(); 
+        list(self::$sampleJson, self::$sampleData) = self::getSampleJsonAndData();
     }
 
     /**
@@ -131,16 +131,14 @@ class PublicMethodTest extends TestCase
         }
     }
 
-    /** Tests JSON::isCountable() and JSON::count() methods. */
-    public function testCountableElements()
+    /**
+     * Tests JSON::isCountable() and JSON::count() methods.
+     * @dataProvider arrayAndJsonProvider
+     */
+    public function testCountable(JSON $json, string $index, array $array)
     {
-        $json = clone self::$sampleJson;
-
-        $this->assertTrue($json->isCountable("apps.browsers"));
-        $this->assertEquals(
-            count(self::$sampleData["apps"]["browsers"]),
-            $json->count("apps.browsers")
-        );
+        $this->assertTrue($json->isCountable($index));
+        $this->assertEquals(count($array), $json->count($index));
     }
 
     public function testPushPopShiftUnshift()
@@ -222,9 +220,8 @@ class PublicMethodTest extends TestCase
 
     public function testReduce()
     {
-        var_dump(self::$sampleJson->get("apps.others"));
         $this->assertIsString(self::$sampleJson->reduce(function ($carry, $value) {
-            return $value;
+            return "$carry, $value";
         }, "apps.others"));
     }
 
