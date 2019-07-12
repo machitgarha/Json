@@ -22,15 +22,23 @@ class ScalarDataExceptionTest extends TestCase
     }
 
     /** @dataProvider callMethodsWithIndexesProvider */
-    public function testCallingValidMethodsWithIndexes(JSON $json, string $funcName, array $args)
+    public function testCallMethodsWithIndexes(JSON $json, string $funcName, array $args)
     {
         $json->$funcName(...$args);
     }
 
     /** @dataProvider methodsForCountableDataProvider */
-    public function testMethodsDependOnCountableData(JSON $json, string $funcName, array $args)
+    public function testMethodsDependOnCountableData(JSON $json, string $funcName, array $args = [])
     {
         $json->$funcName(...$args);
+    }
+
+    protected function prependJsonToEveryElement(JSON $json, array $array): array
+    {
+        foreach ($array as &$item) {
+            array_unshift($item, $json);
+        }
+        return $array;
     }
 
     public function callMethodsWithIndexesProvider()
@@ -39,20 +47,46 @@ class ScalarDataExceptionTest extends TestCase
         $sampleIndex = "appName";
         $sampleValue = "Terminal";
 
-        return [
-            [$json, "get", [$sampleIndex]],
-            [$json, "set", [$sampleValue, $sampleIndex]],
-            [$json, "unset", [$sampleIndex]],
-        ];
+        return $this->prependJsonToEveryElement($json, [
+            ["get", [$sampleIndex]],
+            ["set", [$sampleValue, $sampleIndex]],
+            ["unset", [$sampleIndex]],
+            ["isSet", [$sampleIndex]],
+            ["isCountable", [$sampleIndex]]
+        ]);
     }
 
     public function methodsForCountableDataProvider()
     {
         $json = clone new JSON(1400);
-        $sampleIndex = "year";
         $sampleValue = 1398;
 
-        return [
-        ];     
+        return $this->prependJsonToEveryElement($json, [
+            ["count"],
+            ["iterate"],
+            ["forEach", [function () {}]],
+            ["forEachRecursive", [function () {}]],
+            ["push", [$sampleValue]],
+            ["pop"],
+            ["shift"],
+            ["unshift", [$sampleValue]],
+            ["getValues"],
+            ["getKeys"],
+            ["getRandomValue"],
+            ["getRandomKey"],
+            ["getRandomElement"],
+            ["getRandomValues", [2]],
+            ["getRandomKeys", [2]],
+            ["getRandomSubset", [2]],
+            ["mergeWith", [[]]],
+            ["mergeRecursivelyWith", [[]]],
+            ["difference", [[]]],
+            ["filter"],
+            ["flipValuesAndKeys"],
+            ["reduce", [function () {}]],
+            ["shuffle"],
+            ["reverse"],
+            ["fill", [0, 1, $sampleValue]]
+        ]);
     }
 }

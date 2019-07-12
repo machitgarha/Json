@@ -634,7 +634,7 @@ class JSON implements \ArrayAccess
                     &$data,
                     &$lastKey,
                 ];
-            } 
+            }
             // If $keysCount is 0
             else {
                 $returnValue = [
@@ -646,6 +646,42 @@ class JSON implements \ArrayAccess
 
             return $returnValue;
         }
+    }
+
+    /**
+     * Extract index to an array of keys using a delimiter.
+     *
+     * @param ?string $index
+     * @param string $delimiter
+     * @return array
+     *
+     * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping
+     * them using a backslash.
+     */
+    protected function extractIndex(string $index = null, string $delimiter = "."): array
+    {
+        if ($index === null) {
+            return [];
+        }
+
+        if ($index === "") {
+            return [""];
+        }
+
+        $replacement = "¬";
+        $escapedDelimiter = "\\$delimiter";
+
+        // Replace the escaped delimiter with a less-using character
+        $index = str_replace($escapedDelimiter, $replacement, $index);
+
+        $keys = explode($delimiter, $index);
+
+        // Set the escaped delimiters
+        foreach ($keys as &$key) {
+            $key = str_replace($replacement, $delimiter, $key);
+        }
+
+        return $keys;
     }
 
     /**
@@ -687,42 +723,6 @@ class JSON implements \ArrayAccess
             $indexingType
         ));
         return $result;
-    }
-
-    /**
-     * Extract keys from an index into an array by a delimiter.
-     *
-     * @param ?string $index
-     * @param string $delimiter
-     * @return array
-     *
-     * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping
-     * them using a backslash.
-     */
-    protected function extractIndex(string $index = null, string $delimiter = "."): array
-    {
-        if ($index === null) {
-            return [];
-        }
-
-        if ($index === "") {
-            return [""];
-        }
-
-        $replacement = "¬";
-        $escapedDelimiter = "\\$delimiter";
-
-        // Replace the escaped delimiter with a less-using character
-        $index = str_replace($escapedDelimiter, $replacement, $index);
-
-        $keys = explode($delimiter, $index);
-
-        // Set the escaped delimiters
-        foreach ($keys as &$key) {
-            $key = str_replace($replacement, $delimiter, $key);
-        }
-
-        return $keys;
     }
 
     /**
@@ -910,7 +910,7 @@ class JSON implements \ArrayAccess
     public function forEachRecursive(callable $function, string $index = null): self
     {
         $this->do(function (array &$array) use ($function) {
-            $this->iterateRecursive($array, $function);
+            $this->walkRecursive($array, $function);
         }, $index, true);
         return $this;
     }
@@ -922,12 +922,12 @@ class JSON implements \ArrayAccess
      * @param callable $function {@see self::forEachRecursive()}
      * @return self
      */
-    protected function iterateRecursive(array &$array, callable $function): self
+    protected function walkRecursive(array &$array, callable $function): self
     {
         foreach ($array as $key => &$value) {
             if (is_array($value)) {
                 // Recursion
-                $this->iterateRecursive($value, $function);
+                $this->walkRecursive($value, $function);
             } else {
                 $function($value, $key);
             }
@@ -1289,7 +1289,7 @@ class JSON implements \ArrayAccess
                 unset($diff[$value]);
             }
           
-            return array_keys($diff);        
+            return array_keys($diff);
         };
 
         $diffKey = function (array $array) use ($dataAsArray) {

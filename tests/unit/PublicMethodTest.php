@@ -211,7 +211,7 @@ class PublicMethodTest extends TestCase
             ["error.type", "Exception"],
             ["", "An empty key (index)"]
         ];
-    }    
+    }
 
     public function arrayAndJsonProvider()
     {
@@ -242,5 +242,5 @@ class PublicMethodTest extends TestCase
                 (object)["instance" => "JSON"]
             ]
         ];
-    }    
+    }
 }
