@@ -1392,11 +1392,20 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index
      * @return self
+     * @see https://stackoverflow.com/a/32035692/4215651 Thanks to this.
      */
     public function shuffle(string $index = null): self
     {
-        $this->do(function (array &$data) {
-            shuffle($data);
+        $this->do(function (array &$array) {
+            $shuffledArray = [];
+            $arrayIndexLength = count($array) - 1;
+
+            while (count($shuffledArray) <= $arrayIndexLength) {
+                $randomKey = ($this->randomizationFunction)(0, $arrayIndexLength);
+                $shuffledArray[$randomKey] = $array[$randomKey];
+            }
+
+            $array = $shuffledArray;
         }, $index, true);
         return $this;
     }
