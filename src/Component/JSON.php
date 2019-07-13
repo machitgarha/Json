@@ -185,7 +185,7 @@ class JSON implements \ArrayAccess
          * 1. JSON::OPT_TREAT_AS_STRING is enabled.
          * 2. JSON::OPT_TREAT_AS_STRING is not enabled, and data is not a valid JSON string.
          */
-        if (is_scalar($data) || $data === null) {
+        if (self::isScalar($data)) {
             $this->isDataScalar = true;
             $this->setDataTo($treatAsString ? (string)($data) : $data);
             return;
@@ -710,6 +710,8 @@ class JSON implements \ArrayAccess
      * null if you want to get the data root inside the callback.
      * @param bool $forceCountableValue Force the value be operated to be a countable one, so, the
      * element (i.e. first argument) passing to $function will be an array.
+     * @param bool $extractIndex Whether to extract $index to keys or not. The extraction of $index
+     * is performed using dots.
      * @param int $indexingType Can be one of the JSON::INDEXING_* constants.
      * @return mixed The return value of $function, whether is a generator or not.F
      * @throws Exception When reaching a key that does not exist and $strictIndexing is true.
@@ -722,14 +724,15 @@ class JSON implements \ArrayAccess
         callable $function = null,
         string $index = null,
         bool $forceCountableValue = false,
-        int $indexingType = self::INDEXING_STRICT
+        int $indexingType = self::INDEXING_STRICT,
+        bool $extractIndex = true
     ) {
         if ($this->isDataScalar) {
             throw new ScalarDataException("Cannot use the function on scalar data");
         }
 
         $result = $function(...$this->findElementRecursive(
-            $this->extractIndex($index),
+            $extractIndex ? $this->extractIndex($index) : $index,
             $this->data,
             $forceCountableValue,
             $indexingType
@@ -811,9 +814,50 @@ class JSON implements \ArrayAccess
      * @param string $index
      * @return bool Whether the element is set or not. A null value will be considered as not set.
      */
-    public function isSet(string $index): bool
+    public function isSet(string $index = null): bool
     {
         return $this->get($index) !== null;
+    }
+
+    public function offsetGet($index)
+    {
+        return $this->get((string)($index));
+    }
+
+    public function offsetSet($index, $value)
+    {
+        $this->set($value, (string)($index));
+    }
+
+    public function offsetUnset($index)
+    {
+        $this->unset((string)($index));
+    }
+
+    public function offsetExists($index): bool
+    {
+        return $this->isSet((string)($index));
+    }
+
+    /**
+     * Getting element in object-like manner (e.g. $json->key).
+     *
+     * @param string|int $name
+     * @return JSON
+     */
+    public function __get($name): JSONChild
+    {
+        $classProperties = [];
+        foreach (get_object_vars($this) as $propName => $value) {
+            $classProperties[$propName] = $value;
+        }
+
+        return new JSONChild($this->data[$name], $classProperties, $this);
+    }
+
+    public function __set($name, $value)
+    {
+        $this->data[$name] = $value;
     }
 
     /**
@@ -948,26 +992,6 @@ class JSON implements \ArrayAccess
             }
         }
         return $this;
-    }
-
-    public function offsetGet($index)
-    {
-        return $this->get((string)($index));
-    }
-
-    public function offsetSet($index, $value)
-    {
-        $this->set($value, (string)($index));
-    }
-
-    public function offsetUnset($index)
-    {
-        $this->unset((string)($index));
-    }
-
-    public function offsetExists($index): bool
-    {
-        return $this->isSet((string)($index));
     }
 
     /**
