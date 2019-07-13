@@ -727,14 +727,15 @@ class JSON implements \ArrayAccess
         string $index = null,
         bool $forceCountableValue = false,
         int $indexingType = self::INDEXING_STRICT,
-        bool $extractIndex = true
+        bool $extractIndex = true,
+        bool $allowScalarData = false
     ) {
-        if ($this->isDataScalar) {
-            throw new UncountableValueException("Cannot call the function on scalar data");
+        if ($this->isDataScalar && $index !== null) {
+            throw new UncountableValueException("Indexing is invalid on scalar data");
         }
 
         $result = $function(...$this->findElementRecursive(
-            $extractIndex ? $this->extractIndex($index) : $index,
+            $extractIndex ? $this->extractIndex($index) : (array)($index),
             $this->data,
             $forceCountableValue,
             $indexingType
@@ -751,14 +752,6 @@ class JSON implements \ArrayAccess
      */
     public function get(string $index = null)
     {
-        if ($this->isDataScalar) {
-            if ($index === null) {
-                return $this->data;
-            } else {
-                throw new UncountableValueException("Indexing is invalid");
-            }
-        }
-
         try {
             return $this->do(function ($value) {
                 return $this->getValueBasedOnReturnType($value);
@@ -778,18 +771,13 @@ class JSON implements \ArrayAccess
      */
     public function set($value, string $index = null): self
     {
-        $value = $this->getOptimalValue($value);
+        $this->do(function (&$element, $isDataRoot) use ($value) {
+            $value = $this->getOptimalValue($value);
 
-        if ($this->isDataScalar) {
-            if ($index === null) {
+            if ($isDataRoot) {
                 $this->setDataTo($value);
-                return $this;
-            } else {
-                throw new UncountableValueException("Indexing is invalid");
+                return;
             }
-        }
-
-        $this->do(function (&$element) use ($value) {
             $element = $value;
         }, $index, false, self::INDEXING_FREE);
         return $this;
@@ -825,37 +813,34 @@ class JSON implements \ArrayAccess
         return $this;
     }
 
-    public function &offsetGet($index)
+    private function throwExceptionArrayAccessOnScalar()
     {
         if ($this->isDataScalar) {
-            throw new UncountableValueException("Indexing is invalid");
+            throw new UncountableValueException("Array access is not possible on scalar data");
         }
+    }
 
+    public function &offsetGet($index)
+    {
+        $this->throwExceptionArrayAccessOnScalar();
         return $this->data[$index];
     }
 
     public function offsetSet($index, $value)
     {
-        if ($this->isDataScalar) {
-            throw new UncountableValueException("Indexing is invalid");
-        }
-        $value = $this->getOptimalValue($value);
-        $this->data[$index] = $value;
+        $this->throwExceptionArrayAccessOnScalar();
+        $this->data[$index] = $this->getOptimalValue($value);
     }
 
     public function offsetExists($index): bool
     {
-        if ($this->isDataScalar) {
-            throw new UncountableValueException("Indexing is invalid");
-        }
+        $this->throwExceptionArrayAccessOnScalar();
         return isset($this->data[$index]);
     }
 
     public function offsetUnset($index)
     {
-        if ($this->isDataScalar) {
-            throw new UncountableValueException("Indexing is invalid");
-        }
+        $this->throwExceptionArrayAccessOnScalar();
         unset($this->data[$index]);
     }
 
