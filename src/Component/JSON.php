@@ -13,7 +13,6 @@ use MAChitgarha\Exception\JSON\Exception;
 use MAChitgarha\Exception\JSON\InvalidArgumentException;
 use MAChitgarha\Exception\JSON\InvalidJsonException;
 use MAChitgarha\Exception\JSON\UncountableValueException;
-use MAChitgarha\Exception\JSON\ScalarDataException;
 use MAChitgarha\Exception\JSON\JsonException;
 use MAChitgarha\Exception\JSON\OverflowException;
 
@@ -643,16 +642,18 @@ class JSON implements \ArrayAccess
     
                 $returnValue = [
                     &$data[$lastKey],
+                    false,
                     &$data,
-                    &$lastKey,
+                    $lastKey,
                 ];
             }
             // If $keysCount is 0
             else {
                 $returnValue = [
                     &$data,
+                    true,
                     null,
-                    null
+                    null,
                 ];
             }
 
@@ -701,8 +702,9 @@ class JSON implements \ArrayAccess
      *
      * @param ?callable $function It accepts the following argument(s):
      * 1. The element's value; might be gotten by-reference.
-     * 2. The parent element (that is an array); might be gotten by-reference.
-     * 3. The last key in the index; might be used to access the element (using the parent element).
+     * 2. Whether the the element is data root or not. 
+     * 3. The parent element (that is an array); might be gotten by-reference.
+     * 4. The last key in the index; might be used to access the element (using the parent element).
      * From within the callable, you can yield as many values as you want, and/or return a value.
      * The return type of the method will be exactly the return type of this callable. Note that if
      * $index is null, the first argument will be the only passing argument.
@@ -718,7 +720,7 @@ class JSON implements \ArrayAccess
      * @throws UncountableValueException If reaching a key that contains an uncountable value.
      * @throws UncountableValueException When reaching an uncountable element and
      * $forceCountableValue is set to true.
-     * @throws ScalarDataException If data is scalar and $forceCountableValue is set to true.
+     * @throws UncountableValueException If data is scalar and $forceCountableValue is set to true.
      */
     public function &do(
         callable $function = null,
@@ -728,7 +730,7 @@ class JSON implements \ArrayAccess
         bool $extractIndex = true
     ) {
         if ($this->isDataScalar) {
-            throw new ScalarDataException("Cannot use the function on scalar data");
+            throw new UncountableValueException("Cannot call the function on scalar data");
         }
 
         $result = $function(...$this->findElementRecursive(
@@ -745,7 +747,7 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index Pass null if data is scalar.
      * @return mixed The value of the specified element. Returns null if the index cannot be found.
-     * @throws ScalarDataException If data is scalar and $index is not null.
+     * @throws UncountableValueException If data is scalar and $index is not null.
      */
     public function get(string $index = null)
     {
@@ -753,7 +755,7 @@ class JSON implements \ArrayAccess
             if ($index === null) {
                 return $this->data;
             } else {
-                throw new ScalarDataException("Indexing is invalid");
+                throw new UncountableValueException("Indexing is invalid");
             }
         }
 
@@ -772,7 +774,7 @@ class JSON implements \ArrayAccess
      * @param mixed $value
      * @param ?string $index Pass null if data is scalar.
      * @return self
-     * @throws ScalarDataException If data is scalar and $index is not null.
+     * @throws UncountableValueException If data is scalar and $index is not null.
      */
     public function set($value, string $index = null): self
     {
@@ -783,7 +785,7 @@ class JSON implements \ArrayAccess
                 $this->setDataTo($value);
                 return $this;
             } else {
-                throw new ScalarDataException("Indexing is invalid");
+                throw new UncountableValueException("Indexing is invalid");
             }
         }
 
@@ -810,11 +812,15 @@ class JSON implements \ArrayAccess
      * @param string $index
      * @return self
      */
-    public function unset(string $index): self
+    public function unset(string $index = null): self
     {
-        $this->do(function ($element, &$data, $key) {
-            // Un-setting the element directly is impossible
-            unset($data[$key]);
+        $this->do(function ($element, $isDataRoot, &$data, $key) {
+            if ($isDataRoot) {
+                $this->setDataTo(null);
+            } else {
+                // Un-setting the element directly is impossible
+                unset($data[$key]);
+            }
         }, $index);
         return $this;
     }
@@ -822,7 +828,7 @@ class JSON implements \ArrayAccess
     public function &offsetGet($index)
     {
         if ($this->isDataScalar) {
-            throw new ScalarDataException("Indexing is invalid");
+            throw new UncountableValueException("Indexing is invalid");
         }
 
         return $this->data[$index];
@@ -831,7 +837,7 @@ class JSON implements \ArrayAccess
     public function offsetSet($index, $value)
     {
         if ($this->isDataScalar) {
-            throw new ScalarDataException("Indexing is invalid");
+            throw new UncountableValueException("Indexing is invalid");
         }
         $value = $this->getOptimalValue($value);
         $this->data[$index] = $value;
@@ -840,7 +846,7 @@ class JSON implements \ArrayAccess
     public function offsetExists($index): bool
     {
         if ($this->isDataScalar) {
-            throw new ScalarDataException("Indexing is invalid");
+            throw new UncountableValueException("Indexing is invalid");
         }
         return isset($this->data[$index]);
     }
@@ -848,7 +854,7 @@ class JSON implements \ArrayAccess
     public function offsetUnset($index)
     {
         if ($this->isDataScalar) {
-            throw new ScalarDataException("Indexing is invalid");
+            throw new UncountableValueException("Indexing is invalid");
         }
         unset($this->data[$index]);
     }
@@ -879,7 +885,7 @@ class JSON implements \ArrayAccess
             if ($index === null) {
                 return false;
             } else {
-                throw new ScalarDataException("Indexing is invalid");
+                throw new UncountableValueException("Indexing is invalid");
             }
         }
 
