@@ -794,6 +794,17 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Determines if an element exists or not.
+     *
+     * @param string $index
+     * @return bool Whether the element is set or not. A null value will be considered as not set.
+     */
+    public function isSet(string $index = null): bool
+    {
+        return $this->get($index) !== null;
+    }
+
+    /**
      * Unsets an element.
      *
      * @param string $index
@@ -808,35 +819,38 @@ class JSON implements \ArrayAccess
         return $this;
     }
 
-    /**
-     * Determines if an element exists or not.
-     *
-     * @param string $index
-     * @return bool Whether the element is set or not. A null value will be considered as not set.
-     */
-    public function isSet(string $index = null): bool
+    public function &offsetGet($index)
     {
-        return $this->get($index) !== null;
-    }
+        if ($this->isDataScalar) {
+            throw new ScalarDataException("Indexing is invalid");
+        }
 
-    public function offsetGet($index)
-    {
-        return $this->get((string)($index));
+        return $this->data[$index];
     }
 
     public function offsetSet($index, $value)
     {
-        $this->set($value, (string)($index));
-    }
-
-    public function offsetUnset($index)
-    {
-        $this->unset((string)($index));
+        if ($this->isDataScalar) {
+            throw new ScalarDataException("Indexing is invalid");
+        }
+        $value = $this->getOptimalValue($value);
+        $this->data[$index] = $value;
     }
 
     public function offsetExists($index): bool
     {
-        return $this->isSet((string)($index));
+        if ($this->isDataScalar) {
+            throw new ScalarDataException("Indexing is invalid");
+        }
+        return isset($this->data[$index]);
+    }
+
+    public function offsetUnset($index)
+    {
+        if ($this->isDataScalar) {
+            throw new ScalarDataException("Indexing is invalid");
+        }
+        unset($this->data[$index]);
     }
 
     /**
