@@ -16,35 +16,16 @@ namespace MAChitgarha\Component;
  */
 class JSONChild extends JSON
 {
-    /** @var JSON  */
-    protected $rootData;
-
     /**
-     * @param array|int|string|float|bool|null $data An element of the parent data by-reference.
-     * For sure, it is an array or a scalar.
+     * @param array $data A countable element of the parent data, by-reference.
      * @param array $classProperties Properties from the caller class to be set inside this class.
      */
-    public function __construct(&$dataPointer, array $properties, JSON $rootData)
+    public function __construct(&$dataPointer, array $properties)
     {
         foreach ($properties as $propName => $value) {
             $this->$propName = $value;
         }
 
         $this->data = &$dataPointer;
-        $this->rootData = $rootData;
-
-        if (self::isScalar($dataPointer)) {
-            $this->isDataScalar = true;
-        }
-    }
-
-    /**
-     * Switch to data root (i.e. resets the pointer to data root).
-     *
-     * @return JSON
-     */
-    public function root(): JSON
-    {
-        return $this->rootData;
     }
 }

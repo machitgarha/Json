@@ -840,27 +840,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Getting element in object-like manner (e.g. $json->key).
-     *
-     * @param string|int $name
-     * @return JSON
-     */
-    public function __get($name): JSONChild
-    {
-        $classProperties = [];
-        foreach (get_object_vars($this) as $propName => $value) {
-            $classProperties[$propName] = $value;
-        }
-
-        return new JSONChild($this->data[$name], $classProperties, $this);
-    }
-
-    public function __set($name, $value)
-    {
-        $this->data[$name] = $value;
-    }
-
-    /**
      * Replaces data with a new one.
      *
      * @param mixed $newData
@@ -1473,7 +1452,7 @@ class JSON implements \ArrayAccess
     {
         $this->do(function (&$element) use ($startIndex, $length, $value) {
             $element = array_fill($startIndex, $length, $value);
-        }, $index);
+        }, $index, false, self::INDEXING_FREE);
         return $this;
     }
 
