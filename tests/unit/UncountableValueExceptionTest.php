@@ -30,7 +30,7 @@ class UncountableValueExceptionTest extends TestCase
     }
 
     /** @dataProvider methodsWithUncountableIndexProvider */
-    public function testCallMethodsOnUncountableIndex(JSON $json, string $funcName, ...$args)
+    public function testCallMethodsOnUncountableIndex(JSON $json, string $funcName, array $args)
     {
         $json->$funcName(...$args);
     }
@@ -58,7 +58,7 @@ class UncountableValueExceptionTest extends TestCase
             ["set", [$sampleValue, $sampleIndex]],
             ["unset", [$sampleIndex]],
             ["isSet", [$sampleIndex]],
-            ["isCountable", [$sampleIndex]]
+            // ["isCountable", [$sampleIndex]]
         ]);
     }
 
@@ -92,7 +92,6 @@ class UncountableValueExceptionTest extends TestCase
             ["reduce", [function () {}]],
             ["shuffle"],
             ["reverse"],
-            ["fill", [0, 1, $sampleValue]]
         ]);
     }
 
@@ -101,9 +100,9 @@ class UncountableValueExceptionTest extends TestCase
         $json = new JSON(file_get_contents(__DIR__ . "/../json/apps.json"));
 
         return $this->prependJsonToEveryElement($json, [
-            ["count", "apps.others.0"],
-            ["pop", "apps.ides.Microsoft.1"],
-            ["shift", "apps.others.2.0"],
+            ["count", ["apps.others.0"]],
+            ["pop", ["apps.ides.Microsoft.1"]],
+            ["shift", ["apps.others.2.0"]],
         ]);
     }
 }

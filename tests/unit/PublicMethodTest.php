@@ -78,8 +78,9 @@ class PublicMethodTest extends TestCase
         $json = new JSON();
 
         $json->set($value, $index);
-
         $this->assertTrue($json->isSet($index));
+
+        $json[$index] = $value;
         $this->assertTrue(isset($json[$index]));
     }
 
@@ -168,9 +169,9 @@ class PublicMethodTest extends TestCase
     }
 
     /** @dataProvider arrayAndJsonProvider */
-    public function testDifference(JSON $json, string $index, array $array)
+    public function testDifference(JSON $json, string $index)
     {
-        $diff = $json[$index];
+        $diff = $json->get($index);
 
         $this->assertEmpty($json->difference($diff, false, $index)->get($index));
         $this->assertEmpty($json->difference($diff, true, $index)->get($index));
@@ -208,7 +209,11 @@ class PublicMethodTest extends TestCase
         $this->assertEquals(1000, $json->fill(0, 1000, 4)->count());
     }
 
-    /** Provides index and values pairs. */
+    // Providers
+
+    /** 
+     * 1. index
+     */
     public function indexValuePairsProvider()
     {
         return [

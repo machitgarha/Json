@@ -588,7 +588,7 @@ class JSON implements \ArrayAccess
      */
     protected function &findElementRecursive(
         array $keys,
-        array &$data,
+        &$data,
         bool $forceCountableValue = false,
         int $indexingType = self::INDEXING_STRICT
     ): array {
@@ -598,7 +598,7 @@ class JSON implements \ArrayAccess
             // Get the current key, and remove it from keys array
             $curKey = array_shift($keys);
 
-            if (array_key_exists($curKey, $data)) {
+            if (isset($data[$curKey])) {
                 if (!is_array($data[$curKey])) {
                     if ($indexingType >= self::INDEXING_SAFE) {
                         throw new UncountableValueException("The key '$curKey' contains uncountable value");
@@ -628,8 +628,8 @@ class JSON implements \ArrayAccess
             if ($keysCount === 1) {
                 $lastKey = $keys[0];
 
-                if (array_key_exists($lastKey, $data)) {
-                    if (!is_array($data[$lastKey]) && $forceCountableValue) {
+                if (isset($data[$lastKey])) {
+                    if ($forceCountableValue && !is_array($data[$lastKey])) {
                         throw new UncountableValueException("Expected countable, reached uncountable");
                     }
                 } else {
@@ -647,8 +647,12 @@ class JSON implements \ArrayAccess
                     $lastKey,
                 ];
             }
-            // If $keysCount is 0
+            // If $keysCount is 0, accessing data root
             else {
+                if ($forceCountableValue && $this->isDataScalar) {
+                    throw new UncountableValueException("Expected countable, reached uncountable");
+                }
+
                 $returnValue = [
                     &$data,
                     true,
@@ -727,8 +731,7 @@ class JSON implements \ArrayAccess
         string $index = null,
         bool $forceCountableValue = false,
         int $indexingType = self::INDEXING_STRICT,
-        bool $extractIndex = true,
-        bool $allowScalarData = false
+        bool $extractIndex = true
     ) {
         if ($this->isDataScalar && $index !== null) {
             throw new UncountableValueException("Indexing is invalid on scalar data");
@@ -748,7 +751,6 @@ class JSON implements \ArrayAccess
      *
      * @param ?string $index Pass null if data is scalar.
      * @return mixed The value of the specified element. Returns null if the index cannot be found.
-     * @throws UncountableValueException If data is scalar and $index is not null.
      */
     public function get(string $index = null)
     {
@@ -756,6 +758,8 @@ class JSON implements \ArrayAccess
             return $this->do(function ($value) {
                 return $this->getValueBasedOnReturnType($value);
             }, $index);
+        } catch (UncountableValueException $e) {
+            throw $e;
         } catch (Exception $e) {
             return null;
         }
@@ -767,7 +771,6 @@ class JSON implements \ArrayAccess
      * @param mixed $value
      * @param ?string $index Pass null if data is scalar.
      * @return self
-     * @throws UncountableValueException If data is scalar and $index is not null.
      */
     public function set($value, string $index = null): self
     {
@@ -866,14 +869,6 @@ class JSON implements \ArrayAccess
      */
     public function isCountable(string $index = null): bool
     {
-        if ($this->isDataScalar) {
-            if ($index === null) {
-                return false;
-            } else {
-                throw new UncountableValueException("Indexing is invalid");
-            }
-        }
-
         try {
             return $this->do(function () {
                 return true;
