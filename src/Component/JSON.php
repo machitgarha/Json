@@ -706,7 +706,7 @@ class JSON implements \ArrayAccess
      *
      * @param ?callable $function It accepts the following argument(s):
      * 1. The element's value; might be gotten by-reference.
-     * 2. Whether the the element is data root or not. 
+     * 2. Whether the the element is data root or not.
      * 3. The parent element (that is an array); might be gotten by-reference.
      * 4. The last key in the index; might be used to access the element (using the parent element).
      * From within the callable, you can yield as many values as you want, and/or return a value.

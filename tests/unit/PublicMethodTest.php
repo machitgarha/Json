@@ -211,9 +211,6 @@ class PublicMethodTest extends TestCase
 
     // Providers
 
-    /** 
-     * 1. index
-     */
     public function indexValuePairsProvider()
     {
         return [

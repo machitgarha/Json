@@ -70,8 +70,10 @@ class UncountableValueExceptionTest extends TestCase
         return $this->prependJsonToEveryElement($json, [
             ["count"],
             ["iterate"],
-            ["forEach", [function () {}]],
-            ["forEachRecursive", [function () {}]],
+            ["forEach", [function () {
+            }]],
+            ["forEachRecursive", [function () {
+            }]],
             ["push", [$sampleValue]],
             ["pop"],
             ["shift"],
@@ -89,7 +91,8 @@ class UncountableValueExceptionTest extends TestCase
             ["difference", [[]]],
             ["filter"],
             ["flipValuesAndKeys"],
-            ["reduce", [function () {}]],
+            ["reduce", [function () {
+            }]],
             ["shuffle"],
             ["reverse"],
         ]);
