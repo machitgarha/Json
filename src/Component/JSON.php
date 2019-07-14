@@ -725,6 +725,7 @@ class JSON implements \ArrayAccess
      * @throws UncountableValueException When reaching an uncountable element and
      * $forceCountableValue is set to true.
      * @throws UncountableValueException If data is scalar and $forceCountableValue is set to true.
+     * @todo Remove the at sign operator.
      */
     public function &do(
         callable $function = null,
@@ -737,13 +738,33 @@ class JSON implements \ArrayAccess
             throw new UncountableValueException("Indexing is invalid on scalar data");
         }
 
-        $result = $function(...$this->findElementRecursive(
+        // On debugging, pay attention to @ operator!
+        @$returnValueReference = &$function(...$this->findElementRecursive(
             $extractIndex ? $this->extractIndex($index) : (array)($index),
             $this->data,
             $forceCountableValue,
             $indexingType
         ));
-        return $result;
+        return $returnValueReference;
+    }
+
+    /**
+     * Gets an element inside data.
+     *
+     * @param string $index
+     * @param integer $indexingType Can be one of the JSON::INDEXING_* constants.
+     * @return JSONChild
+     */
+    public function index(string $index, int $indexingType = self::INDEXING_STRICT): JSONChild
+    {
+        $classProps = [];
+        foreach (get_object_vars($this) as $propName => $value) {
+            $classProps[$propName] = $value;
+        }
+
+        return new JSONChild($this->do(function &(&$element) {
+            return $element;
+        }, $index, false, $indexingType), $classProps);
     }
 
     /**
