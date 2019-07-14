@@ -630,7 +630,7 @@ class JSON implements \ArrayAccess
 
                 if (isset($data[$lastKey])) {
                     if ($forceCountableValue && !is_array($data[$lastKey])) {
-                        throw new UncountableValueException("Expected countable, reached uncountable");
+                        throw new UncountableValueException("Cannot use the method on uncountable");
                     }
                 } else {
                     if ($indexingType === self::INDEXING_STRICT) {
@@ -647,10 +647,10 @@ class JSON implements \ArrayAccess
                     $lastKey,
                 ];
             }
-            // If $keysCount is 0, accessing data root
+            // If $keysCount is 0
             else {
                 if ($forceCountableValue && $this->isDataScalar) {
-                    throw new UncountableValueException("Expected countable, reached uncountable");
+                    throw new UncountableValueException("Cannot use the method on uncountable");
                 }
 
                 $returnValue = [
@@ -735,7 +735,7 @@ class JSON implements \ArrayAccess
         bool $extractIndex = true
     ) {
         if ($this->isDataScalar && $index !== null) {
-            throw new UncountableValueException("Indexing is invalid on scalar data");
+            throw new UncountableValueException("Cannot use indexing on uncountable");
         }
 
         // On debugging, pay attention to @ operator!
