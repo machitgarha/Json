@@ -1005,8 +1005,8 @@ class JSON implements \ArrayAccess
     {
         $value = $this->getOptimalValue($value);
 
-        $this->do(function (&$element) use ($value) {
-            array_push($element, $value);
+        $this->do(function (array &$array) use ($value) {
+            array_push($array, $value);
         }, $index, true);
         return $this;
     }
@@ -1019,8 +1019,8 @@ class JSON implements \ArrayAccess
      */
     public function pop(string $index = null)
     {
-        return $this->do(function (&$element) {
-            return array_pop($element);
+        return $this->do(function (array &$array) {
+            return array_pop($array);
         }, $index, true);
     }
 
@@ -1032,7 +1032,7 @@ class JSON implements \ArrayAccess
      */
     public function shift(string $index = null)
     {
-        return $this->do(function ($array) {
+        return $this->do(function (array $array) {
             return array_shift($array);
         }, $index, true);
     }
@@ -1045,8 +1045,8 @@ class JSON implements \ArrayAccess
      */
     public function unshift($value, string $index = null): self
     {
-        $this->do(function (array &$data) use ($value) {
-            array_unshift($data, $value);
+        $this->do(function (array &$array) use ($value) {
+            array_unshift($array, $value);
         }, $index, true);
         return $this;
     }
@@ -1075,8 +1075,8 @@ class JSON implements \ArrayAccess
      */
     public function getValues(string $index = null): array
     {
-        return $this->do(function (array $data) {
-            return array_values($data);
+        return $this->do(function (array $array) {
+            return array_values($array);
         }, $index, true);
     }
 
@@ -1088,8 +1088,8 @@ class JSON implements \ArrayAccess
      */
     public function getKeys(string $index = null): array
     {
-        return $this->do(function (array $data) {
-            return array_keys($data);
+        return $this->do(function (array $array) {
+            return array_keys($array);
         }, $index, true);
     }
 
@@ -1272,7 +1272,7 @@ class JSON implements \ArrayAccess
         // Extracting options
         $reverseOrder = $options & self::MERGE_PREFER_DEFAULT_DATA;
 
-        $this->do(function (&$array) use ($newDataAsArray, $reverseOrder) {
+        $this->do(function (array &$array) use ($newDataAsArray, $reverseOrder) {
             if ($reverseOrder) {
                 $array = array_merge($newDataAsArray, $array);
             } else {
@@ -1295,7 +1295,7 @@ class JSON implements \ArrayAccess
     {
         $newDataAsArray = (array)($this->getOptimalValue($newData));
 
-        $this->do(function (&$array) use ($newDataAsArray) {
+        $this->do(function (array &$array) use ($newDataAsArray) {
             $array = array_merge_recursive($array, $newDataAsArray);
         }, $index, true);
         return $this;
@@ -1371,9 +1371,9 @@ class JSON implements \ArrayAccess
             };
         }
 
-        $this->do(function (array &$data) use ($function) {
+        $this->do(function (array &$array) use ($function) {
             $filteredArray = [];
-            foreach ($data as $key => $value) {
+            foreach ($array as $key => $value) {
                 if ($function($value, $key)) { // @phan-suppress-current-line PhanParamTooMany
                     $filteredArray[$key] = $value;
                 }
@@ -1391,8 +1391,8 @@ class JSON implements \ArrayAccess
      */
     public function flipValuesAndKeys(string $index = null): self
     {
-        $this->do(function (array &$data) {
-            $data = @array_flip($data);
+        $this->do(function (array &$array) {
+            $array = array_flip($array);
         }, $index, true);
         return $this;
     }
@@ -1406,8 +1406,8 @@ class JSON implements \ArrayAccess
      */
     public function reduce(callable $function, string $index = null)
     {
-        return $this->do(function (array $data) use ($function) {
-            return array_reduce($data, $function);
+        return $this->do(function (array $array) use ($function) {
+            return array_reduce($array, $function);
         }, $index, true);
     }
 
@@ -1454,8 +1454,8 @@ class JSON implements \ArrayAccess
      */
     public function reverse(string $index = null): self
     {
-        $this->do(function (array &$data) {
-            $data = array_reverse($data);
+        $this->do(function (array &$array) {
+            $array = array_reverse($array);
         }, $index, true);
         return $this;
     }
