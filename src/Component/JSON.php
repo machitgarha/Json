@@ -142,10 +142,7 @@ class JSON implements \ArrayAccess
      */
     public function __construct($data = [], int $options = 0)
     {
-        $this->options = $options;
-
-        // Set global options
-        $this->jsonDecodeAlways = (bool)($options & self::OPT_JSON_DECODE_ALWAYS);
+        $this->setOptions($options);
 
         $treatAsJsonString = (bool)($options & self::OPT_TREAT_AS_JSON_STRING);
         $treatAsString = (bool)($options & self::OPT_TREAT_AS_STRING);
@@ -223,6 +220,21 @@ class JSON implements \ArrayAccess
 
         $this->isDataScalar = $isScalar;
         $this->data = $value;
+        return $this;
+    }
+
+    /**
+     * Sets options used by methods.
+     *
+     * @param int $options Can be one of the JSON::OPT_* constants.
+     * @return self
+     */
+    public function setOptions(int $options = 0): self
+    {
+        $this->options = $options;
+
+        $this->jsonDecodeAlways = (bool)($options & self::OPT_JSON_DECODE_ALWAYS);
+
         return $this;
     }
 
