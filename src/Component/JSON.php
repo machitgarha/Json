@@ -229,6 +229,28 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Sets the randomization function, used when a random integer is needed.
+     *
+     * @param callable $function It accepts two arguments:
+     * 1. The minimum value to be returned,
+     * 2. The maximum value to be returned;
+     * It must return an integer. You can also use built-in functions like mt_rand().
+     * @return self
+     */
+    public function setRandomizationFunction(callable $function): self
+    {
+        // For sure, the function is callable, because it is defined as callable
+        $this->randomizationFunction = $function;
+
+        $randomValue = $function(0, 1);
+        if ($randomValue !== 0 && $randomValue !== 1) {
+            throw new InvalidArgumentException("Return value of \$function is invalid");
+        }
+
+        return $this;
+    }
+
+    /**
      * Sets the return type that is used by other returning-value methods.
      *
      * @param int $type The type of returning values. For example, consider that you passed data as
@@ -308,6 +330,19 @@ class JSON implements \ArrayAccess
             }
         }
         return $value;
+    }
+
+    /**
+     * Returns a random value by calling {@see self::$randomizationFunction}.
+     *
+     * @param int $min
+     * @param int $max
+     * @return int
+     * @see self::setRandomizationFunction()
+     */
+    protected function randomInt(int $min, int $max): int
+    {
+        return ($this->randomizationFunction)($min, $max);
     }
 
     /**
@@ -758,14 +793,9 @@ class JSON implements \ArrayAccess
      */
     public function index(string $index, int $indexingType = self::INDEXING_FREE): JSONChild
     {
-        $classProps = [];
-        foreach (get_object_vars($this) as $propName => $value) {
-            $classProps[$propName] = $value;
-        }
-
         return new JSONChild($this->do(function &(&$element) {
             return $element;
-        }, $index, false, $indexingType), $classProps);
+        }, $index, false, $indexingType), get_object_vars($this));
     }
 
     /**
@@ -926,14 +956,31 @@ class JSON implements \ArrayAccess
      */
     public function &iterate(string $index = null): \Generator
     {
-        return $this->do(function &(array &$data) {
-            foreach ($data as $key => &$value) {
+        return $this->do(function &(array &$array) {
+            foreach ($array as $key => &$value) {
                 // E.g. convert arrays to objects
                 $value = $this->getValueBasedOnReturnType($value);
 
                 yield $key => $value;
 
                 $value = $this->toJsonIfNeeded($value);
+            }
+        }, $index, true);
+    }
+
+    /**
+     * Iterates over a countable, but returns its value as a new JSON class.
+     *
+     * @param string $index
+     * @return \Generator
+     */
+    public function iterateAsJson(string $index = null): \Generator
+    {
+        $objectVars = get_object_vars($this);
+
+        return $this->do(function (array &$array) use ($objectVars) {
+            foreach ($array as $key => &$value) {
+                yield $key => new JSONChild($value, $objectVars);
             }
         }, $index, true);
     }
@@ -1078,41 +1125,6 @@ class JSON implements \ArrayAccess
         return $this->do(function (array $array) {
             return array_keys($array);
         }, $index, true);
-    }
-
-    /**
-     * Sets the randomization function, used when a random integer is needed.
-     *
-     * @param callable $function It accepts two arguments:
-     * 1. The minimum value to be returned,
-     * 2. The maximum value to be returned;
-     * It must return an integer. You can also use built-in functions like mt_rand().
-     * @return self
-     */
-    public function setRandomizationFunction(callable $function): self
-    {
-        // For sure, the function is callable, because it is defined as callable
-        $this->randomizationFunction = $function;
-
-        $randomValue = $function(0, 1);
-        if ($randomValue !== 0 && $randomValue !== 1) {
-            throw new InvalidArgumentException("Return value of \$function is invalid");
-        }
-
-        return $this;
-    }
-
-    /**
-     * Returns a random value by calling {@see self::$randomizationFunction}.
-     *
-     * @param int $min
-     * @param int $max
-     * @return int
-     * @see self::setRandomizationFunction()
-     */
-    protected function randomInt(int $min, int $max): int
-    {
-        return ($this->randomizationFunction)($min, $max);
     }
 
     /**
