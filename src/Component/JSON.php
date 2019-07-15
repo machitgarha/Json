@@ -949,6 +949,17 @@ class JSON implements \ArrayAccess
     }
 
     /**
+     * Converts the data to an array, if it is scalar.
+     *
+     * @return self
+     */
+    public function toCountable(): self
+    {
+        $this->data = (array)($this->data);
+        return $this;
+    }
+
+    /**
      * Iterates over a countable.
      *
      * @param ?string $index
@@ -1428,17 +1439,6 @@ class JSON implements \ArrayAccess
 
             $array = $shuffledArray;
         }, $index, true);
-        return $this;
-    }
-
-    /**
-     * Converts the data to an array, if it is scalar.
-     *
-     * @return self
-     */
-    public function toCountable(): self
-    {
-        $this->data = (array)($this->data);
         return $this;
     }
 
