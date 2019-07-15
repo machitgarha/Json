@@ -528,7 +528,7 @@ class JSON implements \ArrayAccess
      */
     protected function getValueBasedOnReturnType($value)
     {
-        if (self::isScalar($value) && $this->returnScalarAsScalar) {
+        if ($this->returnScalarAsScalar && self::isScalar($value)) {
             return $value;
         }
 
@@ -753,7 +753,7 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Gets an element's value.
+     * Returns an element's value.
      *
      * @param ?string $index Pass null if data is scalar.
      * @return mixed The value of the specified element. Returns null if the index cannot be found.
@@ -771,6 +771,12 @@ class JSON implements \ArrayAccess
         }
     }
 
+    /**
+     * Returns an element by-reference.
+     *
+     * @param string $index
+     * @return mixed
+     */
     public function &getByReference(string $index = null)
     {
         return $this->do(function &(&$element) {
@@ -911,7 +917,6 @@ class JSON implements \ArrayAccess
 
                 yield $key => $value;
 
-                // E.g. convert objects to arrays
                 $value = $this->toJsonIfNeeded($value);
             }
         }, $index, true);
