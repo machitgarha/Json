@@ -44,7 +44,7 @@ class JSON implements \ArrayAccess
     /** @var int {@see self::setReturnType()}. */
     protected $returnType = self::TYPE_ARRAY;
 
-   // Options and customizations
+    ### Options and customizations
 
     /** @var int Options passed to the constructor. */
     protected $options = 0;
@@ -61,19 +61,19 @@ class JSON implements \ArrayAccess
     /** @var callable {@see self::setRandomizationFunction()}. */
     protected $randomizationFunction = "mt_rand";
 
-    // Data types
+    ### Data types
     /** @var int Type of data passed to the constructor. */
     const TYPE_DEFAULT = 0;
     /** @var int JSON string data type. */
     const TYPE_JSON_STRING = 1;
-    /** @var int Array data type (recursive). */
+    /** @var int Array data type (recursive). This is probably the most efficient way. */
     const TYPE_ARRAY = 3;
     /** @var int Object data type (recursive), without converting indexed arrays to objects. */
     const TYPE_OBJECT = 2;
     /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
     const TYPE_FULL_OBJECT = 4;
 
-    // Indexing types
+    ### Indexing types
     /**
      * @var int If a key cannot be found, create it. If a key contains an uncountable value,
      * override it (i.e. remove its value and convert it to a countable value), This indexing type
@@ -91,7 +91,7 @@ class JSON implements \ArrayAccess
      */
     const INDEXING_STRICT = 2;
 
-    // Merge options
+    ### Merge options
     /**
      * @var int If it is set, when reaching duplicate keys, the new data keys will be replaced
      * instead of the countable in the (default) data. The default behaviour is to use the new data
@@ -99,7 +99,7 @@ class JSON implements \ArrayAccess
      */
     const MERGE_PREFER_DEFAULT_DATA = 1;
 
-    // Options
+    ### Options
     /**
      * @var int Check every string value to be a valid JSON string, and if it is, decode it and use
      * the decoded value instead of the string itself. However, if a string does not contain a valid
@@ -195,6 +195,102 @@ class JSON implements \ArrayAccess
         return new self($data, $options);
     }
 
+    ### Changing options and customizing
+
+    /**
+     * Sets options used by methods.
+     *
+     * @param int $options Can be one of the JSON::OPT_* constants.
+     * @return self
+     */
+    public function setOptions(int $options = 0): self
+    {
+        $this->options = $options;
+
+        $this->jsonDecodeAlways = (bool)($options & self::OPT_JSON_DECODE_ALWAYS);
+
+        return $this;
+    }
+
+    /**
+     * Sets recursion depth when using json_*() functions.
+     *
+     * @param int $depth
+     * @return self
+     */
+    public function setJsonRecursionDepth(int $depth): self
+    {
+        if ($depth < 1) {
+            throw new InvalidArgumentException("Depth must be positive");
+        }
+
+        $this->jsonRecursionDepth = $depth;
+        return $this;
+    }
+
+    /**
+     * Sets the return type that is used by other returning-value methods.
+     *
+     * @param int $type The type of returning values. For example, consider that you passed data as
+     * an array and you pass this argument as JSON::TYPE_OBJECT; in this case, when you use
+     * JSON::get() (with no arguments, to get the data itself), then the data will be returned as
+     * an object.
+     * @param bool $scalarAsIs To return all scalar data as scalar or not. Sometimes, methods
+     * returning a value, reach a scalar value, such as JSON::get(). In these cases, this argument
+     * determines that should the returned value be scalar or not. If it sets to false, then all
+     * scalar data will be returned as the type of $type (e.g. an array).
+     * @return self
+     */
+    public function setReturnType(int $type = self::TYPE_ARRAY, bool $scalarAsIs = true): self
+    {
+        switch ($type) {
+            case self::TYPE_DEFAULT:
+            case self::TYPE_JSON_STRING:
+            case self::TYPE_ARRAY:
+            case self::TYPE_OBJECT:
+            case self::TYPE_FULL_OBJECT:
+                $this->returnType = $type;
+                $this->returnScalarAsScalar = $scalarAsIs;
+                return $this;
+                break;
+
+            default:
+                throw new InvalidArgumentException("Unknown return type");
+        }
+    }
+
+    /**
+     * Gets the value based on the return type.
+     * Based on {@see self::$returnType} and {@see self::$returnScalarAsScalar}, converts the value
+     * to the desired type (if needed) and returns it.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function getValueBasedOnReturnType($value)
+    {
+        if ($this->returnScalarAsScalar && self::isScalar($value)) {
+            return $value;
+        }
+
+        $returnType = $this->returnType;
+        if ($returnType === self::TYPE_DEFAULT) {
+            $returnType = $this->defaultDataType;
+        }
+
+        switch ($returnType) {
+            case self::TYPE_JSON_STRING:
+                return $this->encodeToJsonUseProps($value);
+            case self::TYPE_ARRAY:
+                return $this->convertToArray($value);
+            case self::TYPE_OBJECT:
+                return $this->convertToObject($value);
+            case self::TYPE_FULL_OBJECT:
+                return $this->convertToObject($value, true);
+            default:
+                throw new InvalidArgumentException("Unknown return type");
+        }
+    }
 
     /**
      * Decodes a valid JSON string and returns it if {@see JSON::OPT_JSON_DECODE_ALWAYS} is enabled.
@@ -212,21 +308,6 @@ class JSON implements \ArrayAccess
             }
         }
         return $value;
-    }
-
-    /**
-     * Sets options used by methods.
-     *
-     * @param int $options Can be one of the JSON::OPT_* constants.
-     * @return self
-     */
-    public function setOptions(int $options = 0): self
-    {
-        $this->options = $options;
-
-        $this->jsonDecodeAlways = (bool)($options & self::OPT_JSON_DECODE_ALWAYS);
-
-        return $this;
     }
 
     /**
@@ -484,71 +565,6 @@ class JSON implements \ArrayAccess
     public function __toString(): string
     {
         return $this->getDataAsJsonString();
-    }
-
-    /**
-     * Sets the return type that is used by other returning-value methods.
-     *
-     * @param int $type The type of returning values. For example, consider that you passed data as
-     * an array and you pass this argument as JSON::TYPE_OBJECT; in this case, when you use
-     * $json->get() (with no arguments, to get the data itself), then the data will be returned as
-     * an object
-     * @param bool $scalarAsIs To return all scalar data as scalar or not. Sometimes, methods reach
-     * a scalar value, such as JSON::get(); in such cases, this argument determines that should the
-     * returned data be scalar (i.e. as is) or not. If it sets to false, then all scalar data will
-     * be returned as the type of $type (e.g. an array). This option does not have any effects if
-     * you set $type to JSON::TYPE_FAST.
-     * @return self
-     */
-    public function setReturnType(int $type = self::TYPE_ARRAY, bool $scalarAsIs = true): self
-    {
-        switch ($type) {
-            case self::TYPE_DEFAULT:
-            case self::TYPE_JSON_STRING:
-            case self::TYPE_ARRAY:
-            case self::TYPE_OBJECT:
-            case self::TYPE_FULL_OBJECT:
-                $this->returnType = $type;
-                $this->returnScalarAsScalar = $scalarAsIs;
-                return $this;
-                break;
-
-            default:
-                throw new InvalidArgumentException("Unknown return type");
-        }
-    }
-
-    /**
-     * Gets the value based on the return type.
-     * Based on {@see self::$returnType} and {@see self::$returnScalarAsScalar}, converts the value
-     * to the desired type (if needed) and returns it.
-     *
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function getValueBasedOnReturnType($value)
-    {
-        if ($this->returnScalarAsScalar && self::isScalar($value)) {
-            return $value;
-        }
-
-        $returnType = $this->returnType;
-        if ($returnType === self::TYPE_DEFAULT) {
-            $returnType = $this->defaultDataType;
-        }
-
-        switch ($returnType) {
-            case self::TYPE_JSON_STRING:
-                return $this->encodeToJsonUseProps($value);
-            case self::TYPE_ARRAY:
-                return $this->convertToArray($value);
-            case self::TYPE_OBJECT:
-                return $this->convertToObject($value);
-            case self::TYPE_FULL_OBJECT:
-                return $this->convertToObject($value, true);
-            default:
-                throw new InvalidArgumentException("Unknown return type");
-        }
     }
 
     /**
@@ -1035,22 +1051,6 @@ class JSON implements \ArrayAccess
         $this->do(function (array &$array) use ($value) {
             array_unshift($array, $value);
         }, $index, true);
-        return $this;
-    }
-
-    /**
-     * Sets recursion depth when using json_*() functions.
-     *
-     * @param int $depth
-     * @return self
-     */
-    public function setJsonRecursionDepth(int $depth): self
-    {
-        if ($depth < 1) {
-            throw new InvalidArgumentException("Depth must be positive");
-        }
-
-        $this->jsonRecursionDepth = $depth;
         return $this;
     }
 
