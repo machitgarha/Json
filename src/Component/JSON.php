@@ -35,7 +35,7 @@ class JSON implements \ArrayAccess
      */
     protected $data;
 
-    /** @var bool A scalar type, can be an integer, a string, a float, a boolean, or NULL. */
+    /** @var bool A scalar type could be an integer, a string, a float, a boolean, or NULL. */
     protected $isDataScalar = false;
 
     /** @var int Default data type; can be one of the JSON::TYPE_* constants. */
@@ -44,11 +44,7 @@ class JSON implements \ArrayAccess
     /** @var int {@see self::setReturnType()}. */
     protected $returnType = self::TYPE_ARRAY;
 
-    /** @var bool {@see self::setReturnType()}. */
-    protected $returnScalarAsScalar = true;
-
-    /** @var callable {@see self::setRandomizationFunction()}. */
-    protected $randomizationFunction = "mt_rand";
+   // Options and customizations
 
     /** @var int Options passed to the constructor. */
     protected $options = 0;
@@ -58,6 +54,12 @@ class JSON implements \ArrayAccess
 
     /** @var int {@see self::setJsonRecursionDepth()} */
     protected $jsonRecursionDepth = 512;
+
+    /** @var bool {@see self::setReturnType()}. */
+    protected $returnScalarAsScalar = true;
+
+    /** @var callable {@see self::setRandomizationFunction()}. */
+    protected $randomizationFunction = "mt_rand";
 
     // Data types
     /** @var int Type of data passed to the constructor. */
@@ -70,13 +72,6 @@ class JSON implements \ArrayAccess
     const TYPE_OBJECT = 2;
     /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
     const TYPE_FULL_OBJECT = 4;
-    /**
-     * @var int Array data type (recursive) when data is countable, and scalar values will remain
-     * unchanged, with no, even if you enabled scalarAsScalar option (in JSON::setReturnType()).
-     * This data type makes operation as fast as possible, because of almost minimum type checks and
-     * type conversions.
-     */
-    const TYPE_FAST = 5;
 
     // Indexing types
     /**
@@ -157,7 +152,7 @@ class JSON implements \ArrayAccess
 
         if ($type = self::isArrayOrObject($data)) {
             $this->defaultDataType = $type;
-            $this->setDataTo($this->convertToArray($data));
+            $this->data = $data;
             return;
         }
 
@@ -170,7 +165,7 @@ class JSON implements \ArrayAccess
             
             if ($isJsonValid) {
                 $this->defaultDataType = self::TYPE_JSON_STRING;
-                $this->setDataTo($decodedData);
+                $this->data = $decodedData;
                 return;
             }
         }
@@ -182,12 +177,11 @@ class JSON implements \ArrayAccess
          * 2. JSON::OPT_TREAT_AS_STRING is not enabled, and data is not a valid JSON string.
          */
         if (self::isScalar($data)) {
-            $this->isDataScalar = true;
-            $this->setDataTo($treatAsString ? (string)($data) : $data);
+            $this->data = $treatAsString ? (string)($data) : $data;
             return;
         }
 
-        // If data is invalid
+        // If data is invalid, i.e. is a resource
         throw new InvalidArgumentException("Data must be either countable or scalar");
     }
 
@@ -201,26 +195,23 @@ class JSON implements \ArrayAccess
         return new self($data, $options);
     }
 
+
     /**
-     * Sets data to an array or a scalar value.
-     * The recommended way to change JSON::$data property is using this method, as it prevents from
-     * an invalid data to be replaced in JSON::$data.
+     * Decodes a valid JSON string and returns it if {@see JSON::OPT_JSON_DECODE_ALWAYS} is enabled.
      *
-     * @param array|int|string|float|bool|null $value The value to be replaced in JSON::$data.
-     * @return self
-     * @throws InvalidArgumentException Any data that is not array or scalar is invalid.
+     * @param mixed $value
+     * @return mixed
      */
-    protected function setDataTo($value): self
+    protected function toJsonIfNeeded($value)
     {
-        $isScalar = self::isScalar($value);
-
-        if (!(is_array($value)) && !$isScalar) {
-            throw new InvalidArgumentException("Invalid data type");
+        if ($this->jsonDecodeAlways && is_string($value)) {
+            // Validating JSON string
+            try {
+                $value = self::decodeJson($value, true);
+            } catch (JsonException $e) {
+            }
         }
-
-        $this->isDataScalar = $isScalar;
-        $this->data = $value;
-        return $this;
+        return $value;
     }
 
     /**
@@ -449,32 +440,6 @@ class JSON implements \ArrayAccess
     }
 
     /**
-     * Gets value as an array or a scalar.
-     * Converts a countable value to a recursive array, and return a scalar value as is. Also, this
-     * method handles {@see JSON::OPT_JSON_DECODE_ALWAYS} option.
-     *
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function getOptimalValue($value)
-    {
-        if (self::isArrayOrObject($value)) {
-            return $this->convertToArray($value);
-        }
-
-        // JSON::OPT_JSON_DECODE_ALWAYS handler
-        if ($this->jsonDecodeAlways && is_string($value)) {
-            // Validating JSON string
-            try {
-                return self::decodeJson($value);
-            } catch (JsonException $e) {
-            }
-        }
-        
-        return $value;
-    }
-
-    /**
      * Returns data as a JSON string.
      *
      * @param int $options The options, like JSON_PRETTY_PRINT. {@link
@@ -563,10 +528,6 @@ class JSON implements \ArrayAccess
      */
     protected function getValueBasedOnReturnType($value)
     {
-        if ($this->returnType === self::TYPE_FAST) {
-            return $value;
-        }
-
         if (self::isScalar($value) && $this->returnScalarAsScalar) {
             return $value;
         }
@@ -602,7 +563,8 @@ class JSON implements \ArrayAccess
         array $keys,
         &$data,
         bool $forceCountableValue = false,
-        int $indexingType = self::INDEXING_STRICT
+        int $indexingType = self::INDEXING_STRICT,
+        bool $isDataUnreliable = true
     ): array {
         $keysCount = count($keys);
 
@@ -611,19 +573,21 @@ class JSON implements \ArrayAccess
             $curKey = array_shift($keys);
 
             if (isset($data[$curKey])) {
-                if (!is_array($data[$curKey])) {
-                    if ($indexingType >= self::INDEXING_SAFE) {
-                        throw new UncountableValueException("The key '$curKey' contains uncountable value");
-                    } else {
-                        $data[$curKey] = [];
-                    }
+                $childData = &$data[$curKey];
+
+                if ($isDataUnreliable && is_object($childData)) {
+                    $childData = $this->convertToArray($childData);
+                    $isDataUnreliable = false;
+                }
+
+                if (!is_array($childData) && $indexingType >= self::INDEXING_SAFE) {
+                    throw new UncountableValueException("The key '$curKey' has uncountable value");
                 }
             } else {
                 if ($indexingType === self::INDEXING_STRICT) {
                     throw new Exception("The key '$curKey' does not exist");
-                } else {
-                    $data[$curKey] = [];
                 }
+                $data[$curKey] = [];
             }
 
             // Recursion
@@ -631,7 +595,8 @@ class JSON implements \ArrayAccess
                 $keys,
                 $data[$curKey],
                 $forceCountableValue,
-                $indexingType
+                $indexingType,
+                $isDataUnreliable
             );
         }
 
@@ -641,33 +606,36 @@ class JSON implements \ArrayAccess
                 $lastKey = $keys[0];
 
                 if (isset($data[$lastKey])) {
-                    if ($forceCountableValue && !is_array($data[$lastKey])) {
+                    $childData = &$data[$lastKey];
+
+                    if ($isDataUnreliable && is_object($childData)) {
+                        $childData = $this->convertToArray($childData);
+                        $isDataUnreliable = false;
+                    }
+                    if ($forceCountableValue && !is_array($childData)) {
                         throw new UncountableValueException("Cannot use the method on uncountable");
                     }
                 } else {
                     if ($indexingType === self::INDEXING_STRICT) {
                         throw new Exception("The key '$lastKey' does not exist");
-                    } else {
-                        $data[$lastKey] = null;
                     }
+                    $data[$lastKey] = null;
                 }
     
                 $returnValue = [
                     &$data[$lastKey],
-                    false,
                     &$data,
                     $lastKey,
                 ];
             }
             // If $keysCount is 0
             else {
-                if ($forceCountableValue && $this->isDataScalar) {
+                if ($forceCountableValue && self::isScalar($data)) {
                     throw new UncountableValueException("Cannot use the method on uncountable");
                 }
 
                 $returnValue = [
                     &$data,
-                    true,
                     null,
                     null,
                 ];
@@ -746,14 +714,19 @@ class JSON implements \ArrayAccess
         int $indexingType = self::INDEXING_STRICT,
         bool $extractIndex = true
     ) {
-        if ($this->isDataScalar && $index !== null) {
+        $data = &$this->data;
+        if (is_object($data)) {
+            $data = $this->convertToArray($data);
+        }
+
+        if (self::isScalar($data) && $index !== null) {
             throw new UncountableValueException("Cannot use indexing on uncountable");
         }
 
-        // On debugging, pay attention to @ operator!
-        @$returnValueReference = &$function(...$this->findElementRecursive(
+        // On debugging, pay attention to the following @ operator!
+        @$returnValueReference = &$function(... $this->findElementRecursive(
             $extractIndex ? $this->extractIndex($index) : (array)($index),
-            $this->data,
+            $data,
             $forceCountableValue,
             $indexingType
         ));
@@ -767,7 +740,7 @@ class JSON implements \ArrayAccess
      * @param integer $indexingType Can be one of the JSON::INDEXING_* constants.
      * @return JSONChild
      */
-    public function index(string $index, int $indexingType = self::INDEXING_STRICT): JSONChild
+    public function index(string $index, int $indexingType = self::INDEXING_FREE): JSONChild
     {
         $classProps = [];
         foreach (get_object_vars($this) as $propName => $value) {
@@ -798,6 +771,14 @@ class JSON implements \ArrayAccess
         }
     }
 
+    public function &getByReference(string $index = null)
+    {
+        return $this->do(function &(&$element) {
+            $element = $this->getValueBasedOnReturnType($element);
+            return $element;
+        }, $index);
+    }
+
     /**
      * Sets an element to a value.
      *
@@ -807,14 +788,8 @@ class JSON implements \ArrayAccess
      */
     public function set($value, string $index = null): self
     {
-        $this->do(function (&$element, $isDataRoot) use ($value) {
-            $value = $this->getOptimalValue($value);
-
-            if ($isDataRoot) {
-                $this->setDataTo($value);
-                return;
-            }
-            $element = $value;
+        $this->do(function (&$element) use ($value) {
+            $element = $this->toJsonIfNeeded($value);
         }, $index, false, self::INDEXING_FREE);
         return $this;
     }
@@ -838,20 +813,17 @@ class JSON implements \ArrayAccess
      */
     public function unset(string $index = null): self
     {
-        $this->do(function ($element, $isDataRoot, &$data, $key) {
-            if ($isDataRoot) {
-                $this->setDataTo(null);
-            } else {
-                // Un-setting the element directly is impossible
-                unset($data[$key]);
-            }
+        $this->do(function (&$element, &$data, $key) {
+            $element = null;
+            // Un-setting the element directly is impossible
+            unset($data[$key]);
         }, $index);
         return $this;
     }
 
     private function throwExceptionArrayAccessOnScalar()
     {
-        if ($this->isDataScalar) {
+        if (self::isScalar($this->data)) {
             throw new UncountableValueException("Array access is not possible on scalar data");
         }
     }
@@ -865,7 +837,7 @@ class JSON implements \ArrayAccess
     public function offsetSet($index, $value)
     {
         $this->throwExceptionArrayAccessOnScalar();
-        $this->data[$index] = $this->getOptimalValue($value);
+        $this->data[$index] = $this->toJsonIfNeeded($value);
     }
 
     public function offsetExists($index): bool
@@ -940,7 +912,7 @@ class JSON implements \ArrayAccess
                 yield $key => $value;
 
                 // E.g. convert objects to arrays
-                $value = $this->getOptimalValue($value);
+                $value = $this->toJsonIfNeeded($value);
             }
         }, $index, true);
     }
@@ -1015,10 +987,8 @@ class JSON implements \ArrayAccess
      */
     public function push($value, string $index = null): self
     {
-        $value = $this->getOptimalValue($value);
-
         $this->do(function (array &$array) use ($value) {
-            array_push($array, $value);
+            array_push($array, $this->toJsonIfNeeded($value));
         }, $index, true);
         return $this;
     }
@@ -1279,16 +1249,15 @@ class JSON implements \ArrayAccess
      */
     public function mergeWith($newData, int $options = 0, string $index = null): self
     {
-        $newDataAsArray = (array)($this->getOptimalValue($newData));
-
         // Extracting options
         $reverseOrder = $options & self::MERGE_PREFER_DEFAULT_DATA;
 
-        $this->do(function (array &$array) use ($newDataAsArray, $reverseOrder) {
+        $this->do(function (array &$array) use ($newData, $reverseOrder) {
+            $newData = (array)($this->toJsonIfNeeded($newData));
             if ($reverseOrder) {
-                $array = array_merge($newDataAsArray, $array);
+                $array = array_merge($newData, $array);
             } else {
-                $array = array_merge($array, $newDataAsArray);
+                $array = array_merge($array, $newData);
             }
         }, $index, true);
         return $this;
@@ -1305,10 +1274,9 @@ class JSON implements \ArrayAccess
      */
     public function mergeRecursivelyWith($newData, int $options = 0, string $index = null): self
     {
-        $newDataAsArray = (array)($this->getOptimalValue($newData));
-
-        $this->do(function (array &$array) use ($newDataAsArray) {
-            $array = array_merge_recursive($array, $newDataAsArray);
+        $this->do(function (array &$array) use ($newData) {
+            $newData = (array)($this->toJsonIfNeeded($newData));
+            $array = array_merge_recursive($array, $newData);
         }, $index, true);
         return $this;
     }
@@ -1328,28 +1296,28 @@ class JSON implements \ArrayAccess
         bool $compareKeys = false,
         string $index = null
     ): self {
-        $dataAsArray = (array)($this->getOptimalValue($data));
+        $data = (array)($this->toJsonIfNeeded($data));
 
-        $diff = function (array $array) use ($dataAsArray) {
+        $diff = function (array $array) use ($data) {
             $diff = array();
   
             foreach ($array as $value) {
                 $diff[$value] = 1;
             }
-            foreach ($dataAsArray as $value) {
+            foreach ($data as $value) {
                 unset($diff[$value]);
             }
           
             return array_keys($diff);
         };
 
-        $diffKey = function (array $array) use ($dataAsArray) {
+        $diffKey = function (array $array) use ($data) {
             $diff = array();
 
             foreach ($array as $key => $value) {
                 $diff[$key] = $value;
             }
-            foreach ($dataAsArray as $key => $value) {
+            foreach ($data as $key => $value) {
                 unset($diff[$key]);
             }
           
@@ -1390,7 +1358,7 @@ class JSON implements \ArrayAccess
                     $filteredArray[$key] = $value;
                 }
             }
-            $data = $filteredArray;
+            $array = $filteredArray;
         }, $index, true);
         return $this;
     }
@@ -1454,7 +1422,6 @@ class JSON implements \ArrayAccess
     public function toCountable(): self
     {
         $this->data = (array)($this->data);
-        $this->isDataScalar = false;
         return $this;
     }
 
