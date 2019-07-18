@@ -19,6 +19,7 @@ use MAChitgarha\Json\Option\Type;
 use MAChitgarha\Json\Option\JsonOpt;
 use MAChitgarha\Json\Option\Indexing;
 use MAChitgarha\Json\Option\Merge;
+use MAChitgarha\Json\Option\DoOpt;
 
 /**
  * Handles JSON data type.
@@ -687,9 +688,8 @@ class Json implements \ArrayAccess
      * null if you want to get the data root inside the callback.
      * @param bool $forceCountableValue Force the value be operated to be a countable one, so, the
      * element (i.e. first argument) passing to $function will be an array.
-     * @param bool $extractIndex Whether to extract $index to keys or not. The extraction of $index
-     * is performed using dots.
      * @param int $indexingType One of the Indexing::* constants.
+     * @param int $options A combination of DoOpt::* constants.
      * @return mixed The return value of $function, whether is a generator or not.F
      * @throws Exception When reaching a key that does not exist and $strictIndexing is true.
      * @throws UncountableValueException If reaching a key that contains an uncountable value.
@@ -703,20 +703,23 @@ class Json implements \ArrayAccess
         string $index = null,
         bool $forceCountableValue = false,
         int $indexingType = Indexing::STRICT,
-        bool $extractIndex = true
+        int $options = 0
     ) {
         $data = &$this->data;
         if (is_object($data)) {
-            $data = $this->convertToArray($data);
+            $data = (array)($data);
         }
 
         if (self::isScalar($data) && $index !== null) {
             throw new UncountableValueException("Cannot use indexing on uncountable");
         }
 
+        // Set options
+        $keepIndex = $options & (bool)(DoOpt::KEEP_INDEX);
+
         // On debugging, pay attention to the following @ operator!
         @$returnValueReference = &$function(... $this->findElementRecursive(
-            $extractIndex ? $this->extractIndex($index) : (array)($index),
+            $keepIndex ? $this->extractIndex($index) : (array)($index),
             $data,
             $forceCountableValue,
             $indexingType
