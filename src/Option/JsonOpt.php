@@ -24,7 +24,7 @@ class JsonOpt
      * in other words, don't decode it. Using this option, every non-string and uncountable values
      * will be converted to a string (i.e. integers, booleans and NULL). This option only affects
      * the constructor. It won't have any effects if you use it in combination with
-     * JSON::OPT_TREAT_AS_JSON_STRING.
+     * JsonOpt::AS_JSON.
      */
     const AS_STRING = 2;
     /**

@@ -8,7 +8,7 @@ use MAChitgarha\Component\Json;
 
 class FeatureTest extends TestCase
 {
-    /** @see JSON::extractKeysFromIndex() */
+    /** @see Json::extractKeysFromIndex() */
     public function testEscapedDelimiters()
     {
         $json = new JSON([

@@ -196,10 +196,10 @@ class Json implements \ArrayAccess
      *
      * @param int $type The type of returning values. For example, consider that you passed data as
      * an array and you pass this argument as Type::OBJECT; in this case, when you use
-     * JSON::get() (with no arguments, to get the data itself), then the data will be returned as
+     * Json::get() (with no arguments, to get the data itself), then the data will be returned as
      * an object.
      * @param bool $scalarAsIs To return all scalar data as scalar or not. Sometimes, methods
-     * returning a value, reach a scalar value, such as JSON::get(). In these cases, this argument
+     * returning a value, reach a scalar value, such as Json::get(). In these cases, this argument
      * determines that should the returned value be scalar or not. If it sets to false, then all
      * scalar data will be returned as the type of $type (e.g. an array).
      * @return self
@@ -549,7 +549,7 @@ class Json implements \ArrayAccess
      * @param array $keys The keys to be followed recursively.
      * @param array $data The data. It must be a recursive array or you may encounter errors.
      * @return array{0:array|mixed,1:array|array[],2:mixed}|array{0:array|array[],1:null,2:null}
-     * @see JSON::do()
+     * @see Json::do()
      */
     protected function &findElementRecursive(
         array $keys,

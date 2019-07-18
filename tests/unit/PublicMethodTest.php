@@ -34,7 +34,7 @@ class PublicMethodTest extends TestCase
     }
 
     /**
-     * Tests JSON::getData*() methods.
+     * Tests Json::getData*() methods.
      * @dataProvider expectedGetDataReturnValuesProvider
      */
     public function testGetData($data, $asJson, $asArray, $asObject, $asFullObject)
@@ -103,7 +103,7 @@ class PublicMethodTest extends TestCase
     }
 
     /**
-     * Tests JSON::isCountable() and JSON::count() methods.
+     * Tests Json::isCountable() and Json::count() methods.
      * @dataProvider arrayAndJsonProvider
      */
     public function testCountable(JSON $json, string $index, array $array)
@@ -132,8 +132,8 @@ class PublicMethodTest extends TestCase
     }
 
     /**
-     * Tests JSON::getValues(), JSON::getKeys(), JSON::getRandomValue(), getRandomKey(),
-     * JSON::getRandomValues() and JSON::getRandomKeys().
+     * Tests Json::getValues(), Json::getKeys(), Json::getRandomValue(), getRandomKey(),
+     * Json::getRandomValues() and Json::getRandomKeys().
      * @dataProvider arrayAndJsonProvider
      */
     public function testGettingRandomValuesAndKeys(JSON $json, string $index, array $array)
@@ -152,7 +152,7 @@ class PublicMethodTest extends TestCase
     }
 
     /**
-     * Tests JSON::getValues() and JSON::getKeys().
+     * Tests Json::getValues() and Json::getKeys().
      * @dataProvider arrayAndJsonProvider
      */
     public function testGetValuesAndKeys(JSON $json, string $index, array $array)
@@ -223,7 +223,7 @@ class PublicMethodTest extends TestCase
         ];
     }
 
-    /** Provider for JSON::getData*() methods. */
+    /** Provider for Json::getData*() methods. */
     public function expectedGetDataReturnValuesProvider()
     {
         // JSON data that we expect

@@ -6,6 +6,7 @@ namespace MAChitgarha\UnitTest\Json;
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\Json;
 use MAChitgarha\Json\Exception\InvalidArgumentException;
+use MAChitgarha\Json\Option\JsonOpt;
 
 class InvalidArgumentExceptionTest extends TestCase
 {
@@ -35,7 +36,7 @@ class InvalidArgumentExceptionTest extends TestCase
             [fopen(__FILE__, "r")],
 
             // Invalid combination of data and options
-            [22022, JSON::OPT_TREAT_AS_JSON_STRING],
+            [22022, JsonOpt::AS_JSON],
         ];
     }
 }

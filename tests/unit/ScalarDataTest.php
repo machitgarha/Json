@@ -9,7 +9,7 @@ use MAChitgarha\Component\Json;
 class ScalarDataTest extends TestCase
 {
     /**
-     * Tests JSON::isCountable(), JSON::toCountable() and JSON::count() methods.
+     * Tests Json::isCountable(), Json::toCountable() and Json::count() methods.
      * @dataProvider scalarJsonProvider
      */
     public function testCountable(JSON $json)
