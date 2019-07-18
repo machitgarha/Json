@@ -15,6 +15,10 @@ use MAChitgarha\Exception\JSON\InvalidJsonException;
 use MAChitgarha\Exception\JSON\UncountableValueException;
 use MAChitgarha\Exception\JSON\JsonException;
 use MAChitgarha\Exception\JSON\OverflowException;
+use MAChitgarha\Json\Option\Type;
+use MAChitgarha\Json\Option\JsonOpt;
+use MAChitgarha\Json\Option\Indexing;
+use MAChitgarha\Json\Option\Merge;
 
 /**
  * Handles JSON data type.
@@ -38,18 +42,18 @@ class Json implements \ArrayAccess
     /** @var bool A scalar type could be an integer, a string, a float, a boolean, or NULL. */
     protected $isDataScalar = false;
 
-    /** @var int Default data type; can be one of the JSON::TYPE_* constants. */
-    protected $defaultDataType = self::TYPE_JSON_STRING;
+    /** @var int Default data type; can be one of the Type::* constants. */
+    protected $defaultDataType = Type::JSON_STRING;
 
     /** @var int {@see self::setReturnType()}. */
-    protected $returnType = self::TYPE_ARRAY;
+    protected $returnType = Type::ARRAY;
 
     ### Options and customizations
 
     /** @var int Options passed to the constructor. */
     protected $options = 0;
 
-    /** @var bool {@see self::OPT_JSON_DECODE_ALWAYS} */
+    /** @var bool {@see JsonOpt::DECODE_ALWAYS} */
     protected $jsonDecodeAlways = false;
 
     /** @var int {@see self::setJsonRecursionDepth()} */
@@ -61,93 +65,29 @@ class Json implements \ArrayAccess
     /** @var callable {@see self::setRandomizationFunction()}. */
     protected $randomizationFunction = "mt_rand";
 
-    ### Data types
-    /** @var int Type of data passed to the constructor. */
-    const TYPE_DEFAULT = 0;
-    /** @var int JSON string data type. */
-    const TYPE_JSON_STRING = 1;
-    /** @var int Array data type (recursive). This is probably the most efficient way. */
-    const TYPE_ARRAY = 3;
-    /** @var int Object data type (recursive), without converting indexed arrays to objects. */
-    const TYPE_OBJECT = 2;
-    /** @var int Object data type (recursive), with converting even indexed arrays to objects. */
-    const TYPE_FULL_OBJECT = 4;
-
-    ### Indexing types
-    /**
-     * @var int If a key cannot be found, create it. If a key contains an uncountable value,
-     * override it (i.e. remove its value and convert it to a countable value), This indexing type
-     * could be dangerous; as it removes everything.
-     */
-    const INDEXING_FREE = 0;
-    /**
-     * @var int If a key cannot be found, create it. If a key contains an uncountable value,
-     * throw a new exception and don't continue.
-     */
-    const INDEXING_SAFE = 1;
-    /**
-     * @var int If a key cannot be found or a key contains an uncountable value, throw an exception.
-     * This indexing type is really useful when you want to get the element's value, for example.
-     */
-    const INDEXING_STRICT = 2;
-
-    ### Merge options
-    /**
-     * @var int If it is set, when reaching duplicate keys, the new data keys will be replaced
-     * instead of the countable in the (default) data. The default behaviour is to use the new data
-     * values in these kinds of situations.
-     */
-    const MERGE_PREFER_DEFAULT_DATA = 1;
-
-    ### Options
-    /**
-     * @var int Check every string value to be a valid JSON string, and if it is, decode it and use
-     * the decoded value instead of the string itself. However, if a string does not contain a valid
-     * JSON string, then use the string itself. This option affects performance in some cases, but
-     * it would be so much useful if you work with JSON strings a lot.
-     */
-    const OPT_JSON_DECODE_ALWAYS = 1;
-    /**
-     * @var int Consider data passed into the constructor as string, even if it's a valid JSON data;
-     * in other words, don't decode it. Using this option, every non-string and uncountable values
-     * will be converted to a string (i.e. integers, booleans and NULL). This option only affects
-     * the constructor. It won't have any effects if you use it in combination with
-     * JSON::OPT_TREAT_AS_JSON_STRING.
-     */
-    const OPT_TREAT_AS_STRING = 2;
-    /**
-     * @var int Force data passed into the constructor as a JSON string. Using this option leads
-     * to exceptions if the JSON string is not valid. This option only affects the constructor. Note
-     * that the constructor checks a string data as a JSON string by default.
-     */
-    const OPT_TREAT_AS_JSON_STRING = 8;
-
     /**
      * Prepares JSON data.
      *
      * @param mixed $data The data; can be either countable (i.e. a valid JSON string, an array or
      * an object) or scalar. Data should not contain any closures; otherwise, they will be
      * considered as empty objects.
-     * @param int $options The additional options. Can be one of the JSON::OPT_* constants.
-     * @throws InvalidArgumentException Using JSON::OPT_TREAT_AS_JSON_STRING option and passing
-     * a non-string data.
+     * @param int $options A combination of JsonOpt::* constants.
+     * @throws InvalidArgumentException Using JsonOpt::AS_JSON option and passing a non-string data.
      * @throws InvalidArgumentException If data is neither countable nor scalar.
-     * @throws InvalidJsonException If JSON::OPT_TREAT_AS_JSON_STRING is enabled and data is not a
-     * valid JSON.
+     * @throws InvalidJsonException If JsonOpt::AS_JSON is enabled and data is not a valid JSON.
      */
     public function __construct($data = [], int $options = 0)
     {
         $this->setOptions($options);
 
-        $treatAsJsonString = (bool)($options & self::OPT_TREAT_AS_JSON_STRING);
-        $treatAsString = (bool)($options & self::OPT_TREAT_AS_STRING);
+        $asJson = (bool)($options & JsonOpt::AS_JSON);
+        $asString = (bool)($options & JsonOpt::AS_STRING);
 
         // Check data type
         $isString = is_string($data);
 
-        if ($treatAsJsonString && !$isString) {
-            throw new InvalidArgumentException("You must pass data as string when you use "
-                . "JSON::OPT_TREAT_AS_JSON_STRING option");
+        if ($asJson && !$isString) {
+            throw new InvalidArgumentException("Data must be string when JsonOpt::AS_JSON is used");
         }
 
         if ($type = self::isArrayOrObject($data)) {
@@ -156,28 +96,28 @@ class Json implements \ArrayAccess
             return;
         }
 
-        if (($treatAsJsonString || !$treatAsString) && $isString) {
+        if (($asJson || !$asString) && $isString) {
             list($isJsonValid, $decodedData) = $this->validateStringAsJson($data, true);
 
-            if (!$isJsonValid && $treatAsJsonString) {
+            if (!$isJsonValid && $asJson) {
                 throw new InvalidJsonException();
             }
             
             if ($isJsonValid) {
-                $this->defaultDataType = self::TYPE_JSON_STRING;
+                $this->defaultDataType = Type::JSON_STRING;
                 $this->data = $decodedData;
                 return;
             }
         }
 
         /*
-         * The code will NOT reach here, if, JSON::OPT_TREAT_AS_JSON_STRING is enabled. So, the
-         * code will reach here only if one of the following things happen:
-         * 1. JSON::OPT_TREAT_AS_STRING is enabled.
-         * 2. JSON::OPT_TREAT_AS_STRING is not enabled, and data is not a valid JSON string.
+         * The code will NOT reach here, if, JsonOpt::AS_JSON is enabled. So, the code will reach
+         * here only if one of the following things happen:
+         * 1. JsonOpt::AS_STRING is set.
+         * 2. JsonOpt::AS_STRING is not set, and data is not a valid JSON string.
          */
         if (self::isScalar($data)) {
-            $this->data = $treatAsString ? (string)($data) : $data;
+            $this->data = $asString ? (string)($data) : $data;
             return;
         }
 
@@ -200,14 +140,14 @@ class Json implements \ArrayAccess
     /**
      * Sets options used by methods.
      *
-     * @param int $options Can be one of the JSON::OPT_* constants.
+     * @param int $options A combination of JsonOpt::* constants.
      * @return self
      */
     public function setOptions(int $options = 0): self
     {
         $this->options = $options;
 
-        $this->jsonDecodeAlways = (bool)($options & self::OPT_JSON_DECODE_ALWAYS);
+        $this->jsonDecodeAlways = (bool)($options & JsonOpt::DECODE_ALWAYS);
 
         return $this;
     }
@@ -254,7 +194,7 @@ class Json implements \ArrayAccess
      * Sets the return type that is used by other returning-value methods.
      *
      * @param int $type The type of returning values. For example, consider that you passed data as
-     * an array and you pass this argument as JSON::TYPE_OBJECT; in this case, when you use
+     * an array and you pass this argument as Type::OBJECT; in this case, when you use
      * JSON::get() (with no arguments, to get the data itself), then the data will be returned as
      * an object.
      * @param bool $scalarAsIs To return all scalar data as scalar or not. Sometimes, methods
@@ -263,14 +203,14 @@ class Json implements \ArrayAccess
      * scalar data will be returned as the type of $type (e.g. an array).
      * @return self
      */
-    public function setReturnType(int $type = self::TYPE_ARRAY, bool $scalarAsIs = true): self
+    public function setReturnType(int $type = Type::ARRAY, bool $scalarAsIs = true): self
     {
         switch ($type) {
-            case self::TYPE_DEFAULT:
-            case self::TYPE_JSON_STRING:
-            case self::TYPE_ARRAY:
-            case self::TYPE_OBJECT:
-            case self::TYPE_FULL_OBJECT:
+            case Type::DEFAULT:
+            case Type::JSON_STRING:
+            case Type::ARRAY:
+            case Type::OBJECT:
+            case Type::FULL_OBJECT:
                 $this->returnType = $type;
                 $this->returnScalarAsScalar = $scalarAsIs;
                 return $this;
@@ -296,18 +236,18 @@ class Json implements \ArrayAccess
         }
 
         $returnType = $this->returnType;
-        if ($returnType === self::TYPE_DEFAULT) {
+        if ($returnType === Type::DEFAULT) {
             $returnType = $this->defaultDataType;
         }
 
         switch ($returnType) {
-            case self::TYPE_JSON_STRING:
+            case Type::JSON_STRING:
                 return $this->encodeToJsonUseProps($value);
-            case self::TYPE_ARRAY:
+            case Type::ARRAY:
                 return $this->convertToArray($value);
-            case self::TYPE_OBJECT:
+            case Type::OBJECT:
                 return $this->convertToObject($value);
-            case self::TYPE_FULL_OBJECT:
+            case Type::FULL_OBJECT:
                 return $this->convertToObject($value, true);
             default:
                 throw new InvalidArgumentException("Unknown return type");
@@ -315,7 +255,7 @@ class Json implements \ArrayAccess
     }
 
     /**
-     * Decodes a valid JSON string and returns it if {@see JSON::OPT_JSON_DECODE_ALWAYS} is enabled.
+     * Decodes a valid JSON string and returns it if {@see JsonOpt::DECODE_ALWAYS} is set.
      *
      * @param mixed $value
      * @return mixed
@@ -351,7 +291,7 @@ class Json implements \ArrayAccess
      * @param mixed $data
      * @param bool $throwException To throw exceptions when data is not either an array or an
      * object or not.
-     * @return int 0 if is not any of them, JSON::TYPE_ARRAY if it is an array and JSON::TYPE_OBJECT
+     * @return int 0 if is not any of them, Type::ARRAY if it is an array and Type::OBJECT
      * if it is an object.
      * @throws InvalidArgumentException
      */
@@ -364,8 +304,8 @@ class Json implements \ArrayAccess
             throw new InvalidArgumentException("Data must be either an array or an object");
         }
 
-        return ($isArray ? self::TYPE_ARRAY :
-            ($isObject ? self::TYPE_OBJECT : 0));
+        return ($isArray ? Type::ARRAY :
+            ($isObject ? Type::OBJECT : 0));
     }
 
     /**
@@ -614,7 +554,7 @@ class Json implements \ArrayAccess
         array $keys,
         &$data,
         bool $forceCountableValue = false,
-        int $indexingType = self::INDEXING_STRICT,
+        int $indexingType = Indexing::STRICT,
         bool $isDataUnreliable = true
     ): array {
         $keysCount = count($keys);
@@ -631,11 +571,11 @@ class Json implements \ArrayAccess
                     $isDataUnreliable = false;
                 }
 
-                if (!is_array($childData) && $indexingType >= self::INDEXING_SAFE) {
+                if (!is_array($childData) && $indexingType >= Indexing::SAFE) {
                     throw new UncountableValueException("The key '$curKey' has uncountable value");
                 }
             } else {
-                if ($indexingType === self::INDEXING_STRICT) {
+                if ($indexingType === Indexing::STRICT) {
                     throw new Exception("The key '$curKey' does not exist");
                 }
                 $data[$curKey] = [];
@@ -667,7 +607,7 @@ class Json implements \ArrayAccess
                         throw new UncountableValueException("Cannot use the method on uncountable");
                     }
                 } else {
-                    if ($indexingType === self::INDEXING_STRICT) {
+                    if ($indexingType === Indexing::STRICT) {
                         throw new Exception("The key '$lastKey' does not exist");
                     }
                     $data[$lastKey] = null;
@@ -749,7 +689,7 @@ class Json implements \ArrayAccess
      * element (i.e. first argument) passing to $function will be an array.
      * @param bool $extractIndex Whether to extract $index to keys or not. The extraction of $index
      * is performed using dots.
-     * @param int $indexingType Can be one of the JSON::INDEXING_* constants.
+     * @param int $indexingType One of the Indexing::* constants.
      * @return mixed The return value of $function, whether is a generator or not.F
      * @throws Exception When reaching a key that does not exist and $strictIndexing is true.
      * @throws UncountableValueException If reaching a key that contains an uncountable value.
@@ -762,7 +702,7 @@ class Json implements \ArrayAccess
         callable $function = null,
         string $index = null,
         bool $forceCountableValue = false,
-        int $indexingType = self::INDEXING_STRICT,
+        int $indexingType = Indexing::STRICT,
         bool $extractIndex = true
     ) {
         $data = &$this->data;
@@ -788,10 +728,10 @@ class Json implements \ArrayAccess
      * Gets an element inside data.
      *
      * @param string $index
-     * @param integer $indexingType Can be one of the JSON::INDEXING_* constants.
+     * @param int $indexingType One of the Indexing::* constants.
      * @return JSONChild
      */
-    public function index(string $index, int $indexingType = self::INDEXING_FREE): JSONChild
+    public function index(string $index, int $indexingType = Indexing::FREE): JSONChild
     {
         return new JSONChild($this->do(function &(&$element) {
             return $element;
@@ -842,7 +782,7 @@ class Json implements \ArrayAccess
     {
         $this->do(function (&$element) use ($value) {
             $element = $this->toJsonIfNeeded($value);
-        }, $index, false, self::INDEXING_FREE);
+        }, $index, false, Indexing::FREE);
         return $this;
     }
 
@@ -1271,14 +1211,14 @@ class Json implements \ArrayAccess
      *
      * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
      * and will be treated as an array.
-     * @param int $options Can be one of the JSON::MERGE_* constants (not JSON::MERGE_R_* ones).
+     * @param int $options A combination of Merge::* constants.
      * @param ?string $index
      * @return self
      */
     public function mergeWith($newData, int $options = 0, string $index = null): self
     {
         // Extracting options
-        $reverseOrder = $options & self::MERGE_PREFER_DEFAULT_DATA;
+        $reverseOrder = $options & Merge::KEEP_DEFAULT;
 
         $this->do(function (array &$array) use ($newData, $reverseOrder) {
             $newData = (array)($this->toJsonIfNeeded($newData));
@@ -1296,7 +1236,7 @@ class Json implements \ArrayAccess
      *
      * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
      * and will be treated as an array.
-     * @param int $options Can be one of the JSON::MERGE_R_* constants.
+     * @param int $options Currently, no options are available.
      * @param ?string $index
      * @return self
      */
@@ -1469,7 +1409,7 @@ class Json implements \ArrayAccess
     {
         $this->do(function (&$element) use ($startIndex, $length, $value) {
             $element = array_fill($startIndex, $length, $value);
-        }, $index, false, self::INDEXING_FREE);
+        }, $index, false, Indexing::FREE);
         return $this;
     }
 
