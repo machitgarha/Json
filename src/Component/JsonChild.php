@@ -1,6 +1,6 @@
 <?php
 /**
- * JSONChild class file.
+ * JsonChild class file.
  *
  * @author Mohammad Amin Chitgarha <machitgarha@outlook.com>
  * @see https://github.com/MAChitgarha/JSON
@@ -14,7 +14,7 @@ namespace MAChitgarha\Component;
  *
  * @see https://github.com/MAChitgarha/JSON/wiki
  */
-class JSONChild extends JSON
+class JsonChild extends Json
 {
     /**
      * @param array $data A countable element of the parent data, by-reference.

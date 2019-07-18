@@ -24,7 +24,7 @@ use MAChitgarha\Exception\JSON\OverflowException;
  * @see https://github.com/MAChitgarha/JSON/wiki
  * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
  */
-class JSON implements \ArrayAccess
+class Json implements \ArrayAccess
 {
     /**
      * @var array|int|string|float|bool|null JSON data as a complete native PHP array (to be
