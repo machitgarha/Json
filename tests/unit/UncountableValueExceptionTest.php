@@ -42,7 +42,7 @@ class UncountableValueExceptionTest extends TestCase
 
     public function callMethodsWithIndexesProvider()
     {
-        $json = clone new JSON("Ubuntu");
+        $json = clone new Json("Ubuntu");
         $sampleIndex = "appName";
         $sampleValue = "Terminal";
 
@@ -57,7 +57,7 @@ class UncountableValueExceptionTest extends TestCase
 
     public function methodsForCountableDataProvider()
     {
-        $json = clone new JSON(1400);
+        $json = clone new Json(1400);
         $sampleValue = 1398;
 
         return $this->prependJsonToEveryElement($json, [
@@ -93,7 +93,7 @@ class UncountableValueExceptionTest extends TestCase
 
     public function methodsWithUncountableIndexProvider()
     {
-        $json = new JSON(file_get_contents(__DIR__ . "/../json/apps.json"));
+        $json = new Json(file_get_contents(__DIR__ . "/../json/apps.json"));
 
         return $this->prependJsonToEveryElement($json, [
             ["count", ["apps.others.0"]],

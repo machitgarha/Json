@@ -11,7 +11,7 @@ class FeatureTest extends TestCase
     /** @see Json::extractKeysFromIndex() */
     public function testEscapedDelimiters()
     {
-        $json = new JSON([
+        $json = new Json([
             "fileInfo" => [
                 "data.json" => "Complex"
             ]

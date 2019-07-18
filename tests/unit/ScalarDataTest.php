@@ -21,7 +21,7 @@ class ScalarDataTest extends TestCase
 
     public function scalarJsonProvider()
     {
-        $json = new JSON(random_bytes(10));
+        $json = new Json(random_bytes(10));
 
         return [
             [clone $json]

@@ -719,7 +719,7 @@ class Json implements \ArrayAccess
 
         // On debugging, pay attention to the following @ operator!
         @$returnValueReference = &$function(... $this->findElementRecursive(
-            $keepIndex ? $this->extractIndex($index) : (array)($index),
+            $keepIndex ? (array)($index) : $this->extractIndex($index),
             $data,
             $forceCountableValue,
             $indexingType
@@ -736,7 +736,7 @@ class Json implements \ArrayAccess
      */
     public function index(string $index, int $indexingType = Indexing::FREE): JSONChild
     {
-        return new JSONChild($this->do(function &(&$element) {
+        return new JsonChild($this->do(function &(&$element) {
             return $element;
         }, $index, false, $indexingType), get_object_vars($this));
     }
@@ -923,7 +923,7 @@ class Json implements \ArrayAccess
     }
 
     /**
-     * Iterates over a countable, but returns its value as a new JSON class.
+     * Iterates over a countable, but returns its value as a new Json class.
      *
      * @param string $index
      * @return \Generator
@@ -934,7 +934,7 @@ class Json implements \ArrayAccess
 
         return $this->do(function (array &$array) use ($objectVars) {
             foreach ($array as $key => &$value) {
-                yield $key => new JSONChild($value, $objectVars);
+                yield $key => new JsonChild($value, $objectVars);
             }
         }, $index, true);
     }

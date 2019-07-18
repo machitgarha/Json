@@ -18,7 +18,7 @@ class InvalidArgumentExceptionTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         // Set up fixtures
-        $this->json = new JSON();
+        $this->json = new Json();
     }
 
     /**
@@ -26,7 +26,7 @@ class InvalidArgumentExceptionTest extends TestCase
      */
     public function testConstructorInvalidArgs($data, int $options = 0)
     {
-        new JSON($data, $options);
+        new Json($data, $options);
     }
 
     public function constructorInvalidArgsProvider()

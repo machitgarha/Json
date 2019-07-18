@@ -18,7 +18,7 @@ class PublicMethodTest extends TestCase
         static $sampleJson, $sampleData;
 
         if (!isset($sampleJson)) {
-            $sampleJson = new JSON(file_get_contents(__DIR__ . "/../json/apps.json"));
+            $sampleJson = new Json(file_get_contents(__DIR__ . "/../json/apps.json"));
             $sampleData = $sampleJson->getDataAsArray();
         }
 
@@ -39,7 +39,7 @@ class PublicMethodTest extends TestCase
      */
     public function testGetData($data, $asJson, $asArray, $asObject, $asFullObject)
     {
-        $json = new JSON($data);
+        $json = new Json($data);
 
         $this->assertEquals($asJson, $json->getDataAsJsonString());
         $this->assertEquals($asArray, $json->getDataAsArray());
@@ -50,7 +50,7 @@ class PublicMethodTest extends TestCase
     /** @dataProvider indexValuePairsProvider */
     public function testSetAndGet(string $index, $value)
     {
-        $json = new JSON();
+        $json = new Json();
 
         $json->set($value, $index);
         $this->assertEquals($value, $json->get($index));
@@ -59,7 +59,7 @@ class PublicMethodTest extends TestCase
     /** @dataProvider indexValuePairsProvider */
     public function testSetAndGetUsingArrayAccess(string $index, $value)
     {
-        $json = new JSON();
+        $json = new Json();
 
         $json[$index] = $value;
         $this->assertEquals($value, $json[$index]);
@@ -68,7 +68,7 @@ class PublicMethodTest extends TestCase
     /** @dataProvider indexValuePairsProvider */
     public function testIsSet(string $index, $value)
     {
-        $json = new JSON();
+        $json = new Json();
 
         $json->set($value, $index);
         $this->assertTrue($json->isSet($index));
@@ -80,7 +80,7 @@ class PublicMethodTest extends TestCase
     /** @dataProvider indexValuePairsProvider */
     public function testUnset(string $index, $value)
     {
-        $json = new JSON();
+        $json = new Json();
 
         $json->set($value, $index);
         $json->unset($index);
@@ -172,7 +172,7 @@ class PublicMethodTest extends TestCase
 
     public function testFilter()
     {
-        $json = new JSON([
+        $json = new Json([
             220,
             4,
             24
@@ -185,7 +185,7 @@ class PublicMethodTest extends TestCase
 
     public function testFlip()
     {
-        $json = new JSON();
+        $json = new Json();
         $this->assertEquals(1, $json->fill(0, 1000, 1)->flipValuesAndKeys()->count());
     }
 
@@ -198,7 +198,7 @@ class PublicMethodTest extends TestCase
 
     public function testFill()
     {
-        $json = new JSON();
+        $json = new Json();
         $this->assertEquals(1000, $json->fill(0, 1000, 4)->count());
     }
 

@@ -20,7 +20,7 @@ class InvalidJsonExceptionTest extends TestCase
     /** @dataProvider invalidJsonProvider */
     public function testConstructor(string $data)
     {
-        new JSON($data, Json::OPT_TREAT_AS_JSON_STRING);
+        new Json($data, Json::OPT_TREAT_AS_JSON_STRING);
     }
 
     /** @todo Import JSON schema. */
