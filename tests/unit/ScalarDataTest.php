@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Unit tests for MAChitgarha\Component\JSON class.
+ * Unit tests for MAChitgarha\Component\Json class.
  *
  * Go to the project's root and run the tests in this way:
  * phpunit --bootstrap vendor/autoload.php tests/unit
  *
- * @see MAChitgarha\Component\JSON
+ * @see MAChitgarha\Component\Json
  */
-namespace MAChitgarha\UnitTest\JSON;
+namespace MAChitgarha\UnitTest\Json;
 
 use PHPUnit\Framework\TestCase;
-use MAChitgarha\Component\JSON;
+use MAChitgarha\Component\Json;
 
 class ScalarDataTest extends TestCase
 {

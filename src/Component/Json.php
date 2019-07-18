@@ -1,20 +1,20 @@
 <?php
 /**
- * JSON class file.
+ * Json class file.
  *
  * @author Mohammad Amin Chitgarha <machitgarha@outlook.com>
- * @see https://github.com/MAChitgarha/JSON
+ * @see https://github.com/MAChitgarha/Json
  * @see https://packagist.org/packages/machitgarha/json
  */
 
 namespace MAChitgarha\Component;
 
-use MAChitgarha\Exception\JSON\Exception;
-use MAChitgarha\Exception\JSON\InvalidArgumentException;
-use MAChitgarha\Exception\JSON\InvalidJsonException;
-use MAChitgarha\Exception\JSON\UncountableValueException;
-use MAChitgarha\Exception\JSON\JsonException;
-use MAChitgarha\Exception\JSON\OverflowException;
+use MAChitgarha\Json\Exception\Exception;
+use MAChitgarha\Json\Exception\InvalidArgumentException;
+use MAChitgarha\Json\Exception\InvalidJsonException;
+use MAChitgarha\Json\Exception\UncountableValueException;
+use MAChitgarha\Json\Exception\JsonException;
+use MAChitgarha\Json\Exception\OverflowException;
 use MAChitgarha\Json\Option\Type;
 use MAChitgarha\Json\Option\JsonOpt;
 use MAChitgarha\Json\Option\Indexing;
@@ -26,8 +26,8 @@ use MAChitgarha\Json\Option\DoOpt;
  *
  * Gets a JSON string or a PHP native array or object and handles it as a JSON data.
  *
- * @see https://github.com/MAChitgarha/JSON/wiki
- * @see https://github.com/MAChitgarha/JSON/wiki/Glossary
+ * @see https://github.com/MAChitgarha/Json/wiki
+ * @see https://github.com/MAChitgarha/Json/wiki/Glossary
  */
 class Json implements \ArrayAccess
 {

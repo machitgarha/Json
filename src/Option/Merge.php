@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Mohammad Amin Chitgarha <machitgarha@outlook.com>
- * @see https://github.com/MAChitgarha/JSON
+ * @see https://github.com/MAChitgarha/Json
  * @see https://packagist.org/packages/machitgarha/json
  */
 

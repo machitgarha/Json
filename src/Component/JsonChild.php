@@ -3,7 +3,7 @@
  * JsonChild class file.
  *
  * @author Mohammad Amin Chitgarha <machitgarha@outlook.com>
- * @see https://github.com/MAChitgarha/JSON
+ * @see https://github.com/MAChitgarha/Json
  * @see https://packagist.org/packages/machitgarha/json
  */
 
@@ -12,7 +12,7 @@ namespace MAChitgarha\Component;
 /**
  * Holds an element of the parent data by-reference and make operations on it.
  *
- * @see https://github.com/MAChitgarha/JSON/wiki
+ * @see https://github.com/MAChitgarha/Json/wiki
  */
 class JsonChild extends Json
 {

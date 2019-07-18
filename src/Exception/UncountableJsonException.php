@@ -1,11 +1,11 @@
 <?php
 /**
- * Exception class file for MAChitgarha\Component\JSON.
+ * Exception class file for MAChitgarha\Component\Json.
  *
- * @see MAChitgarha\Component\JSON
+ * @see MAChitgarha\Component\Json
  */
 
-namespace MAChitgarha\Exception\JSON;
+namespace MAChitgarha\Json\Exception;
 
 class UncountableJsonException extends UncountableValueException
 {

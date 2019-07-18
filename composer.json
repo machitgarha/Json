@@ -28,7 +28,7 @@
     "autoload": {
         "psr-4": {
             "MAChitgarha\\": "src",
-            "MAChitgarha\\Exception\\JSON\\": "src/Exception"
+            "MAChitgarha\\Json\\": "src"
         }
     },
     "type": "library",
