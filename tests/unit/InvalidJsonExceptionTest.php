@@ -6,6 +6,7 @@ namespace MAChitgarha\UnitTest\Json;
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Component\Json;
 use MAChitgarha\Json\Exception\InvalidJsonException;
+use MAChitgarha\Json\Option\JsonOpt;
 
 class InvalidJsonExceptionTest extends TestCase
 {
@@ -20,7 +21,7 @@ class InvalidJsonExceptionTest extends TestCase
     /** @dataProvider invalidJsonProvider */
     public function testConstructor(string $data)
     {
-        new Json($data, Json::OPT_TREAT_AS_JSON_STRING);
+        new Json($data, JsonOpt::AS_JSON);
     }
 
     /** @todo Import JSON schema. */
