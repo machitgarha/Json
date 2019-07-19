@@ -31,11 +31,8 @@ use MAChitgarha\Json\Option\DoOpt;
 class Json implements \ArrayAccess
 {
     /**
-     * @var array|int|string|float|bool|null JSON data as a complete native PHP array (to be
-     * handled more easily), or as a scalar type. It is important to note that what we mean from a
-     * scalar type can be NULL, also. If the data passed to the constructor is countable, then the
-     * data will be saved as an array; otherwise, if it's scalar, it will be saved as is. Also,
-     * these allowed types can be in a string that contains a valid JSON data.
+     * @var mixed JSON data parsed in the constructor. It should be everything but a resource type,
+     * but it may. Setting it to a resource might lead to errors/exceptions.
      */
     protected $data;
 
@@ -64,8 +61,8 @@ class Json implements \ArrayAccess
      * considered as empty objects.
      * @param int $options A combination of JsonOpt::* constants.
      * @throws InvalidArgumentException Using JsonOpt::AS_JSON option and passing a non-string data.
-     * @throws InvalidArgumentException If data is neither countable nor scalar.
      * @throws InvalidJsonException If JsonOpt::AS_JSON is enabled and data is not a valid JSON.
+     * @throws InvalidArgumentException If data is a resource.
      */
     public function __construct($data = [], int $options = 0)
     {
@@ -110,8 +107,7 @@ class Json implements \ArrayAccess
             return;
         }
 
-        // If data is invalid, i.e. is a resource
-        throw new InvalidArgumentException("Data must be either countable or scalar");
+        throw new InvalidArgumentException("Data must not be a resource");
     }
 
     /**
@@ -233,7 +229,8 @@ class Json implements \ArrayAccess
 
     /**
      * Tells whether data type is scalar or not.
-     * A scalar type, can be an integer, a string, a float, a boolean, or NULL.
+     * A scalar type, can be an integer, a string, a float, a boolean, or NULL (in PHP itself, NULL
+     * is not a scalar value, but here it is considered as scalar).
      *
      * @param mixed $data
      * @param bool $throwException To throw exceptions when data is not scalar or not.
