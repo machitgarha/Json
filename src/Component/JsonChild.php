@@ -27,8 +27,5 @@ class JsonChild extends Json
         }
 
         $this->data = &$dataPointer;
-        if (!is_array($dataPointer)) {
-            $this->isDataScalar = true;
-        }
     }
 }

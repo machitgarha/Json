@@ -547,14 +547,14 @@ class Json implements \ArrayAccess
     /**
      * Extract index to an array of keys using a delimiter.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @param string $delimiter
      * @return array
      *
      * @since 0.3.2 Add escaping delimiters, i.e., using delimiters as the part of keys by escaping
      * them using a backslash.
      */
-    protected function extractIndex(string $index = null, string $delimiter = "."): array
+    protected function extractIndex($index = null, string $delimiter = "."): array
     {
         if ($index === null) {
             return [];
@@ -591,7 +591,7 @@ class Json implements \ArrayAccess
      * From within the callable, you can yield as many values as you want, and/or return a value.
      * The return type of the method will be exactly the return type of this callable. Note that if
      * $index is null, the first argument will be the only passing argument.
-     * @param ?string $index The index of the element to be found, and it's extracted as keys. Pass
+     * @param ?string|int $index The index of the element to be found, and it's extracted as keys. Pass
      * null if you want to get the data root inside the callback.
      * @param bool $forceCountableValue Force the value be operated to be a countable one, so, the
      * element (i.e. first argument) passing to $function will be an array.
@@ -607,7 +607,7 @@ class Json implements \ArrayAccess
      */
     public function &do(
         callable $function = null,
-        string $index = null,
+        $index = null,
         bool $forceCountableValue = false,
         int $indexingType = Indexing::STRICT,
         int $options = 0
@@ -651,10 +651,10 @@ class Json implements \ArrayAccess
     /**
      * Returns an element's value.
      *
-     * @param ?string $index Pass null if data is scalar.
+     * @param ?string|int $index Pass null if data is scalar.
      * @return mixed The value of the specified element. Returns null if the index cannot be found.
      */
-    public function get(string $index = null)
+    public function get($index = null)
     {
         try {
             return $this->do(function ($value) {
@@ -670,10 +670,10 @@ class Json implements \ArrayAccess
     /**
      * Returns an element by-reference.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return mixed
      */
-    public function &getByReference(string $index = null)
+    public function &getByReference($index = null)
     {
         return $this->do(function &(&$element) {
             return $element;
@@ -684,10 +684,10 @@ class Json implements \ArrayAccess
      * Sets an element to a value.
      *
      * @param mixed $value
-     * @param ?string $index Pass null if data is scalar.
+     * @param ?string|int $index Pass null if data is scalar.
      * @return self
      */
-    public function set($value, string $index = null): self
+    public function set($value, $index = null): self
     {
         $this->do(function (&$element) use ($value) {
             $element = $this->toJsonIfNeeded($value);
@@ -698,10 +698,10 @@ class Json implements \ArrayAccess
     /**
      * Determines if an element exists or not.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return bool Whether the element is set or not. A null value will be considered as not set.
      */
-    public function isSet(string $index = null): bool
+    public function isSet($index = null): bool
     {
         return $this->get($index) !== null;
     }
@@ -709,10 +709,10 @@ class Json implements \ArrayAccess
     /**
      * Unsets an element.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function unset(string $index = null): self
+    public function unset($index = null): self
     {
         $this->do(function (&$element, &$data, $key) {
             $element = null;
@@ -769,11 +769,11 @@ class Json implements \ArrayAccess
     /**
      * Determines whether an element is countable or not.
      *
-     * @param ?string $index Pass null if you want to check the data itself (i.e. checking if it is
+     * @param ?string|int $index Pass null if you want to check the data itself (i.e. checking if it is
      * scalar or not).
      * @return bool
      */
-    public function isCountable(string $index = null): bool
+    public function isCountable($index = null): bool
     {
         try {
             return $this->do(function () {
@@ -787,10 +787,10 @@ class Json implements \ArrayAccess
     /**
      * Counts the numbers elements in a countable element.
      *
-     * @param ?string $index Pass null if you want to get the number of elements in the data root.
+     * @param ?string|int $index Pass null if you want to get the number of elements in the data root.
      * @return int
      */
-    public function count(string $index = null): int
+    public function count($index = null): int
     {
         return $this->do(function ($element) {
             return count($element);
@@ -800,10 +800,10 @@ class Json implements \ArrayAccess
     /**
      * Converts the data to an array, if it is scalar.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function toCountable(string $index = null): self
+    public function toCountable($index = null): self
     {
         $this->do(function (&$value) {
             $value = (array)($value);
@@ -814,10 +814,10 @@ class Json implements \ArrayAccess
     /**
      * Iterates over a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return \Generator
      */
-    public function &iterate(string $index = null): \Generator
+    public function &iterate($index = null): \Generator
     {
         return $this->do(function &(array &$array) {
             foreach ($array as $key => &$value) {
@@ -831,10 +831,10 @@ class Json implements \ArrayAccess
     /**
      * Iterates over a countable, but returns its value as a new Json class.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return \Generator
      */
-    public function iterateAsJson(string $index = null): \Generator
+    public function iterateAsJson($index = null): \Generator
     {
         $objectVars = get_object_vars($this);
 
@@ -853,10 +853,10 @@ class Json implements \ArrayAccess
      * 1. The element's value; might be gotten by-reference.
      * 2. The element's key.
      * 3. The parent element; might be gotten by-reference.
-     * @param ?string $index
+     * @param ?string|int $index
      * @return mixed
      */
-    public function forEach(callable $function, string $index = null)
+    public function forEach(callable $function, $index = null)
     {
         return $this->do(function (array &$array) use ($function) {
             foreach ($array as $key => &$value) {
@@ -875,10 +875,10 @@ class Json implements \ArrayAccess
      * @param callable $function The function to be called on each member, accepts three arguments:
      * 1. The element's value, might be gotten by-reference.
      * 2. The element's key.
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function forEachRecursive(callable $function, string $index = null): self
+    public function forEachRecursive(callable $function, $index = null): self
     {
         $this->do(function (array &$array) use ($function) {
             $this->walkRecursive($array, $function);
@@ -910,10 +910,10 @@ class Json implements \ArrayAccess
      * Pushes a value to the end of a countable.
      *
      * @param mixed $value
-     * @param ?string $index Pass null if you want to push the value to the data root.
+     * @param ?string|int $index Pass null if you want to push the value to the data root.
      * @return self
      */
-    public function push($value, string $index = null): self
+    public function push($value, $index = null): self
     {
         $this->do(function (array &$array) use ($value) {
             array_push($array, $this->toJsonIfNeeded($value));
@@ -924,10 +924,10 @@ class Json implements \ArrayAccess
     /**
      * Pops the last value of a countable and returns it.
      *
-     * @param ?string $index Pass null if you want to pop from the data root.
+     * @param ?string|int $index Pass null if you want to pop from the data root.
      * @return mixed The removed element's value.
      */
-    public function pop(string $index = null)
+    public function pop($index = null)
     {
         return $this->do(function (array &$array) {
             return array_pop($array);
@@ -937,10 +937,10 @@ class Json implements \ArrayAccess
     /**
      * Removes the first element of a countable.
      *
-     * @param ?string $index Pass null if you want to remove an element from the data root.
+     * @param ?string|int $index Pass null if you want to remove an element from the data root.
      * @return mixed The removed element's value.
      */
-    public function shift(string $index = null)
+    public function shift($index = null)
     {
         return $this->do(function (array $array) {
             return array_shift($array);
@@ -950,10 +950,10 @@ class Json implements \ArrayAccess
     /**
      * Prepends an element to a countable.
      *
-     * @param ?string $index Pass null if you want to prepend an element to the data root.
+     * @param ?string|int $index Pass null if you want to prepend an element to the data root.
      * @return self
      */
-    public function unshift($value, string $index = null): self
+    public function unshift($value, $index = null): self
     {
         $this->do(function (array &$array) use ($value) {
             array_unshift($array, $value);
@@ -964,10 +964,10 @@ class Json implements \ArrayAccess
     /**
      * Returns all values of a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return array
      */
-    public function getValues(string $index = null): array
+    public function getValues($index = null): array
     {
         return $this->do(function (array $array) {
             return array_values($array);
@@ -977,10 +977,10 @@ class Json implements \ArrayAccess
     /**
      * Returns all keys of a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return array
      */
-    public function getKeys(string $index = null): array
+    public function getKeys($index = null): array
     {
         return $this->do(function (array $array) {
             return array_keys($array);
@@ -990,10 +990,10 @@ class Json implements \ArrayAccess
     /**
      * Returns a random value from a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return mixed
      */
-    public function getRandomValue(string $index = null)
+    public function getRandomValue($index = null)
     {
         return $this->do(function (array $array) {
             return array_values($array)[$this->randomInt(0, count($array) - 1)];
@@ -1003,10 +1003,10 @@ class Json implements \ArrayAccess
     /**
      * Returns a random key from a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return int|string
      */
-    public function getRandomKey(string $index = null)
+    public function getRandomKey($index = null)
     {
         return $this->do(function (array $array) {
             return array_keys($array)[$this->randomInt(0, count($array) - 1)];
@@ -1016,12 +1016,12 @@ class Json implements \ArrayAccess
     /**
      * Returns a random key/value pair from a countable
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return array{0:string|int,1:mixed} An array that contains the element's key and the
      * element's value, respectively. You can get it as a list: list($key, $value). You can
      * also get the value by-reference.
      */
-    public function getRandomElement(string $index = null): array
+    public function getRandomElement($index = null): array
     {
         return $this->do(function (array &$array) {
             $randomKey = array_keys($array)[$this->randomInt(0, count($array) - 1)];
@@ -1037,10 +1037,10 @@ class Json implements \ArrayAccess
      * Returns one or more random values from a countable in data.
      *
      * @param int $count
-     * @param ?string $index
+     * @param ?string|int $index
      * @return array
      */
-    public function getRandomValues(int $count, string $index = null): array
+    public function getRandomValues(int $count, $index = null): array
     {
         return $this->do(function (array $array) use ($count) {
             $maxArrayIndex = count($array) - 1;
@@ -1064,10 +1064,10 @@ class Json implements \ArrayAccess
      * Returns one or more random keys from a countable in data.
      *
      * @param integer $count
-     * @param ?string $index
+     * @param ?string|int $index
      * @return array
      */
-    public function getRandomKeys(int $count, string $index = null): array
+    public function getRandomKeys(int $count, $index = null): array
     {
         return $this->do(function (array $array) use ($count) {
             $maxArrayIndex = count($array) - 1;
@@ -1091,10 +1091,10 @@ class Json implements \ArrayAccess
      * Returns a random subset of a countable.
      *
      * @param integer $size Subset's length.
-     * @param ?string $index
+     * @param ?string|int $index
      * @return array
      */
-    public function getRandomSubset(int $size, string $index = null): array
+    public function getRandomSubset(int $size, $index = null): array
     {
         return $this->do(function (array &$array) use ($size) {
             $maxArrayIndex = count($array) - 1;
@@ -1121,10 +1121,10 @@ class Json implements \ArrayAccess
      * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
      * and will be treated as an array.
      * @param int $options A combination of Merge::* constants.
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function mergeWith($newData, int $options = 0, string $index = null): self
+    public function mergeWith($newData, int $options = 0, $index = null): self
     {
         // Extracting options
         $reverseOrder = $options & Merge::KEEP_DEFAULT;
@@ -1146,10 +1146,10 @@ class Json implements \ArrayAccess
      * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
      * and will be treated as an array.
      * @param int $options Currently, no options are available.
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function mergeRecursivelyWith($newData, int $options = 0, string $index = null): self
+    public function mergeRecursivelyWith($newData, int $options = 0, $index = null): self
     {
         $this->do(function (array &$array) use ($newData) {
             $newData = (array)($this->toJsonIfNeeded($newData));
@@ -1164,14 +1164,14 @@ class Json implements \ArrayAccess
      * @param mixed $data The data to be compared with. Any values (except recourses)
      * can be passed and will be treated as an array.
      * @param bool $compareKeys To calculate intersection in the keys or not (i.e. in values).
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      * @see https://gist.github.com/nunoveloso/1992851 Thanks to this.
      */
     public function difference(
         $data,
         bool $compareKeys = false,
-        string $index = null
+        $index = null
     ): self {
         $data = (array)($this->toJsonIfNeeded($data));
 
@@ -1217,10 +1217,10 @@ class Json implements \ArrayAccess
      * 2. The element's key.
      * Keep in mind, the given value by the callable is safe from overwriting; so getting it
      * by-reference or not does not matter. The default function removes all null values.
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function filter(callable $function = null, string $index = null): self
+    public function filter(callable $function = null, $index = null): self
     {
         if ($function === null) {
             $function = function ($value) {
@@ -1243,10 +1243,10 @@ class Json implements \ArrayAccess
     /**
      * Flips values and keys in a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function flipValuesAndKeys(string $index = null): self
+    public function flipValuesAndKeys($index = null): self
     {
         $this->do(function (array &$array) {
             $array = array_flip($array);
@@ -1257,11 +1257,11 @@ class Json implements \ArrayAccess
     /**
      * Shuffles a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      * @see https://stackoverflow.com/a/32035692/4215651 Thanks to this.
      */
-    public function shuffle(string $index = null): self
+    public function shuffle($index = null): self
     {
         $this->do(function (array &$array) {
             $shuffledArray = [];
@@ -1280,10 +1280,10 @@ class Json implements \ArrayAccess
     /**
      * Reverses a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function reverse(string $index = null): self
+    public function reverse($index = null): self
     {
         $this->do(function (array &$array) {
             $array = array_reverse($array);
@@ -1297,10 +1297,10 @@ class Json implements \ArrayAccess
      * @param int $startIndex
      * @param int $length
      * @param mixed $value
-     * @param ?string $index
+     * @param ?string|int $index
      * @return self
      */
-    public function fill(int $startIndex, int $length, $value, string $index = null): self
+    public function fill(int $startIndex, int $length, $value, $index = null): self
     {
         $this->do(function (&$element) use ($startIndex, $length, $value) {
             $element = array_fill($startIndex, $length, $value);
@@ -1311,10 +1311,10 @@ class Json implements \ArrayAccess
     /**
      * Returns the first key of a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return string|int
      */
-    public function getFirstKey(string $index = null)
+    public function getFirstKey($index = null)
     {
         return $this->do(function (array $array) {
             foreach ($array as $key => $value) {
@@ -1326,11 +1326,11 @@ class Json implements \ArrayAccess
     /**
      * Returns the last key of a countable.
      *
-     * @param ?string $index
+     * @param ?string|int $index
      * @return string|int
      * @see https://stackoverflow.com/a/7478419/4215651 Thanks to this.
      */
-    public function getLastKey(string $index = null)
+    public function getLastKey($index = null)
     {
         return $this->do(function (array $array) {
             return key(array_slice($array, -1, 1, true));
