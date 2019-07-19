@@ -84,8 +84,6 @@ class UncountableValueExceptionTest extends TestCase
             ["difference", [[]]],
             ["filter"],
             ["flipValuesAndKeys"],
-            ["reduce", [function () {
-            }]],
             ["shuffle"],
             ["reverse"],
         ]);

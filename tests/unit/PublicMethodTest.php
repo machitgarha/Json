@@ -189,13 +189,6 @@ class PublicMethodTest extends TestCase
         $this->assertEquals(1, $json->fill(0, 1000, 1)->flipValuesAndKeys()->count());
     }
 
-    public function testReduce()
-    {
-        $this->assertIsString(self::$sampleJson->reduce(function ($carry, $value) {
-            return "$carry, $value";
-        }, "apps.others"));
-    }
-
     public function testFill()
     {
         $json = new Json();
