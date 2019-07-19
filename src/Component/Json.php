@@ -438,7 +438,7 @@ class Json implements \ArrayAccess, \Countable
      *
      * @return object
      */
-    public function getDataAsFullObject(): object
+    public function getDataAsFullObject()
     {
         return $this->convertToObject($this->data, true);
     }

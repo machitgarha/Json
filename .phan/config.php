@@ -9,4 +9,5 @@ return [
     "directory_list" => [
         "src"
     ],
+    "target_php_version" => "7.0",
 ];
