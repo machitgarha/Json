@@ -36,9 +36,6 @@ class Json implements \ArrayAccess
      */
     protected $data;
 
-    /** @var bool A scalar type could be an integer, a string, a float, a boolean, or NULL. */
-    protected $isDataScalar = false;
-
     ### Options and customizations
 
     /** @var int Options passed to the constructor. */
@@ -803,11 +800,14 @@ class Json implements \ArrayAccess
     /**
      * Converts the data to an array, if it is scalar.
      *
+     * @param ?string $index
      * @return self
      */
-    public function toCountable(): self
+    public function toCountable(string $index = null): self
     {
-        $this->data = (array)($this->data);
+        $this->do(function (&$value) {
+            $value = (array)($value);
+        }, $index);
         return $this;
     }
 
