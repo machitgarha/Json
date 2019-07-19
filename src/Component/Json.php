@@ -673,7 +673,7 @@ class Json implements \ArrayAccess
     /**
      * Returns an element by-reference.
      *
-     * @param string $index
+     * @param ?string $index
      * @return mixed
      */
     public function &getByReference(string $index = null)
@@ -701,7 +701,7 @@ class Json implements \ArrayAccess
     /**
      * Determines if an element exists or not.
      *
-     * @param string $index
+     * @param ?string $index
      * @return bool Whether the element is set or not. A null value will be considered as not set.
      */
     public function isSet(string $index = null): bool
@@ -712,7 +712,7 @@ class Json implements \ArrayAccess
     /**
      * Unsets an element.
      *
-     * @param string $index
+     * @param ?string $index
      * @return self
      */
     public function unset(string $index = null): self
@@ -831,7 +831,7 @@ class Json implements \ArrayAccess
     /**
      * Iterates over a countable, but returns its value as a new Json class.
      *
-     * @param string $index
+     * @param ?string $index
      * @return \Generator
      */
     public function iterateAsJson(string $index = null): \Generator

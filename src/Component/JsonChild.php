@@ -17,8 +17,8 @@ namespace MAChitgarha\Component;
 class JsonChild extends Json
 {
     /**
-     * @param array $data A countable element of the parent data, by-reference.
-     * @param array $classProperties Properties from the caller class to be set inside this class.
+     * @param mixed $dataPointer The element to be held, by-reference.
+     * @param array $properties Properties from the caller class to be set inside this class.
      */
     public function __construct(&$dataPointer, array $properties)
     {
