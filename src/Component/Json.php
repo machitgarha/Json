@@ -15,7 +15,6 @@ use MAChitgarha\Json\Exception\InvalidJsonException;
 use MAChitgarha\Json\Exception\UncountableValueException;
 use MAChitgarha\Json\Exception\JsonException;
 use MAChitgarha\Json\Exception\OverflowException;
-use MAChitgarha\Json\Option\Type;
 use MAChitgarha\Json\Option\JsonOpt;
 use MAChitgarha\Json\Option\Indexing;
 use MAChitgarha\Json\Option\Merge;
@@ -43,12 +42,6 @@ class Json implements \ArrayAccess
     /** @var bool A scalar type could be an integer, a string, a float, a boolean, or NULL. */
     protected $isDataScalar = false;
 
-    /** @var int Default data type; can be one of the Type::* constants. */
-    protected $defaultDataType = Type::JSON_STRING;
-
-    /** @var int {@see self::setReturnType()}. */
-    protected $returnType = Type::ARRAY;
-
     ### Options and customizations
 
     /** @var int Options passed to the constructor. */
@@ -59,9 +52,6 @@ class Json implements \ArrayAccess
 
     /** @var int {@see self::setJsonRecursionDepth()} */
     protected $jsonRecursionDepth = 512;
-
-    /** @var bool {@see self::setReturnType()}. */
-    protected $returnScalarAsScalar = true;
 
     /** @var callable {@see self::setRandomizationFunction()}. */
     protected $randomizationFunction = "mt_rand";
@@ -91,8 +81,7 @@ class Json implements \ArrayAccess
             throw new InvalidArgumentException("Data must be string when JsonOpt::AS_JSON is used");
         }
 
-        if ($type = self::isArrayOrObject($data)) {
-            $this->defaultDataType = $type;
+        if (self::isArrayOrObject($data)) {
             $this->data = $data;
             return;
         }
@@ -105,7 +94,6 @@ class Json implements \ArrayAccess
             }
             
             if ($isJsonValid) {
-                $this->defaultDataType = Type::JSON_STRING;
                 $this->data = $decodedData;
                 return;
             }
@@ -192,70 +180,6 @@ class Json implements \ArrayAccess
     }
 
     /**
-     * Sets the return type that is used by other returning-value methods.
-     *
-     * @param int $type The type of returning values. For example, consider that you passed data as
-     * an array and you pass this argument as Type::OBJECT; in this case, when you use
-     * Json::get() (with no arguments, to get the data itself), then the data will be returned as
-     * an object.
-     * @param bool $scalarAsIs To return all scalar data as scalar or not. Sometimes, methods
-     * returning a value, reach a scalar value, such as Json::get(). In these cases, this argument
-     * determines that should the returned value be scalar or not. If it sets to false, then all
-     * scalar data will be returned as the type of $type (e.g. an array).
-     * @return self
-     */
-    public function setReturnType(int $type = Type::ARRAY, bool $scalarAsIs = true): self
-    {
-        switch ($type) {
-            case Type::DEFAULT:
-            case Type::JSON_STRING:
-            case Type::ARRAY:
-            case Type::OBJECT:
-            case Type::FULL_OBJECT:
-                $this->returnType = $type;
-                $this->returnScalarAsScalar = $scalarAsIs;
-                return $this;
-                break;
-
-            default:
-                throw new InvalidArgumentException("Unknown return type");
-        }
-    }
-
-    /**
-     * Gets the value based on the return type.
-     * Based on {@see self::$returnType} and {@see self::$returnScalarAsScalar}, converts the value
-     * to the desired type (if needed) and returns it.
-     *
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function getValueBasedOnReturnType($value)
-    {
-        if ($this->returnScalarAsScalar && self::isScalar($value)) {
-            return $value;
-        }
-
-        $returnType = $this->returnType;
-        if ($returnType === Type::DEFAULT) {
-            $returnType = $this->defaultDataType;
-        }
-
-        switch ($returnType) {
-            case Type::JSON_STRING:
-                return $this->encodeToJsonUseProps($value);
-            case Type::ARRAY:
-                return $this->convertToArray($value);
-            case Type::OBJECT:
-                return $this->convertToObject($value);
-            case Type::FULL_OBJECT:
-                return $this->convertToObject($value, true);
-            default:
-                throw new InvalidArgumentException("Unknown return type");
-        }
-    }
-
-    /**
      * Decodes a valid JSON string and returns it if {@see JsonOpt::DECODE_ALWAYS} is set.
      *
      * @param mixed $value
@@ -292,8 +216,7 @@ class Json implements \ArrayAccess
      * @param mixed $data
      * @param bool $throwException To throw exceptions when data is not either an array or an
      * object or not.
-     * @return int 0 if is not any of them, Type::ARRAY if it is an array and Type::OBJECT
-     * if it is an object.
+     * @return int 0 if is not any of them, 1 if it is an array and -1 if it is an object.
      * @throws InvalidArgumentException
      */
     protected static function isArrayOrObject($data, bool $throwException = false): int
@@ -305,8 +228,7 @@ class Json implements \ArrayAccess
             throw new InvalidArgumentException("Data must be either an array or an object");
         }
 
-        return ($isArray ? Type::ARRAY :
-            ($isObject ? Type::OBJECT : 0));
+        return ($isArray ? 1 : ($isObject ? -1 : 0));
     }
 
     /**
@@ -555,8 +477,7 @@ class Json implements \ArrayAccess
         array $keys,
         &$data,
         bool $forceCountableValue = false,
-        int $indexingType = Indexing::STRICT,
-        bool $isDataUnreliable = true
+        int $indexingType = Indexing::STRICT
     ): array {
         $keysCount = count($keys);
 
@@ -567,9 +488,8 @@ class Json implements \ArrayAccess
             if (isset($data[$curKey])) {
                 $childData = &$data[$curKey];
 
-                if ($isDataUnreliable && is_object($childData)) {
-                    $childData = $this->convertToArray($childData);
-                    $isDataUnreliable = false;
+                if (is_object($childData)) {
+                    $childData = (array)($childData);
                 }
 
                 if (!is_array($childData) && $indexingType >= Indexing::SAFE) {
@@ -587,8 +507,7 @@ class Json implements \ArrayAccess
                 $keys,
                 $data[$curKey],
                 $forceCountableValue,
-                $indexingType,
-                $isDataUnreliable
+                $indexingType
             );
         }
 
@@ -600,9 +519,8 @@ class Json implements \ArrayAccess
                 if (isset($data[$lastKey])) {
                     $childData = &$data[$lastKey];
 
-                    if ($isDataUnreliable && is_object($childData)) {
-                        $childData = $this->convertToArray($childData);
-                        $isDataUnreliable = false;
+                    if (is_object($childData)) {
+                        $childData = (array)($childData);
                     }
                     if ($forceCountableValue && !is_array($childData)) {
                         throw new UncountableValueException("Cannot use the method on uncountable");
@@ -632,6 +550,12 @@ class Json implements \ArrayAccess
                     null,
                 ];
             }
+
+            /*
+             * For sure, $returnValue[1] is an array or null. Just we must make sure that
+             * $returnValue[0] is an array, for further operations. So:
+             */
+            $returnValue[0] = $this->convertToArray($returnValue[0]);
 
             return $returnValue;
         }
@@ -751,7 +675,7 @@ class Json implements \ArrayAccess
     {
         try {
             return $this->do(function ($value) {
-                return $this->getValueBasedOnReturnType($value);
+                return $value;
             }, $index);
         } catch (UncountableValueException $e) {
             throw $e;
@@ -769,7 +693,6 @@ class Json implements \ArrayAccess
     public function &getByReference(string $index = null)
     {
         return $this->do(function &(&$element) {
-            $element = $this->getValueBasedOnReturnType($element);
             return $element;
         }, $index);
     }
@@ -912,9 +835,6 @@ class Json implements \ArrayAccess
     {
         return $this->do(function &(array &$array) {
             foreach ($array as $key => &$value) {
-                // E.g. convert arrays to objects
-                $value = $this->getValueBasedOnReturnType($value);
-
                 yield $key => $value;
 
                 $value = $this->toJsonIfNeeded($value);
