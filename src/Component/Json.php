@@ -1349,20 +1349,6 @@ class Json implements \ArrayAccess
     }
 
     /**
-     * Reduces a countable to a single value.
-     *
-     * @param callable $function Read array_reduce() documentation for more information.
-     * @param ?string $index
-     * @return mixed
-     */
-    public function reduce(callable $function, string $index = null)
-    {
-        return $this->do(function (array $array) use ($function) {
-            return array_reduce($array, $function);
-        }, $index, true);
-    }
-
-    /**
      * Shuffles a countable.
      *
      * @param ?string $index
