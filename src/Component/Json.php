@@ -28,7 +28,7 @@ use MAChitgarha\Json\Option\DoOpt;
  * @see https://github.com/MAChitgarha/Json/wiki
  * @see https://github.com/MAChitgarha/Json/wiki/Glossary
  */
-class Json implements \ArrayAccess
+class Json implements \ArrayAccess, \Countable
 {
     /**
      * @var mixed JSON data parsed in the constructor. It should be everything but a resource type,
@@ -373,13 +373,14 @@ class Json implements \ArrayAccess
      * Converts an object or an array to a recursive array.
      *
      * @param mixed $data
-     * @return array
+     * @return mixed
      * @see https://stackoverflow.com/a/54131002/4215651 Thanks to this.
      */
-    protected function convertToArray($data): array
+    protected function convertToArray($data)
     {
         if (is_object($data) || is_array($data)) {
             foreach ((array)($data) as &$value) {
+                // Recursion
                 $value = $this->convertToArray($value);
             }
         }
