@@ -210,21 +210,11 @@ class Json implements \ArrayAccess
      * Determines if data is an array or an object, or force it to be one of them.
      *
      * @param mixed $data
-     * @param bool $throwException To throw exceptions when data is not either an array or an
-     * object or not.
      * @return int 0 if is not any of them, 1 if it is an array and -1 if it is an object.
-     * @throws InvalidArgumentException
      */
-    protected static function isArrayOrObject($data, bool $throwException = false): int
+    protected static function isArrayOrObject($data): int
     {
-        $isArray = is_array($data);
-        $isObject = is_object($data);
-
-        if (!($isArray || $isObject) && $throwException) {
-            throw new InvalidArgumentException("Data must be either an array or an object");
-        }
-
-        return ($isArray ? 1 : ($isObject ? -1 : 0));
+        return (is_array($data) ? 1 : (is_object($data) ? -1 : 0));
     }
 
     /**
@@ -233,19 +223,11 @@ class Json implements \ArrayAccess
      * is not a scalar value, but here it is considered as scalar).
      *
      * @param mixed $data
-     * @param bool $throwException To throw exceptions when data is not scalar or not.
      * @return bool
-     * @throws InvalidArgumentException
      */
-    protected static function isScalar($data, bool $throwException = false): bool
+    protected static function isScalar($data): bool
     {
-        $isScalar = is_scalar($data) || $data === null;
-
-        if (!$isScalar && $throwException) {
-            throw new InvalidArgumentException("Data must be scalar");
-        }
-
-        return $isScalar;
+        return is_scalar($data) || $data === null;
     }
 
     /**
@@ -393,18 +375,24 @@ class Json implements \ArrayAccess
     /**
      * Converts an object or an array to a recursive array.
      *
-     * @param array|object $data
+     * @param mixed $data
      * @return array
+     * @see https://stackoverflow.com/a/54131002/4215651 Thanks to this.
      */
     protected function convertToArray($data): array
     {
-        return (new \ArrayObject($data))->getArrayCopy();
+        if (is_object($data) || is_array($data)) {
+            foreach ((array)($data) as &$value) {
+                $value = $this->convertToArray($value);
+            }
+        }
+        return $data;
     }
 
     /**
      * Converts an array or an object to a recursive object.
      *
-     * @param array $data
+     * @param mixed $data
      * @param bool $forceObject Whether to convert indexed arrays to objects or not.
      * @return object|array
      */
@@ -552,7 +540,8 @@ class Json implements \ArrayAccess
              * For sure, $returnValue[1] is an array or null. Just we must make sure that
              * $returnValue[0] is an array, for further operations. So:
              */
-            $returnValue[0] = $this->convertToArray($returnValue[0]);
+            $value = &$returnValue[0];
+            $value = self::isScalar($value) ? $value : $this->convertToArray($value);
 
             return $returnValue;
         }
@@ -639,7 +628,7 @@ class Json implements \ArrayAccess
         $keepIndex = $options & (bool)(DoOpt::KEEP_INDEX);
 
         // On debugging, pay attention to the following @ operator!
-        @$returnValueReference = &$function(... $this->findElementRecursive(
+        @$returnValueReference = &$function(...$this->findElementRecursive(
             $keepIndex ? (array)($index) : $this->extractIndex($index),
             $data,
             $forceCountableValue,
