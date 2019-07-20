@@ -14,10 +14,3 @@ before_script: skip
 script:
   - ./vendor/bin/phan
   - ./vendor/bin/phpunit
-
-after_success:
-  # Fix code styles
-  - ./vendor/bin/php-cs-fixer fix .
-  - git commit -a -m "Fix code styles"
-  - git checkout $TRAVIS_BRANCH
-  - git push origin
