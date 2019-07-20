@@ -1,8 +1,7 @@
 language: php
 php:
   - 7.0
-before_install:
-  - sudo apt install composer
+before_install: skip
 install:
   - composer install --dev
 before_script: skip
