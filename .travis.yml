@@ -2,7 +2,7 @@ language: php
 php:
   - 7.3
 before_install:
-  - sudo pecl install ast
+  - pecl install ast
   - echo "extension=ast.so" > add-ast.ini
   - phpenv config-add add-ast.ini
 install:
