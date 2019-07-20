@@ -773,8 +773,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Determines whether an element is countable or not.
      *
-     * @param ?string|int $index Pass null if you want to check the data itself (i.e. checking if it is
-     * scalar or not).
+     * @param ?string|int $index
      * @return bool
      */
     public function isCountable($index = null): bool
@@ -789,9 +788,9 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Counts the numbers elements in a countable element.
+     * Returns the numbers elements in a countable.
      *
-     * @param ?string|int $index Pass null if you want to get the number of elements in the data root.
+     * @param ?string|int $index
      * @return int
      */
     public function count($index = null): int
@@ -802,7 +801,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Converts the data to an array, if it is scalar.
+     * Casts the data to an array (if it is scalar).
      *
      * @param ?string|int $index
      * @return self
@@ -816,7 +815,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Iterates over a countable.
+     * Iterates a countable.
      *
      * @param ?string|int $index
      * @return \Generator
@@ -833,7 +832,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Iterates over a countable, but returns its value as a new Json class.
+     * Iterates a countable, but returns each iteration value as a new Json class.
      *
      * @param ?string|int $index
      * @return \Generator
@@ -852,8 +851,8 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Calls a function on each member of a countable and returns its first non-null return value.
      *
-     * @param callable $function The function to be called on each member until returning any
-     * non-null values. It accepts the following arguments:
+     * @param callable $function The function to be called on each member until returning a 
+     * non-null value, that accepts the following arguments:
      * 1. The element's value; might be gotten by-reference.
      * 2. The element's key.
      * 3. The parent element; might be gotten by-reference.
@@ -891,7 +890,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Iterates a countable recursively and applies a function on its each member.
+     * Iterates a countable recursively and applies a function on each member of it.
      *
      * @param array $array
      * @param callable $function {@see self::forEachRecursive()}
@@ -911,10 +910,10 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Pushes a value to the end of a countable.
+     * Appends a value to the end of a countable.
      *
      * @param mixed $value
-     * @param ?string|int $index Pass null if you want to push the value to the data root.
+     * @param ?string|int $index
      * @return self
      */
     public function push($value, $index = null): self
@@ -928,7 +927,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Pops the last value of a countable and returns it.
      *
-     * @param ?string|int $index Pass null if you want to pop from the data root.
+     * @param ?string|int $index
      * @return mixed The removed element's value.
      */
     public function pop($index = null)
@@ -952,9 +951,9 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Prepends an element to a countable.
+     * Prepends a value to the beginning of a countable.
      *
-     * @param ?string|int $index Pass null if you want to prepend an element to the data root.
+     * @param ?string|int $index
      * @return self
      */
     public function unshift($value, $index = null): self
