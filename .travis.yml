@@ -1,0 +1,12 @@
+language: php
+php:
+  - 7.0
+before_install:
+  - sudo apt install composer
+install:
+  - composer install --dev
+before_script: skip
+script:
+  - ./vendor/bin/phan
+after_failure:
+  - echo "OH!"
