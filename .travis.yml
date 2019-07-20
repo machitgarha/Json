@@ -1,9 +1,12 @@
 language: php
 php:
   - 7.3
-before_install: skip
+before_install:
+  - sudo pecl install ast
+  - echo "extension=ast.so" > add-ast.ini
+  - phpenv config-add add-ast.ini
 install:
-  - composer install --dev
+  - composer install
 before_script: skip
 script:
   - ./vendor/bin/phan
