@@ -192,7 +192,7 @@ class Json implements \ArrayAccess, \Countable
      * @param mixed $value
      * @return mixed
      */
-    protected function toJsonIfNeeded($value)
+    protected function decodeJsonIfNeeded($value)
     {
         if ($this->jsonDecodeAlways && is_string($value)) {
             // Validating JSON string
@@ -691,7 +691,7 @@ class Json implements \ArrayAccess, \Countable
     public function set($value, $index = null): self
     {
         $this->do(function (&$element) use ($value) {
-            $element = $this->toJsonIfNeeded($value);
+            $element = $this->decodeJsonIfNeeded($value);
         }, $index, false, Indexing::FREE);
         return $this;
     }
@@ -742,7 +742,7 @@ class Json implements \ArrayAccess, \Countable
     public function offsetSet($index, $value)
     {
         $this->throwExceptionArrayAccessOnScalar();
-        $this->data[$index] = $this->toJsonIfNeeded($value);
+        $this->data[$index] = $this->decodeJsonIfNeeded($value);
     }
 
     public function offsetExists($index): bool
@@ -826,7 +826,7 @@ class Json implements \ArrayAccess, \Countable
             foreach ($array as $key => &$value) {
                 yield $key => $value;
 
-                $value = $this->toJsonIfNeeded($value);
+                $value = $this->decodeJsonIfNeeded($value);
             }
         }, $index, true);
     }
@@ -919,7 +919,7 @@ class Json implements \ArrayAccess, \Countable
     public function push($value, $index = null): self
     {
         $this->do(function (array &$array) use ($value) {
-            array_push($array, $this->toJsonIfNeeded($value));
+            array_push($array, $this->decodeJsonIfNeeded($value));
         }, $index, true);
         return $this;
     }
@@ -1017,12 +1017,11 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Returns a random key/value pair from a countable
+     * Returns a random key/value pair from a countable. The value will be returned by-reference.
      *
      * @param ?string|int $index
-     * @return array{0:string|int,1:mixed} An array that contains the element's key and the
-     * element's value, respectively. You can get it as a list: list($key, $value). You can
-     * also get the value by-reference.
+     * @return array{0:string|int,1:mixed} An array containing the element's key and the
+     * element's value, respectively. You can get it as a list: list($key, $value).
      */
     public function getRandomElement($index = null): array
     {
@@ -1037,7 +1036,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Returns one or more random values from a countable in data.
+     * Returns some random values from a countable.
      *
      * @param int $count
      * @param ?string|int $index
@@ -1064,7 +1063,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Returns one or more random keys from a countable in data.
+     * Returns some random keys from a countable.
      *
      * @param integer $count
      * @param ?string|int $index
@@ -1119,25 +1118,24 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Merges a countable in data with another countable data.
+     * Merges a countable with another countable.
      *
-     * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
-     * and will be treated as an array.
+     * @param mixed $value Anything but a resource. It will be treated as an array.
      * @param int $options A combination of Merge::* constants.
      * @param ?string|int $index
      * @return self
      */
-    public function mergeWith($newData, int $options = 0, $index = null): self
+    public function mergeWith($value, int $options = 0, $index = null): self
     {
         // Extracting options
         $reverseOrder = $options & Merge::KEEP_DEFAULT;
 
-        $this->do(function (array &$array) use ($newData, $reverseOrder) {
-            $newData = (array)($this->toJsonIfNeeded($newData));
+        $this->do(function (array &$array) use ($value, $reverseOrder) {
+            $value = (array)($this->decodeJsonIfNeeded($value));
             if ($reverseOrder) {
-                $array = array_merge($newData, $array);
+                $array = array_merge($value, $array);
             } else {
-                $array = array_merge($array, $newData);
+                $array = array_merge($array, $value);
             }
         }, $index, true);
         return $this;
@@ -1146,17 +1144,16 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Merges a countable in data with another countable data.
      *
-     * @param mixed $newData The new data to be merged. Any values (except recourses) can be passed
-     * and will be treated as an array.
+     * @param mixed $value Anything but a resource. It will be treated as an array.
      * @param int $options Currently, no options are available.
      * @param ?string|int $index
      * @return self
      */
-    public function mergeRecursivelyWith($newData, int $options = 0, $index = null): self
+    public function mergeRecursivelyWith($value, int $options = 0, $index = null): self
     {
-        $this->do(function (array &$array) use ($newData) {
-            $newData = (array)($this->toJsonIfNeeded($newData));
-            $array = array_merge_recursive($array, $newData);
+        $this->do(function (array &$array) use ($value) {
+            $value = (array)($this->decodeJsonIfNeeded($value));
+            $array = array_merge_recursive($array, $value);
         }, $index, true);
         return $this;
     }
@@ -1176,7 +1173,7 @@ class Json implements \ArrayAccess, \Countable
         bool $compareKeys = false,
         $index = null
     ): self {
-        $data = (array)($this->toJsonIfNeeded($data));
+        $data = (array)($this->decodeJsonIfNeeded($data));
 
         $diff = function (array $array) use ($data) {
             $diff = array();
