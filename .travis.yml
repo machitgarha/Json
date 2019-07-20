@@ -1,14 +1,20 @@
 language: php
+
 php:
   - 7.3
+
 before_install:
+  - pecl channel-update pecl.php.net
   - pecl install ast
-  - echo "extension=ast.so" > add-ast.ini
-  - phpenv config-add add-ast.ini
 install:
   - composer install
+
 before_script: skip
 script:
   - ./vendor/bin/phan
-after_failure:
-  - echo "OH!"
+  - ./vendor/bin/phpunit
+  - ./vendor/bin/php-cs-fixer fix .
+
+after_success:
+  - git commit -a -m "Fix code styles"
+  - git push
