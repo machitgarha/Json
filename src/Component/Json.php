@@ -415,53 +415,6 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Returns data as a JSON string.
-     *
-     * @param int $options The options, like JSON_PRETTY_PRINT. {@link
-     * http://php.net/json.constants}
-     * @return string
-     */
-    public function getDataAsJsonString(int $options = 0): string
-    {
-        return $this->encodeToJsonUseProps($this->data, $options);
-    }
-
-    /**
-     * Returns data as a recursive array.
-     *
-     * @return array
-     */
-    public function getDataAsArray(): array
-    {
-        return $this->normalize($this->data);
-    }
-
-    /**
-     * Returns data as a recursive object.
-     *
-     * @return object|array
-     */
-    public function getDataAsObject()
-    {
-        return $this->toObject($this->data);
-    }
-
-    /**
-     * Returns data as a completely-recursive object (i.e. even converts indexed arrays to objects).
-     *
-     * @return object
-     */
-    public function getDataAsFullObject()
-    {
-        return $this->toObject($this->data, true);
-    }
-
-    public function __toString(): string
-    {
-        return $this->getDataAsJsonString();
-    }
-
-    /**
      * Finds a specific element using $keys and calls a function on it.
      *
      * @param array $keys The keys to be followed recursively.
@@ -663,10 +616,10 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Returns an element's value.
+     * Returns an element's value. All countable values will be returned as arrays.
      *
-     * @param ?string|int $index Pass null if data is scalar.
-     * @return mixed The value of the specified element. Returns null if the index cannot be found.
+     * @param ?string|int $index
+     * @return mixed Returns null if the index cannot be found.
      */
     public function get($index = null)
     {
@@ -679,6 +632,40 @@ class Json implements \ArrayAccess, \Countable
         } catch (Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Returns an element's value as a JSON string.
+     *
+     * @param ?string|int $index
+     * @param int $options The options, like JSON_PRETTY_PRINT. {@link
+     * http://php.net/json.constants}
+     * @return string
+     */
+    public function getAsJson($index = null, int $options = 0): string
+    {
+        return $this->do(function ($value) use ($options) {
+            return $this->encodeToJsonUseProps($value, $options);
+        }, $index);
+    }
+
+    public function __toString(): string
+    {
+        return $this->getAsJson();
+    }
+
+    /**
+     * Returns an element's value as a recursive object.
+     *
+     * @param ?string|int $index
+     * @param bool $indexedArraysToObjects Whether to convert indexed arrays to objects or not.
+     * @return object|array
+     */
+    public function getAsObject($index = null, bool $indexedArraysToObjects = false)
+    {
+        return $this->do(function ($value) use ($indexedArraysToObjects) {
+            return $this->toObject($value, $indexedArraysToObjects);
+        }, $index);
     }
 
     /**
