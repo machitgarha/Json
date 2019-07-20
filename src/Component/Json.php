@@ -205,6 +205,38 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
+     * Converts all objects inside a value (if exists) to arrays, recursively.
+     *
+     * @param mixed $value
+     * @return mixed
+     * @see https://stackoverflow.com/a/54131002/4215651 Thanks to this.
+     */
+    protected function normalize($value)
+    {
+        if (is_object($value) || is_array($value)) {
+            foreach ((array)($value) as &$item) {
+                // Recursion
+                $item = $this->normalize($item);
+            }
+        }
+        return $value;
+    }
+
+    /**
+     * Converts an array or an object to a recursive object.
+     *
+     * @param mixed $value
+     * @param bool $forceObject Whether to convert indexed arrays to objects or not.
+     * @return object|array
+     */
+    protected function toObject($value, bool $forceObject = false)
+    {
+        return $this->decodeJsonUseProps(
+            $this->encodeToJsonUseProps($value, $forceObject ? JSON_FORCE_OBJECT : 0)
+        );
+    }
+
+    /**
      * Returns a random value by calling {@see self::$randomizationFunction}.
      *
      * @param int $min
@@ -245,15 +277,15 @@ class Json implements \ArrayAccess, \Countable
      * Encodes a data as JSON.
      * See json_encode() documentation for more details.
      *
-     * @param mixed $data
+     * @param mixed $value
      * @param int $options
      * @param int $depth
      * @return string
      * @throws JsonException
      */
-    public static function encodeToJson($data, int $options = 0, int $depth = 512): string
+    public static function encodeToJson($value, int $options = 0, int $depth = 512): string
     {
-        $encodedData = json_encode($data, $options, $depth);
+        $encodedData = json_encode($value, $options, $depth);
         self::handleJsonErrors(json_last_error());
         return $encodedData;
     }
@@ -262,20 +294,20 @@ class Json implements \ArrayAccess, \Countable
      * Decodes a JSON string.
      * See json_decode() documentation for more details.
      *
-     * @param string $data
-     * @param bool $assoc
+     * @param string $value
+     * @param bool $asArray To return the result as an array or not (i.e. an object).
      * @param int $depth
      * @param int $options
      * @return mixed
      * @throws JsonException
      */
     public static function decodeJson(
-        string $data,
-        bool $assoc = false,
+        string $value,
+        bool $asArray = false,
         int $depth = 512,
         int $options = 0
     ) {
-        $decodedData = json_decode($data, $assoc, $depth, $options);
+        $decodedData = json_decode($value, $asArray, $depth, $options);
         self::handleJsonErrors(json_last_error());
         return $decodedData;
     }
@@ -328,90 +360,58 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Checks a string data to be a valid JSON string.
+     * Validates a string to be a valid JSON string.
      *
-     * @param string $data
+     * @param string $value
      * @param bool $assoc Return decoded JSON as associative array or not.
      * @return array An array of two values:
      * [0]: Is the string a valid JSON or not,
-     * [1]: The decoded JSON string, and it will be null if the string is not a valid JSON, or an
+     * [1]: The decoded JSON string, or null if either the string is not a valid JSON or an
      * error occurred while decoding it.
      */
-    protected static function validateStringAsJson(string $data, bool $assoc = false): array
+    protected static function validateStringAsJson(string $value, bool $assoc = false): array
     {
         try {
-            $decodedData = self::decodeJson($data, $assoc);
+            $decodedValue = self::decodeJson($value, $assoc);
         } catch (JsonException $e) {
             return [false, null];
         }
-        return [true, $decodedData];
+        return [true, $decodedValue];
     }
 
     /**
      * Checks if a string is a valid JSON or not.
      *
-     * @param string $data Data to be checked.
+     * @param string $value
      * @return bool
      */
-    public static function isJsonValid(string $data): bool
+    public static function isJsonValid(string $value): bool
     {
-        return self::validateStringAsJson($data)[0];
+        return self::validateStringAsJson($value)[0];
     }
 
     /**
-     * Uses needed class properties as arguments/options for {@see self::encodeToJson()}.
+     * Uses needed properties as arguments/options for {@see self::encodeToJson()}.
      *
-     * @param mixed $data
+     * @param mixed $value
      * @param int $options
      * @return string
      */
-    protected function encodeToJsonUseProps($data, int $options = 0): string
+    protected function encodeToJsonUseProps($value, int $options = 0): string
     {
-        return self::encodeToJson($data, $options, $this->jsonRecursionDepth);
+        return self::encodeToJson($value, $options, $this->jsonRecursionDepth);
     }
 
     /**
-     * Uses needed class properties as arguments/options for {@see self::encodeToJson()}.
+     * Uses needed properties as arguments/options for {@see self::decodeJson()}.
      *
-     * @param string $data
-     * @param bool $assoc
+     * @param string $value
+     * @param bool $asArray
      * @return mixed
      */
-    protected function decodeJsonUseProps(string $data, bool $assoc = false)
+    protected function decodeJsonUseProps(string $value, bool $asArray = false)
     {
-        return self::decodeJson($data, $assoc, $this->jsonRecursionDepth);
-    }
-
-    /**
-     * Converts an object or an array to a recursive array.
-     *
-     * @param mixed $data
-     * @return mixed
-     * @see https://stackoverflow.com/a/54131002/4215651 Thanks to this.
-     */
-    protected function convertToArray($data)
-    {
-        if (is_object($data) || is_array($data)) {
-            foreach ((array)($data) as &$value) {
-                // Recursion
-                $value = $this->convertToArray($value);
-            }
-        }
-        return $data;
-    }
-
-    /**
-     * Converts an array or an object to a recursive object.
-     *
-     * @param mixed $data
-     * @param bool $forceObject Whether to convert indexed arrays to objects or not.
-     * @return object|array
-     */
-    protected function convertToObject($data, bool $forceObject = false)
-    {
-        return $this->decodeJsonUseProps(
-            $this->encodeToJsonUseProps($data, $forceObject ? JSON_FORCE_OBJECT : 0)
-        );
+        return self::decodeJson($value, $asArray, $this->jsonRecursionDepth);
     }
 
     /**
@@ -433,7 +433,7 @@ class Json implements \ArrayAccess, \Countable
      */
     public function getDataAsArray(): array
     {
-        return $this->convertToArray($this->data);
+        return $this->normalize($this->data);
     }
 
     /**
@@ -443,7 +443,7 @@ class Json implements \ArrayAccess, \Countable
      */
     public function getDataAsObject()
     {
-        return $this->convertToObject($this->data);
+        return $this->toObject($this->data);
     }
 
     /**
@@ -453,7 +453,7 @@ class Json implements \ArrayAccess, \Countable
      */
     public function getDataAsFullObject()
     {
-        return $this->convertToObject($this->data, true);
+        return $this->toObject($this->data, true);
     }
 
     public function __toString(): string
@@ -552,7 +552,7 @@ class Json implements \ArrayAccess, \Countable
              * $returnValue[0] is an array, for further operations. So:
              */
             $value = &$returnValue[0];
-            $value = self::isScalar($value) ? $value : $this->convertToArray($value);
+            $value = self::isScalar($value) ? $value : $this->normalize($value);
 
             return $returnValue;
         }
