@@ -21,12 +21,9 @@ use MAChitgarha\Json\Option\Merge;
 use MAChitgarha\Json\Option\DoOpt;
 
 /**
- * Handles JSON data type.
- *
- * Gets a JSON string or a PHP native array or object and handles it as a JSON data.
+ * JSON data handler.
  *
  * @see https://github.com/MAChitgarha/Json/wiki
- * @see https://github.com/MAChitgarha/Json/wiki/Glossary
  */
 class Json implements \ArrayAccess, \Countable
 {
@@ -51,60 +48,42 @@ class Json implements \ArrayAccess, \Countable
     protected $randomizationFunction = "mt_rand";
 
     /**
-     * Prepares JSON data.
-     *
-     * @param mixed $data The data; can be either countable (i.e. a valid JSON string, an array or
-     * an object) or scalar. Data should not contain any closures; otherwise, they will be
-     * considered as empty objects.
+     * @param mixed $data The data. It must be either countable or scalar (i.e. it must not be
+     * resource).
      * @param int $options A combination of JsonOpt::* constants.
      * @throws InvalidArgumentException Using JsonOpt::AS_JSON option and passing a non-string data.
-     * @throws InvalidJsonException If JsonOpt::AS_JSON is enabled and data is not a valid JSON.
+     * @throws InvalidJsonException Using JsonOpt::AS_JSON option and passing invalid JSON string.
      * @throws InvalidArgumentException If data is a resource.
      */
     public function __construct($data = [], int $options = 0)
     {
+        // Setting options
         $this->setOptions($options);
-
         $asJson = (bool)($options & JsonOpt::AS_JSON);
-        $asString = (bool)($options & JsonOpt::AS_STRING);
 
-        // Check data type
-        $isString = is_string($data);
-
-        if ($asJson && !$isString) {
-            throw new InvalidArgumentException("Data must be string when JsonOpt::AS_JSON is used");
-        }
-
-        if (self::isArrayOrObject($data)) {
-            $this->data = $data;
-            return;
-        }
-
-        if (($asJson || !$asString) && $isString) {
+        // Handling JsonOpt::AS_JSON option
+        if (is_string($data)) {
             list($isJsonValid, $decodedData) = $this->validateStringAsJson($data, true);
 
-            if (!$isJsonValid && $asJson) {
-                throw new InvalidJsonException();
-            }
-            
             if ($isJsonValid) {
                 $this->data = $decodedData;
                 return;
             }
+
+            // Data contains invalid JSON
+            if ($asJson) {
+                throw new InvalidJsonException();
+            }
+        } elseif ($asJson) {
+            throw new InvalidArgumentException("Data must be string if using JsonOpt::AS_JSON");
         }
 
-        /*
-         * The code will NOT reach here, if, JsonOpt::AS_JSON is enabled. So, the code will reach
-         * here only if one of the following things happen:
-         * 1. JsonOpt::AS_STRING is set.
-         * 2. JsonOpt::AS_STRING is not set, and data is not a valid JSON string.
-         */
-        if (self::isScalar($data)) {
-            $this->data = $asString ? (string)($data) : $data;
-            return;
+        if (is_resource($data)) {
+            throw new InvalidArgumentException("Data must not be a resource");
         }
 
-        throw new InvalidArgumentException("Data must not be a resource");
+        $this->data = $data;
+        return;
     }
 
     /**

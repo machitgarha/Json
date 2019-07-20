@@ -20,14 +20,6 @@ class JsonOpt
      */
     const DECODE_ALWAYS = 1;
     /**
-     * @var int Consider data passed into the constructor as string, even if it's a valid JSON data;
-     * in other words, don't decode it. Using this option, every non-string and uncountable values
-     * will be converted to a string (i.e. integers, booleans and NULL). This option only affects
-     * the constructor. It won't have any effects if you use it in combination with
-     * JsonOpt::AS_JSON.
-     */
-    const AS_STRING = 2;
-    /**
      * @var int Force data passed into the constructor as a JSON string. Using this option leads
      * to exceptions if the JSON string is not valid. This option only affects the constructor. Note
      * that the constructor checks a string data as a JSON string by default.
