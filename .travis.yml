@@ -19,4 +19,5 @@ after_success:
   # Fix code styles
   - ./vendor/bin/php-cs-fixer fix .
   - git commit -a -m "Fix code styles"
-  - env
+  - git checkout $TRAVIS_BRANCH
+  - git push origin
