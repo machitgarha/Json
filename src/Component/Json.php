@@ -715,10 +715,13 @@ class Json implements \ArrayAccess, \Countable
      */
     public function unset($index = null): self
     {
-        $this->do(function (&$element, &$data, $key) {
-            $element = null;
-            // Un-setting the element directly is impossible
-            unset($data[$key]);
+        $this->do(function (&$element, &$parent, $key) {
+            // If element is the data itself
+            if ($parent === null) {
+                $element = null;
+            } else {
+                unset($parent[$key]);
+            }
         }, $index);
         return $this;
     }
