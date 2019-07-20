@@ -1,0 +1,16 @@
+dist: bionic
+language: php
+
+php:
+  - 7.3
+
+before_install:
+  - pecl channel-update pecl.php.net
+  - pecl install ast
+install:
+  - composer install
+
+before_script: skip
+script:
+  - ./vendor/bin/phan
+  - ./vendor/bin/phpunit
