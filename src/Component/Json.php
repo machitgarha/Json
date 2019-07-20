@@ -96,10 +96,8 @@ class Json implements \ArrayAccess, \Countable
         return new self($data, $options);
     }
 
-    ### Changing options and customizing
-
     /**
-     * Sets options used by methods.
+     * Resets all options.
      *
      * @param int $options A combination of JsonOpt::* constants.
      * @return self
@@ -111,6 +109,41 @@ class Json implements \ArrayAccess, \Countable
         $this->jsonDecodeAlways = (bool)($options & JsonOpt::DECODE_ALWAYS);
 
         return $this;
+    }
+
+    /**
+     * Sets an option.
+     *
+     * @param int $option
+     * @return self
+     */
+    public function addOption(int $option): self
+    {
+        $this->setOptions($this->options | $option);
+        return $this;
+    }
+
+    /**
+     * Unsets an option.
+     *
+     * @param int $option
+     * @return self
+     */
+    public function removeOption(int $option): self
+    {
+        $this->setOptions($this->options & ~$option);
+        return $this;
+    }
+
+    /**
+     * Tells whether an option is set or not.
+     *
+     * @param int $option
+     * @return bool
+     */
+    public function isOptionSet(int $option): bool
+    {
+        return ($this->options & $option) === $option;
     }
 
     /**
