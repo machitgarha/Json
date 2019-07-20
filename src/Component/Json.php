@@ -147,10 +147,11 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Sets recursion depth when using json_*() functions.
+     * Sets recursion depth when encoding/decoding JSON strings.
      *
      * @param int $depth
      * @return self
+     * @throws InvalidArgumentException If $depth is less than 1.
      */
     public function setJsonRecursionDepth(int $depth): self
     {
@@ -170,6 +171,7 @@ class Json implements \ArrayAccess, \Countable
      * 2. The maximum value to be returned;
      * It must return an integer. You can also use built-in functions like mt_rand().
      * @return self
+     * @throws InvalidArgumentException If $function returns an unexpected value.
      */
     public function setRandomizationFunction(callable $function): self
     {
@@ -216,14 +218,14 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Determines if data is an array or an object, or force it to be one of them.
+     * Determines if data is an array or an object.
      *
      * @param mixed $data
      * @return int 0 if is not any of them, 1 if it is an array and -1 if it is an object.
      */
     protected static function isArrayOrObject($data): int
     {
-        return (is_array($data) ? 1 : (is_object($data) ? -1 : 0));
+        return is_array($data) <=> is_object($data);
     }
 
     /**
@@ -289,7 +291,6 @@ class Json implements \ArrayAccess, \Countable
         switch ($jsonErrorStat) {
             case JSON_ERROR_NONE:
                 return;
-                break;
             
             case JSON_ERROR_DEPTH:
                 $message = "Maximum stack depth exceeded";
@@ -315,7 +316,7 @@ class Json implements \ArrayAccess, \Countable
                 break;
             
             case JSON_ERROR_UNSUPPORTED_TYPE:
-                $message = "A value cannot be encoded, possibly is a resource";
+                $message = "A value cannot be encoded, possibly a resource";
                 break;
             
             default:
