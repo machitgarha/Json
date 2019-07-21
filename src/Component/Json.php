@@ -33,8 +33,6 @@ class Json implements \ArrayAccess, \Countable
      */
     protected $data;
 
-    ### Options and customizations
-
     /** @var int Options passed to the constructor. */
     protected $options = 0;
 
