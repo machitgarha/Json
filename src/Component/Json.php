@@ -1277,7 +1277,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Reverses a countable.
+     * Reverses the order of elements in a countable.
      *
      * @param ?string|int $index
      * @return self
@@ -1291,7 +1291,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Fills an element with a value.
+     * Sets an element to an array filled with a value.
      *
      * @param int $startIndex
      * @param int $length

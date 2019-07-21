@@ -19,7 +19,7 @@ class PublicMethodTest extends TestCase
 
         if (!isset($sampleJson)) {
             $sampleJson = new Json(file_get_contents(__DIR__ . "/../json/apps.json"));
-            $sampleData = $sampleJson->getDataAsArray();
+            $sampleData = $sampleJson->get();
         }
 
         return [
@@ -34,21 +34,21 @@ class PublicMethodTest extends TestCase
     }
 
     /**
-     * Tests Json::getData*() methods.
+     * Tests Json::get() and Json::getAs*() methods.
      * @dataProvider expectedGetDataReturnValuesProvider
      */
-    public function testGetData($data, $asJson, $asArray, $asObject, $asFullObject)
+    public function testGetAs($data, $asJson, $asArray, $asObject, $asFullObject)
     {
         $json = new Json($data);
 
-        $this->assertEquals($asJson, $json->getDataAsJsonString());
-        $this->assertEquals($asArray, $json->getDataAsArray());
-        $this->assertEquals($asObject, $json->getDataAsObject());
-        $this->assertEquals($asFullObject, $json->getDataAsFullObject());
+        $this->assertEquals($asArray, $json->get());
+        $this->assertEquals($asJson, $json->getAsJson());
+        $this->assertEquals($asObject, $json->getAsObject());
+        $this->assertEquals($asFullObject, $json->getAsObject(null, true));
     }
 
     /** @dataProvider indexValuePairsProvider */
-    public function testSetAndGet(string $index, $value)
+    public function testSetAndGet($index, $value)
     {
         $json = new Json();
 
@@ -57,7 +57,7 @@ class PublicMethodTest extends TestCase
     }
 
     /** @dataProvider indexValuePairsProvider */
-    public function testSetAndGetUsingArrayAccess(string $index, $value)
+    public function testSetAndGetUsingArrayAccess($index, $value)
     {
         $json = new Json();
 
@@ -66,7 +66,7 @@ class PublicMethodTest extends TestCase
     }
 
     /** @dataProvider indexValuePairsProvider */
-    public function testIsSet(string $index, $value)
+    public function testIsSet($index, $value)
     {
         $json = new Json();
 
@@ -78,7 +78,7 @@ class PublicMethodTest extends TestCase
     }
 
     /** @dataProvider indexValuePairsProvider */
-    public function testUnset(string $index, $value)
+    public function testUnset($index, $value)
     {
         $json = new Json();
 
@@ -106,7 +106,7 @@ class PublicMethodTest extends TestCase
      * Tests Json::isCountable() and Json::count() methods.
      * @dataProvider arrayAndJsonProvider
      */
-    public function testCountable(JSON $json, string $index, array $array)
+    public function testCountable(JSON $json, $index, array $array)
     {
         $this->assertTrue($json->isCountable($index));
         $this->assertEquals(count($array), $json->count($index));
@@ -136,7 +136,7 @@ class PublicMethodTest extends TestCase
      * Json::getRandomValues() and Json::getRandomKeys().
      * @dataProvider arrayAndJsonProvider
      */
-    public function testGettingRandomValuesAndKeys(JSON $json, string $index, array $array)
+    public function testGettingRandomValuesAndKeys(JSON $json, $index, array $array)
     {
         $this->assertTrue(in_array($json->getRandomValue($index), $array));
         $this->assertArrayHasKey($json->getRandomKey($index), $array);
@@ -155,14 +155,14 @@ class PublicMethodTest extends TestCase
      * Tests Json::getValues() and Json::getKeys().
      * @dataProvider arrayAndJsonProvider
      */
-    public function testGetValuesAndKeys(JSON $json, string $index, array $array)
+    public function testGetValuesAndKeys(JSON $json, $index, array $array)
     {
         $this->assertEquals(array_values($array), $json->getValues($index));
         $this->assertEquals(array_keys($array), $json->getKeys($index));
     }
 
     /** @dataProvider arrayAndJsonProvider */
-    public function testDifference(JSON $json, string $index)
+    public function testDifference(JSON $json, $index)
     {
         $diff = $json->get($index);
 
@@ -193,6 +193,20 @@ class PublicMethodTest extends TestCase
     {
         $json = new Json();
         $this->assertEquals(1000, $json->fill(0, 1000, 4)->count());
+    }
+
+    /**
+     * Tests Json::getFirstKey() and Json::getLastKey() methods.
+     * @dataProvider arrayAndJsonProvider
+     */
+    public function testGetKeys(Json $json, $index)
+    {
+        $this->assertEquals($json->iterate($index)->key(), $json->getFirstKey($index));
+
+        foreach ($json->iterate($index) as $key => $value) {
+            $lastKey = $key;
+        }
+        $this->assertEquals($lastKey, $json->getLastKey($index));
     }
 
     // Providers
