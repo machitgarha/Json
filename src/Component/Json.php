@@ -1120,7 +1120,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Merges a countable with another countable.
      *
-     * @param mixed $value Anything but a resource. It will be treated as an array.
+     * @param mixed $value It will be treated as an array, and must not be a resource.
      * @param int $options A combination of Merge::* constants.
      * @param ?string|int $index
      * @return self
@@ -1144,7 +1144,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Merges a countable in data with another countable data.
      *
-     * @param mixed $value Anything but a resource. It will be treated as an array.
+     * @param mixed $value It will be treated as an array, and must not be a resource.
      * @param int $options Currently, no options are available.
      * @param ?string|int $index
      * @return self
@@ -1159,50 +1159,49 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Removes intersection of a countable with a another countable.
+     * Removes intersections of a countable with another countable.
      *
-     * @param mixed $data The data to be compared with. Any values (except recourses)
-     * can be passed and will be treated as an array.
-     * @param bool $compareKeys To calculate intersection in the keys or not (i.e. in values).
+     * @param mixed $value Comparing value. It will be treated as an array, and must not be a
+     * resource.
+     * @param bool $compareKeys To compute intersections in the keys or in the values.
      * @param ?string|int $index
      * @return self
      * @see https://gist.github.com/nunoveloso/1992851 Thanks to this.
      */
     public function difference(
-        $data,
+        $value,
         bool $compareKeys = false,
         $index = null
     ): self {
-        $data = (array)($this->decodeJsonIfNeeded($data));
-
-        $diff = function (array $array) use ($data) {
+        $diff = function (array $array1, array $array2) {
             $diff = array();
   
-            foreach ($array as $value) {
+            foreach ($array1 as $value) {
                 $diff[$value] = 1;
             }
-            foreach ($data as $value) {
+            foreach ($array2 as $value) {
                 unset($diff[$value]);
             }
           
             return array_keys($diff);
         };
 
-        $diffKey = function (array $array) use ($data) {
+        $diffKey = function (array $array1, array $array2) {
             $diff = array();
 
-            foreach ($array as $key => $value) {
+            foreach ($array1 as $key => $value) {
                 $diff[$key] = $value;
             }
-            foreach ($data as $key => $value) {
+            foreach ($array2 as $key => $value) {
                 unset($diff[$key]);
             }
           
             return $diff;
         };
 
-        $this->do(function (array &$array) use ($compareKeys, $diff, $diffKey) {
-            $array = $compareKeys ? $diff($array) : $diffKey($array);
+        $this->do(function (array &$array) use ($value, $compareKeys, $diff, $diffKey) {
+            $value = (array)($this->decodeJsonIfNeeded($value));
+            $array = $compareKeys ? $diff($array, $value) : $diffKey($array, $value);
         }, $index, true);
         return $this;
     }
@@ -1210,13 +1209,12 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Filters a countable using a callable.
      *
-     * @param ?callable $function The function to be called on each member of the countable. It
-     * should return a boolean, or any non-false values is considered as true (i.e. any value
-     * that loosely equals false is considered as false, such as 0); it accepts two arguments:
-     * 1. The element's value.
+     * @param ?callable $function The filtering function. It should return a boolean, or any
+     * non-false values is considered as true (i.e. any value that loosely equals false is
+     * considered as false, such as 0). It accepts two arguments:
+     * 1. The element's value (not passing by-reference). 
      * 2. The element's key.
-     * Keep in mind, the given value by the callable is safe from overwriting; so getting it
-     * by-reference or not does not matter. The default function removes all null values.
+     * The default function removes all null values.
      * @param ?string|int $index
      * @return self
      */
@@ -1255,7 +1253,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Shuffles a countable.
+     * Shuffles values of a countable.
      *
      * @param ?string|int $index
      * @return self
@@ -1264,11 +1262,12 @@ class Json implements \ArrayAccess, \Countable
     public function shuffle($index = null): self
     {
         $this->do(function (array &$array) {
+            $arrayKeys = array_keys($array);
             $shuffledArray = [];
             $arrayIndexLength = count($array) - 1;
 
             while (count($shuffledArray) <= $arrayIndexLength) {
-                $randomKey = ($this->randomizationFunction)(0, $arrayIndexLength);
+                $randomKey = $arrayKeys[($this->randomizationFunction)(0, $arrayIndexLength)];
                 $shuffledArray[$randomKey] = $array[$randomKey];
             }
 
