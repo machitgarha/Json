@@ -1,30 +1,17 @@
 <?php
 
-/**
- * Unit tests for MAChitgarha\Component\JSON class.
- *
- * Go to the project's root and run the tests in this way:
- * phpunit --bootstrap vendor/autoload.php tests/unit
- *
- * @see MAChitgarha\Component\JSON
- */
-namespace MAChitgarha\UnitTest\JSON;
+/** @see MAChitgarha\Component\Json */
+namespace MAChitgarha\UnitTest\Json;
 
 use PHPUnit\Framework\TestCase;
-use MAChitgarha\Component\JSON;
+use MAChitgarha\Component\Json;
 
-/**
- * Tests visible or hidden features of the class.
- */
 class FeatureTest extends TestCase
 {
-    /**
-     * Tests escaped delimiters.
-     * @see JSON::extractKeysFromIndex()
-     */
+    /** @see Json::extractKeysFromIndex() */
     public function testEscapedDelimiters()
     {
-        $json = new JSON([
+        $json = new Json([
             "fileInfo" => [
                 "data.json" => "Complex"
             ]
