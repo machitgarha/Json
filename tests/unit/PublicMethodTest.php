@@ -148,7 +148,11 @@ class PublicMethodTest extends TestCase
 
         $this->assertEmpty(array_diff($randomValues, array_values($array)));
         $this->assertEmpty(array_diff($randomKeys, array_keys($array)));
-        $this->assertArraySubset($randomSubset, $array);
+
+        foreach ($randomSubset as $key => $value) {
+            $this->assertArrayHasKey($key, $array);
+            $this->assertEquals($array[$key], $value);
+        }
     }
 
     /**
