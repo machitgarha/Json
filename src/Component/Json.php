@@ -28,8 +28,8 @@ use MAChitgarha\Json\Option\DoOpt;
 class Json implements \ArrayAccess, \Countable
 {
     /**
-     * @var mixed JSON data parsed in the constructor. It should be everything but a resource type,
-     * but it may. Setting it to a resource might lead to errors/exceptions.
+     * @var mixed Data parsed in the constructor. It should be everything but a resource type, but
+     * it may. Setting it to a resource might lead to errors/exceptions.
      */
     protected $data;
 
@@ -59,7 +59,6 @@ class Json implements \ArrayAccess, \Countable
         $this->setOptions($options);
         $asJson = (bool)($options & JsonOpt::AS_JSON);
 
-        // Handling JsonOpt::AS_JSON option
         if (is_string($data)) {
             list($isJsonValid, $decodedData) = $this->validateStringAsJson($data, true);
 
@@ -185,7 +184,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Decodes a valid JSON string and returns it if {@see JsonOpt::DECODE_ALWAYS} is set.
+     * Decodes a string as a valid JSON if {@see JsonOpt::DECODE_ALWAYS} is set.
      *
      * @param mixed $value
      * @return mixed
@@ -197,6 +196,7 @@ class Json implements \ArrayAccess, \Countable
             try {
                 $value = self::decodeJson($value, true);
             } catch (JsonException $e) {
+                // Just a try, not a force
             }
         }
         return $value;
@@ -272,7 +272,7 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Encodes a data as JSON.
+     * Encodes a value as JSON.
      * See json_encode() documentation for more details.
      *
      * @param mixed $value
@@ -358,10 +358,10 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Validates a string to be a valid JSON string.
+     * Validates a string as a JSON string.
      *
      * @param string $value
-     * @param bool $assoc Return decoded JSON as associative array or not.
+     * @param bool $assoc To return decoded JSON as associative array or not.
      * @return array An array of two values:
      * [0]: Is the string a valid JSON or not,
      * [1]: The decoded JSON string, or null if either the string is not a valid JSON or an
@@ -604,9 +604,9 @@ class Json implements \ArrayAccess, \Countable
      *
      * @param string $index
      * @param int $indexingType One of the Indexing::* constants.
-     * @return JSONChild
+     * @return JsonChild
      */
-    public function index(string $index, int $indexingType = Indexing::FREE): JSONChild
+    public function index(string $index, int $indexingType = Indexing::FREE): JsonChild
     {
         return new JsonChild($this->do(function &(&$element) {
             return $element;

@@ -14,7 +14,7 @@ class UncountableValueExceptionTest extends TestCase
         $this->expectException(UncountableValueException::class);
     }
 
-    protected function prependJsonToEveryElement(JSON $json, array $array): array
+    protected function prependJsonToEveryElement(Json $json, array $array): array
     {
         foreach ($array as &$item) {
             array_unshift($item, $json);
@@ -23,19 +23,19 @@ class UncountableValueExceptionTest extends TestCase
     }
 
     /** @dataProvider methodsWithUncountableIndexProvider */
-    public function testCallMethodsOnUncountableIndex(JSON $json, string $funcName, array $args)
+    public function testCallMethodsOnUncountableIndex(Json $json, string $funcName, array $args)
     {
         $json->$funcName(...$args);
     }
 
     /** @dataProvider callMethodsWithIndexesProvider */
-    public function testCallMethodsWithIndexes(JSON $json, string $funcName, array $args)
+    public function testCallMethodsWithIndexes(Json $json, string $funcName, array $args)
     {
         $json->$funcName(...$args);
     }
 
     /** @dataProvider methodsForCountableDataProvider */
-    public function testMethodsDependOnCountableData(JSON $json, string $funcName, array $args = [])
+    public function testMethodsDependOnCountableData(Json $json, string $funcName, array $args = [])
     {
         $json->$funcName(...$args);
     }

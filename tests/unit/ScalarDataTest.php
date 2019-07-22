@@ -12,7 +12,7 @@ class ScalarDataTest extends TestCase
      * Tests Json::isCountable(), Json::toCountable() and Json::count() methods.
      * @dataProvider scalarJsonProvider
      */
-    public function testCountable(JSON $json)
+    public function testCountable(Json $json)
     {
         $this->assertFalse($json->isCountable());
         $this->assertTrue($json->toCountable()->isCountable());

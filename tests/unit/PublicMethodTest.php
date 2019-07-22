@@ -8,9 +8,9 @@ use MAChitgarha\Component\Json;
 
 class PublicMethodTest extends TestCase
 {
-    /** @var Json The sample JSON which loads from a file. */
+    /** @var Json The sample Json which loads from a file. */
     public static $sampleJson;
-    /** @var array The data of the sample JSON as an array. */
+    /** @var array The data of the sample Json as an array. */
     public static $sampleData;
 
     private static function getSampleJsonAndData()
@@ -106,7 +106,7 @@ class PublicMethodTest extends TestCase
      * Tests Json::isCountable() and Json::count() methods.
      * @dataProvider arrayAndJsonProvider
      */
-    public function testCountable(JSON $json, $index, array $array)
+    public function testCountable(Json $json, $index, array $array)
     {
         $this->assertTrue($json->isCountable($index));
         $this->assertEquals(count($array), $json->count($index));
@@ -136,7 +136,7 @@ class PublicMethodTest extends TestCase
      * Json::getRandomValues() and Json::getRandomKeys().
      * @dataProvider arrayAndJsonProvider
      */
-    public function testGettingRandomValuesAndKeys(JSON $json, $index, array $array)
+    public function testGettingRandomValuesAndKeys(Json $json, $index, array $array)
     {
         $this->assertTrue(in_array($json->getRandomValue($index), $array));
         $this->assertArrayHasKey($json->getRandomKey($index), $array);
@@ -155,14 +155,14 @@ class PublicMethodTest extends TestCase
      * Tests Json::getValues() and Json::getKeys().
      * @dataProvider arrayAndJsonProvider
      */
-    public function testGetValuesAndKeys(JSON $json, $index, array $array)
+    public function testGetValuesAndKeys(Json $json, $index, array $array)
     {
         $this->assertEquals(array_values($array), $json->getValues($index));
         $this->assertEquals(array_keys($array), $json->getKeys($index));
     }
 
     /** @dataProvider arrayAndJsonProvider */
-    public function testDifference(JSON $json, $index)
+    public function testDifference(Json $json, $index)
     {
         $diff = $json->get($index);
 
@@ -243,11 +243,11 @@ class PublicMethodTest extends TestCase
                 (object)[(object)[]]
             ],
             [
-                '{"instance":"JSON"}',
-                '{"instance":"JSON"}',
-                ["instance" => "JSON"],
-                (object)["instance" => "JSON"],
-                (object)["instance" => "JSON"]
+                '{"instance":"Json"}',
+                '{"instance":"Json"}',
+                ["instance" => "Json"],
+                (object)["instance" => "Json"],
+                (object)["instance" => "Json"]
             ]
         ];
     }
