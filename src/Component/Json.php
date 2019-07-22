@@ -849,7 +849,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Calls a function on each member of a countable and returns its first non-null return value.
      *
-     * @param callable $function The function to be called on each member until returning a 
+     * @param callable $function The function to be called on each member until returning a
      * non-null value, that accepts the following arguments:
      * 1. The element's value; might be gotten by-reference.
      * 2. The element's key.
@@ -1210,7 +1210,7 @@ class Json implements \ArrayAccess, \Countable
      * @param ?callable $function The filtering function. It should return a boolean, or any
      * non-false values is considered as true (i.e. any value that loosely equals false is
      * considered as false, such as 0). It accepts two arguments:
-     * 1. The element's value (not passing by-reference). 
+     * 1. The element's value (not passing by-reference).
      * 2. The element's key.
      * The default function removes all null values.
      * @param ?string|int $index
