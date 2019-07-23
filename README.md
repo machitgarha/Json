@@ -79,4 +79,6 @@ __Note__: The documentation is currently outdated. Use the code documentation. W
 
 See [the  GitHub wiki](https://github.com/MAChitgarha/Json/wiki).
 
+## Contribution?
 
+Excellent! Thank you! More details can be found [here](.github/CONTRIBUTING.md).
