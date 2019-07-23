@@ -354,7 +354,7 @@ class Json implements \ArrayAccess, \Countable
                 break;
         }
 
-        throw new JsonException($message);
+        throw new JsonException($message, $jsonErrorStat);
     }
 
     /**
@@ -640,7 +640,7 @@ class Json implements \ArrayAccess, \Countable
      * http://php.net/json.constants}
      * @return string
      */
-    public function getAsJson($index = null, int $options = 0): string
+    public function getAsJson(int $options = 0, $index = null): string
     {
         return $this->do(function ($value) use ($options) {
             return $this->encodeToJsonUseProps($value, $options);
@@ -659,7 +659,7 @@ class Json implements \ArrayAccess, \Countable
      * @param bool $indexedArraysToObjects Whether to convert indexed arrays to objects or not.
      * @return object|array
      */
-    public function getAsObject($index = null, bool $indexedArraysToObjects = false)
+    public function getAsObject(bool $indexedArraysToObjects = false, $index = null)
     {
         return $this->do(function ($value) use ($indexedArraysToObjects) {
             return $this->toObject($value, $indexedArraysToObjects);
