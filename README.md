@@ -1,6 +1,7 @@
 # Json
 
 ![Release](https://img.shields.io/github/tag/machitgarha/json.svg?label=Release&color=darkblue&style=popout-square)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b84d834ab51748d394b3923ca00d1ba1)](https://app.codacy.com/app/machitgarhaa/Json?utm_source=github.com&utm_medium=referral&utm_content=MAChitgarha/Json&utm_campaign=Badge_Grade_Dashboard)
 [![License](https://img.shields.io/github/license/machitgarha/json.svg?label=License&color=darkblue&style=popout-square)](LICENSE.md)
 
 ## What's it?
