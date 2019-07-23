@@ -29,7 +29,7 @@ Like JavaScript dots to get indexes, or native PHP arrays? Choose. Even with Jav
 
 An example from [PHPUnit](https://github.com/sebastianbergmann/phpunit/blob/256901b90d55163005669ec29d5646c357f3d7ef/src/Util/Json.php#L24) source code:
 
-```
+```php
 function prettify(string $json): string {
     $decodedJson = \json_decode($json, true);
 
@@ -45,7 +45,7 @@ function prettify(string $json): string {
 
 Looks good, but it can be really better:
 
-```
+```php
 // use MAChitgarha\Component\Json
 
 function prettify(string $jsonStr): string {
