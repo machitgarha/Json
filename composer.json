@@ -1,20 +1,23 @@
 {
     "name": "machitgarha/json",
-    "description": "Manages your JSON data easily",
+    "description": "A package for handling JSON data, focusing on performance",
     "authors": [
         {
             "name": "Mohammad Amin Chitgarha",
             "email": "machitgarha@outlook.com",
-            "homepage": "https://github.com/machitgarha",
+            "homepage": "https://github.com/MAChitgarha",
             "role": "Creator"
         }
     ],
-    "homepage": "https://github.com/machitgarha/json",
+    "homepage": "https://github.com/MAChitgarha/Json",
     "keywords": [
         "json",
         "php7",
         "array",
-        "object"
+        "object",
+        "performance",
+        "speed",
+        "fast"
     ],
     "license": "MIT",
     "readme": "README.md",
@@ -27,11 +30,14 @@
     },
     "autoload": {
         "psr-4": {
-            "MAChitgarha\\": "src"
+            "MAChitgarha\\": "src",
+            "MAChitgarha\\Json\\": "src"
         }
     },
     "type": "library",
     "require-dev": {
-        "phpunit/phpunit": "^7.4"
+        "phpunit/phpunit": "7.*",
+        "phan/phan": "^2.2",
+        "friendsofphp/php-cs-fixer": "^2.15"
     }
 }

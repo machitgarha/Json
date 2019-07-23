@@ -7,6 +7,12 @@
 
 return [
     "directory_list" => [
-        "src"
+        "src/",
+        "tests/unit/",
+        "vendor/"
     ],
+    "exclude_analysis_directory_list" => [
+        "vendor/",
+    ],
+    "target_php_version" => "7.0",
 ];

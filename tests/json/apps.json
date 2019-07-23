@@ -1,0 +1,33 @@
+{
+    "apps": {
+        "ides": {
+            "JetBrains": [
+                "WebStorm",
+                "PhpStorm"
+            ],
+            "Microsoft": [
+                "VSCode",
+                "Visual Studio"
+            ]
+        },
+        "browsers": {
+            "open-source": [
+                "Firefox",
+                "Chrome"
+            ],
+            "closed-source": [
+                "Safari",
+                "IE"
+            ],
+            "unknown": [
+                "Opera",
+                "Edge"
+            ]
+        },
+        "others": [
+            "GIMP",
+            "Slack",
+            "VLC"
+        ]
+    }
+}
