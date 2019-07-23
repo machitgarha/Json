@@ -33,7 +33,7 @@ If you are contributing for the first time, don't fear. Follow the guidelines [h
 The branches comes in details:
 
 - `master`: Except `develop` branch, no other branches will be merged into `master` branch. No pull requests must be made on this branch; otherwise, it will be rejected.
-- `develop`: All pull requests and merges to `master` branch happens in this branch. So, before making any changes, make sure your branch is created from the develop branch. 
+- `develop`: All pull requests and merges to `master` branch happens in this branch. So, before making any changes, make sure your branch is created from `develop` branch. 
     
 ## Versioning
 
@@ -74,4 +74,3 @@ Keep the code well-documented, please!
 ## Do not
 
 - Contribute code style fixes.
-
