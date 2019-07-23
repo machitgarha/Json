@@ -80,7 +80,6 @@ class Json implements \ArrayAccess, \Countable
         }
 
         $this->data = $data;
-        return;
     }
 
     /**
