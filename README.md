@@ -3,6 +3,9 @@
 ![Release](https://img.shields.io/github/tag/machitgarha/json.svg?label=Release&color=darkblue&style=popout-square)
 ![License](https://img.shields.io/github/license/machitgarha/json.svg?label=License&color=darkblue&style=popout-square)
 
+## What's it?
+
+A component for your JSON data. Huh! Just that? No! Continue reading.
 
 ## Why Json?
 
@@ -70,6 +73,9 @@ composer require machitgarha/json
 __Note__: You can also clone the project and load the files in your own way. The recommended way is Composer, however.
 
 ## Documentation
-See [the wiki](https://github.com/MAChitgarha/Json/wiki). 
+
+__Note__: The documentation is currently outdated. Use the code documentation. We try to update it as soon as possible.
+
+See [the  GitHub wiki](https://github.com/MAChitgarha/Json/wiki).
 
 
