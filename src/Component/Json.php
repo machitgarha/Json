@@ -354,7 +354,7 @@ class Json implements \ArrayAccess, \Countable
                 break;
         }
 
-        throw new JsonException($message);
+        throw new JsonException($message, $jsonErrorStat);
     }
 
     /**
