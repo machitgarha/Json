@@ -3,6 +3,7 @@
 ![Release](https://img.shields.io/github/tag/machitgarha/json.svg?label=Release&color=darkblue&style=popout-square)
 ![License](https://img.shields.io/github/license/machitgarha/json.svg?label=License&color=darkblue&style=popout-square)
 
+
 ## Why Json?
 
 ### Performance
@@ -56,16 +57,19 @@ Advantages:
 
 ## Good! What Do I Need?
 
-Almost nothing. PHP7, the [JSON extension](https://www.php.net/manual/en/book.json.php) that comes with PHP7 by default, and Composer.
+Almost nothing. PHP7, the [JSON extension](https://www.php.net/manual/en/book.json.php) that comes with PHP7 by default, and usually Composer.
 
 ## Installing
 
-## Documentation
-See [the wiki](https://github.com/MAChitgarha/Json/wiki).
-
-## Installing
-You can easily install it with Composer:
+Composer is there!
 
 ```
 composer require machitgarha/json
 ```
+
+__Note__: You can also clone the project and load the files in your own way. The recommended way is Composer, however.
+
+## Documentation
+See [the wiki](https://github.com/MAChitgarha/Json/wiki). 
+
+
