@@ -635,9 +635,9 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Returns an element's value as a JSON string.
      *
-     * @param ?string|int $index
      * @param int $options The options, like JSON_PRETTY_PRINT. {@link
      * http://php.net/json.constants}
+     * @param ?string|int $index
      * @return string
      */
     public function getAsJson(int $options = 0, $index = null): string
@@ -655,8 +655,8 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Returns an element's value as a recursive object.
      *
-     * @param ?string|int $index
      * @param bool $indexedArraysToObjects Whether to convert indexed arrays to objects or not.
+     * @param ?string|int $index
      * @return object|array
      */
     public function getAsObject(bool $indexedArraysToObjects = false, $index = null)

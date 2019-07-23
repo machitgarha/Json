@@ -44,7 +44,7 @@ class PublicMethodTest extends TestCase
         $this->assertEquals($asArray, $json->get());
         $this->assertEquals($asJson, $json->getAsJson());
         $this->assertEquals($asObject, $json->getAsObject());
-        $this->assertEquals($asFullObject, $json->getAsObject(null, true));
+        $this->assertEquals($asFullObject, $json->getAsObject(true));
     }
 
     /** @dataProvider indexValuePairsProvider */
