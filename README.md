@@ -2,6 +2,7 @@
 
 ![Release](https://img.shields.io/github/tag/machitgarha/json.svg?label=Release&color=darkblue&style=popout-square)
 [![License](https://img.shields.io/github/license/machitgarha/json.svg?label=License&color=darkblue&style=popout-square)](LICENSE.md)
+[![Code Quality](https://img.shields.io/codefactor/grade/github/machitgarha/json/master.svg?label=Code%20Quality&style=flat-square)](https://www.codefactor.io/repository/github/machitgarha/json)
 
 ## What's it?
 
@@ -78,4 +79,6 @@ __Note__: The documentation is currently outdated. Use the code documentation. W
 
 See [the  GitHub wiki](https://github.com/MAChitgarha/Json/wiki).
 
+## Contribution?
 
+Excellent! Thank you! More details can be found [here](.github/CONTRIBUTING.md).

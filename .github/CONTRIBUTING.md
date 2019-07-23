@@ -1,4 +1,3 @@
-
 Thank you for your decision. Contributing to this repository is really welcomed. If you want to report something important, contact me via machitgarha@outlook.com.
 # Code of Conduct
 
@@ -32,8 +31,9 @@ If you are contributing for the first time, don't fear. Follow the guidelines [h
 
 The branches comes in details:
 
-- `master`: Except `develop` branch, no other branches will be merged into `master` branch. No pull requests must be made on this branch; otherwise, it will be rejected.
-- `develop`: All pull requests and merges to `master` branch happens in this branch. So, before making any changes, make sure your branch is created from `develop` branch. 
+- `master`: Except `develop` and `metadata` branches, no other branches will be merged into `master` branch. No pull requests must be made on this branch; otherwise, it will be rejected.
+- `develop`: All pull requests and merges to `master` branch happens in this branch. So, before making any changes, make sure your branch is created from `develop` branch.
+- `metadata`: Including all metadata changes, including changes to `composer.json` (i.e. not affecting dependencies) and `README.md`. This branch will be merged directly into `master` or `develop` branches, if needed.
     
 ## Versioning
 
