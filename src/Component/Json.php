@@ -80,7 +80,6 @@ class Json implements \ArrayAccess, \Countable
         }
 
         $this->data = $data;
-        return;
     }
 
     /**
@@ -99,7 +98,7 @@ class Json implements \ArrayAccess, \Countable
      * @param int $options A combination of JsonOpt::* constants.
      * @return self
      */
-    public function setOptions(int $options = 0): self
+    public function setOptions(int $options = 0)
     {
         $this->options = $options;
 
@@ -114,7 +113,7 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return self
      */
-    public function addOption(int $option): self
+    public function addOption(int $option)
     {
         $this->setOptions($this->options | $option);
         return $this;
@@ -126,7 +125,7 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return self
      */
-    public function removeOption(int $option): self
+    public function removeOption(int $option)
     {
         $this->setOptions($this->options & ~$option);
         return $this;
@@ -321,7 +320,7 @@ class Json implements \ArrayAccess, \Countable
         switch ($jsonErrorStat) {
             case JSON_ERROR_NONE:
                 return;
-            
+
             case JSON_ERROR_DEPTH:
                 $message = "Maximum stack depth exceeded";
                 break;
@@ -330,7 +329,7 @@ class Json implements \ArrayAccess, \Countable
             case JSON_ERROR_SYNTAX:
                 $message = "Invalid or malformed JSON";
                 break;
-            
+
             case JSON_ERROR_CTRL_CHAR:
             case JSON_ERROR_UTF8:
             case JSON_ERROR_UTF16:
@@ -340,15 +339,15 @@ class Json implements \ArrayAccess, \Countable
             case JSON_ERROR_INF_OR_NAN:
                 $message = "NAN and INF cannot be encoded";
                 break;
-            
+
             case JSON_ERROR_INVALID_PROPERTY_NAME:
                 $message = "Found an invalid property name";
                 break;
-            
+
             case JSON_ERROR_UNSUPPORTED_TYPE:
                 $message = "A value cannot be encoded, possibly a resource";
                 break;
-            
+
             default:
                 $message = "Unknown JSON error";
                 break;
@@ -478,7 +477,7 @@ class Json implements \ArrayAccess, \Countable
                     }
                     $data[$lastKey] = null;
                 }
-    
+
                 $returnValue = [
                     &$data[$lastKey],
                     &$data,
@@ -550,14 +549,13 @@ class Json implements \ArrayAccess, \Countable
      *
      * @param ?callable $function It accepts the following argument(s):
      * 1. The element's value; might be gotten by-reference.
-     * 2. Whether the the element is data root or not.
-     * 3. The parent element (that is an array); might be gotten by-reference.
-     * 4. The last key in the index; might be used to access the element (using the parent element).
+     * 2. The parent element (that is an array); might be gotten by-reference.
+     * 3. The last key in the index; might be used to access the element (using the parent element).
      * From within the callable, you can yield as many values as you want, and/or return a value.
      * The return type of the method will be exactly the return type of this callable. Note that if
      * $index is null, the first argument will be the only passing argument.
-     * @param ?string|int $index The index of the element to be found, and it's extracted as keys. Pass
-     * null if you want to get the data root inside the callback.
+     * @param ?string|int $index The index of the element to be found, and it's extracted as keys.
+     * Pass null if you want to get the data root inside the callback.
      * @param bool $forceCountableValue Force the value be operated to be a countable one, so, the
      * element (i.e. first argument) passing to $function will be an array.
      * @param int $indexingType One of the Indexing::* constants.
@@ -1055,7 +1053,7 @@ class Json implements \ArrayAccess, \Countable
             while (count($randomValues) < $count) {
                 $randomValues[] = $array[$arrayKeys[$this->randomInt(0, $maxArrayIndex)]];
             }
-        
+
             return $randomValues;
         }, $index, true);
     }
@@ -1082,7 +1080,7 @@ class Json implements \ArrayAccess, \Countable
             while (count($randomKeys) < $count) {
                 $randomKeys[] = $arrayKeys[$this->randomInt(0, $maxArrayIndex)];
             }
-        
+
             return $randomKeys;
         }, $index, true);
     }
@@ -1110,7 +1108,7 @@ class Json implements \ArrayAccess, \Countable
                 $randomKey = $arrayKeys[$this->randomInt(0, $maxArrayIndex)];
                 $randomSubset[$randomKey] = $array[$randomKey];
             }
-        
+
             return $randomSubset;
         }, $index, true);
     }
@@ -1173,14 +1171,14 @@ class Json implements \ArrayAccess, \Countable
     ): self {
         $diff = function (array $array1, array $array2) {
             $diff = array();
-  
+
             foreach ($array1 as $value) {
                 $diff[$value] = 1;
             }
             foreach ($array2 as $value) {
                 unset($diff[$value]);
             }
-          
+
             return array_keys($diff);
         };
 
@@ -1193,7 +1191,7 @@ class Json implements \ArrayAccess, \Countable
             foreach ($array2 as $key => $value) {
                 unset($diff[$key]);
             }
-          
+
             return $diff;
         };
 

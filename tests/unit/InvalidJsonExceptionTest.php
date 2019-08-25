@@ -24,7 +24,6 @@ class InvalidJsonExceptionTest extends TestCase
         new Json($data, JsonOpt::AS_JSON);
     }
 
-    /** @todo Import JSON schema. */
     public function invalidJsonProvider()
     {
         return [
