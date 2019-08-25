@@ -320,7 +320,7 @@ class Json implements \ArrayAccess, \Countable
         switch ($jsonErrorStat) {
             case JSON_ERROR_NONE:
                 return;
-            
+
             case JSON_ERROR_DEPTH:
                 $message = "Maximum stack depth exceeded";
                 break;
@@ -329,7 +329,7 @@ class Json implements \ArrayAccess, \Countable
             case JSON_ERROR_SYNTAX:
                 $message = "Invalid or malformed JSON";
                 break;
-            
+
             case JSON_ERROR_CTRL_CHAR:
             case JSON_ERROR_UTF8:
             case JSON_ERROR_UTF16:
@@ -339,15 +339,15 @@ class Json implements \ArrayAccess, \Countable
             case JSON_ERROR_INF_OR_NAN:
                 $message = "NAN and INF cannot be encoded";
                 break;
-            
+
             case JSON_ERROR_INVALID_PROPERTY_NAME:
                 $message = "Found an invalid property name";
                 break;
-            
+
             case JSON_ERROR_UNSUPPORTED_TYPE:
                 $message = "A value cannot be encoded, possibly a resource";
                 break;
-            
+
             default:
                 $message = "Unknown JSON error";
                 break;
@@ -477,7 +477,7 @@ class Json implements \ArrayAccess, \Countable
                     }
                     $data[$lastKey] = null;
                 }
-    
+
                 $returnValue = [
                     &$data[$lastKey],
                     &$data,
@@ -1054,7 +1054,7 @@ class Json implements \ArrayAccess, \Countable
             while (count($randomValues) < $count) {
                 $randomValues[] = $array[$arrayKeys[$this->randomInt(0, $maxArrayIndex)]];
             }
-        
+
             return $randomValues;
         }, $index, true);
     }
@@ -1081,7 +1081,7 @@ class Json implements \ArrayAccess, \Countable
             while (count($randomKeys) < $count) {
                 $randomKeys[] = $arrayKeys[$this->randomInt(0, $maxArrayIndex)];
             }
-        
+
             return $randomKeys;
         }, $index, true);
     }
@@ -1109,7 +1109,7 @@ class Json implements \ArrayAccess, \Countable
                 $randomKey = $arrayKeys[$this->randomInt(0, $maxArrayIndex)];
                 $randomSubset[$randomKey] = $array[$randomKey];
             }
-        
+
             return $randomSubset;
         }, $index, true);
     }
@@ -1172,14 +1172,14 @@ class Json implements \ArrayAccess, \Countable
     ): self {
         $diff = function (array $array1, array $array2) {
             $diff = array();
-  
+
             foreach ($array1 as $value) {
                 $diff[$value] = 1;
             }
             foreach ($array2 as $value) {
                 unset($diff[$value]);
             }
-          
+
             return array_keys($diff);
         };
 
@@ -1192,7 +1192,7 @@ class Json implements \ArrayAccess, \Countable
             foreach ($array2 as $key => $value) {
                 unset($diff[$key]);
             }
-          
+
             return $diff;
         };
 
