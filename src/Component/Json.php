@@ -549,14 +549,13 @@ class Json implements \ArrayAccess, \Countable
      *
      * @param ?callable $function It accepts the following argument(s):
      * 1. The element's value; might be gotten by-reference.
-     * 2. Whether the the element is data root or not.
-     * 3. The parent element (that is an array); might be gotten by-reference.
-     * 4. The last key in the index; might be used to access the element (using the parent element).
+     * 2. The parent element (that is an array); might be gotten by-reference.
+     * 3. The last key in the index; might be used to access the element (using the parent element).
      * From within the callable, you can yield as many values as you want, and/or return a value.
      * The return type of the method will be exactly the return type of this callable. Note that if
      * $index is null, the first argument will be the only passing argument.
-     * @param ?string|int $index The index of the element to be found, and it's extracted as keys. Pass
-     * null if you want to get the data root inside the callback.
+     * @param ?string|int $index The index of the element to be found, and it's extracted as keys.
+     * Pass null if you want to get the data root inside the callback.
      * @param bool $forceCountableValue Force the value be operated to be a countable one, so, the
      * element (i.e. first argument) passing to $function will be an array.
      * @param int $indexingType One of the Indexing::* constants.
