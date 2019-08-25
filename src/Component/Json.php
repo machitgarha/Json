@@ -98,7 +98,7 @@ class Json implements \ArrayAccess, \Countable
      * @param int $options A combination of JsonOpt::* constants.
      * @return self
      */
-    public function setOptions(int $options = 0): self
+    public function setOptions(int $options = 0)
     {
         $this->options = $options;
 
@@ -113,7 +113,7 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return self
      */
-    public function addOption(int $option): self
+    public function addOption(int $option)
     {
         $this->setOptions($this->options | $option);
         return $this;
@@ -125,7 +125,7 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return self
      */
-    public function removeOption(int $option): self
+    public function removeOption(int $option)
     {
         $this->setOptions($this->options & ~$option);
         return $this;
