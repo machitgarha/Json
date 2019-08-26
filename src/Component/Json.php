@@ -85,9 +85,10 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Creates a new instance of the class.
      *
+     * @see self::__construct()
      * @return self
      */
-    public static function new($data = [], int $options = 0): self
+    public static function new($data = [], int $options = 0)
     {
         return new self($data, $options);
     }
@@ -528,11 +529,15 @@ class Json implements \ArrayAccess, \Countable
             return [""];
         }
 
+        if (!is_string($index) || !is_int($index)) {
+            throw new InvalidArgumentException("Index must be either a string or an integer");
+        }
+
         $replacement = "¬";
         $escapedDelimiter = "\\$delimiter";
 
         // Replace the escaped delimiter with a less-using character
-        $index = str_replace($escapedDelimiter, $replacement, $index);
+        $index = str_replace($escapedDelimiter, $replacement, (string)($index));
 
         $keys = explode($delimiter, $index);
 
