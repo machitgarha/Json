@@ -147,10 +147,10 @@ class Json implements \ArrayAccess, \Countable
      * Sets recursion depth when encoding/decoding JSON strings.
      *
      * @param int $depth
-     * @return self
+     * @return 
      * @throws InvalidArgumentException If $depth is less than 1.
      */
-    public function setJsonRecursionDepth(int $depth): self
+    public function setJsonRecursionDepth(int $depth)
     {
         if ($depth < 1) {
             throw new InvalidArgumentException("Depth must be positive");
@@ -925,7 +925,7 @@ class Json implements \ArrayAccess, \Countable
     public function push($value, $index = null): self
     {
         $this->do(function (array &$array) use ($value) {
-            array_push($array, $this->decodeJsonIfNeeded($value));
+            $array[] = $this->decodeJsonIfNeeded($value);
         }, $index, true);
         return $this;
     }
