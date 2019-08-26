@@ -3,6 +3,7 @@
 ![Release](https://img.shields.io/github/tag/machitgarha/json.svg?label=Release&color=darkblue&style=popout-square)
 [![License](https://img.shields.io/github/license/machitgarha/json.svg?label=License&color=darkblue&style=popout-square)](LICENSE.md)
 [![Code Quality](https://img.shields.io/codefactor/grade/github/machitgarha/json/master.svg?label=Code%20Quality&style=flat-square)](https://www.codefactor.io/repository/github/machitgarha/json)
+[![Build](https://img.shields.io/travis/machitgarha/json?style=flat-square)](https://travis-ci.org/MAChitgarha/Json)
 
 ## What's it?
 
