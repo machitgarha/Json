@@ -529,11 +529,15 @@ class Json implements \ArrayAccess, \Countable
             return [""];
         }
 
+        if (!is_string($index) || !is_int($index)) {
+            throw new InvalidArgumentException("Index must be either a string or an integer");
+        }
+
         $replacement = "¬";
         $escapedDelimiter = "\\$delimiter";
 
         // Replace the escaped delimiter with a less-using character
-        $index = str_replace($escapedDelimiter, $replacement, $index);
+        $index = str_replace($escapedDelimiter, $replacement, (string)($index));
 
         $keys = explode($delimiter, $index);
 
