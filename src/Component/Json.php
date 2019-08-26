@@ -85,9 +85,10 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Creates a new instance of the class.
      *
+     * @see self::__construct()
      * @return self
      */
-    public static function new($data = [], int $options = 0): self
+    public static function new($data = [], int $options = 0)
     {
         return new self($data, $options);
     }
