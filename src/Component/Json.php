@@ -529,7 +529,7 @@ class Json implements \ArrayAccess, \Countable
             return [""];
         }
 
-        if (!is_string($index) || !is_int($index)) {
+        if (!is_string($index) && !is_int($index)) {
             throw new InvalidArgumentException("Index must be either a string or an integer");
         }
 
