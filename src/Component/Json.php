@@ -618,7 +618,7 @@ class Json implements \ArrayAccess, \Countable
 
     public function __set($methodName, $closure)
     {
-        if ($closure instanceof \Closure) {
+        if (!($closure instanceof \Closure)) {
             throw new InvalidArgumentException("The value must be a closure");
         }
 
@@ -652,7 +652,7 @@ class Json implements \ArrayAccess, \Countable
         $this->anonymousMethods[$methodName]->call($this, ...$args);
     }
 
-    public function __callStatic($methodName, $args)
+    public static function __callStatic($methodName, $args)
     {
         if (!$this->__isset($methodName)) {
             throw new RuntimeException("Method '$methodName' is not defined");
