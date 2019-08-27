@@ -649,7 +649,7 @@ class Json implements \ArrayAccess, \Countable
             throw new RuntimeException("Method '$methodName' is not defined");
         }
 
-        $this->anonymousMethods[$methodName]->call($this, ...$args);
+        return $this->anonymousMethods[$methodName]->call($this, ...$args);
     }
 
     public static function __callStatic($methodName, $args)
@@ -658,7 +658,7 @@ class Json implements \ArrayAccess, \Countable
             throw new RuntimeException("Method '$methodName' is not defined");
         }
 
-        $this->anonymousMethods[$methodName](...$args);
+        return $this->anonymousMethods[$methodName](...$args);
     }
 
     /**
