@@ -638,6 +638,11 @@ class Json implements \ArrayAccess, \Countable
         $this->anonymousMethods[$methodName] = $closure;
     }
 
+    public function __unset($methodName)
+    {
+        unset($this->anonymousMethods[$methodName]);
+    }
+
     public function __call($methodName, $args)
     {
         if (!$this->__isset($methodName)) {
