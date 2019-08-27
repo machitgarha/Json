@@ -616,11 +616,6 @@ class Json implements \ArrayAccess, \Countable
         return $returnValueReference;
     }
 
-    public function __isset($methodName)
-    {
-        return isset($this->anonymousMethods[$methodName]);
-    }
-
     public function __set($methodName, $closure)
     {
         if ($closure instanceof \Closure) {
@@ -636,6 +631,11 @@ class Json implements \ArrayAccess, \Countable
         }
 
         $this->anonymousMethods[$methodName] = $closure;
+    }
+
+    public function __isset($methodName)
+    {
+        return isset($this->anonymousMethods[$methodName]);
     }
 
     public function __unset($methodName)
