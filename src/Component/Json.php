@@ -33,6 +33,14 @@ class Json implements \ArrayAccess, \Countable
      */
     protected $data;
 
+    /**
+     * @var \Closure[] Anonymous methods that can be set on-the-fly.
+     * @see self::__set()
+     * @see self::__call()
+     * @see self::__callStatic()
+     */
+    protected $anonymousMethods = [];
+
     /** @var int Options passed to the constructor. */
     protected $options = 0;
 
@@ -147,10 +155,10 @@ class Json implements \ArrayAccess, \Countable
      * Sets recursion depth when encoding/decoding JSON strings.
      *
      * @param int $depth
-     * @return 
+     * @return self
      * @throws InvalidArgumentException If $depth is less than 1.
      */
-    public function setJsonRecursionDepth(int $depth)
+    public function setJsonRecursionDepth(int $depth): self
     {
         if ($depth < 1) {
             throw new InvalidArgumentException("Depth must be positive");
@@ -605,6 +613,23 @@ class Json implements \ArrayAccess, \Countable
             $indexingType
         ));
         return $returnValueReference;
+    }
+
+    public function __set($methodName, $closure)
+    {
+        if ($closure instanceof \Closure) {
+            throw new InvalidArgumentException("The value must be a closure");
+        }
+
+        if (method_exists($this, $methodName)) {
+            throw new Exception("Method '$methodName' exists, cannot overwrite it");
+        }
+
+        if (isset($this->anonymousMethods[$methodName])) {
+            throw new RuntimeException("Anonymous method '$methodName' already defined");
+        }
+
+        $this->anonymousMethods[$methodName] = $closure;
     }
 
     /**
