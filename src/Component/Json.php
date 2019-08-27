@@ -15,6 +15,7 @@ use MAChitgarha\Json\Exception\InvalidJsonException;
 use MAChitgarha\Json\Exception\UncountableValueException;
 use MAChitgarha\Json\Exception\JsonException;
 use MAChitgarha\Json\Exception\OverflowException;
+use MAChitgarha\Json\Exception\RuntimeException;
 use MAChitgarha\Json\Option\JsonOpt;
 use MAChitgarha\Json\Option\Indexing;
 use MAChitgarha\Json\Option\Merge;
@@ -615,6 +616,11 @@ class Json implements \ArrayAccess, \Countable
         return $returnValueReference;
     }
 
+    public function __isset($methodName)
+    {
+        return isset($this->anonymousMethods[$methodName]);
+    }
+
     public function __set($methodName, $closure)
     {
         if ($closure instanceof \Closure) {
@@ -625,11 +631,20 @@ class Json implements \ArrayAccess, \Countable
             throw new Exception("Method '$methodName' exists, cannot overwrite it");
         }
 
-        if (isset($this->anonymousMethods[$methodName])) {
+        if ($this->__isset($methodName)) {
             throw new RuntimeException("Anonymous method '$methodName' already defined");
         }
 
         $this->anonymousMethods[$methodName] = $closure;
+    }
+
+    public function __call($methodName, $args)
+    {
+        if (!$this->__isset($methodName)) {
+            throw new RuntimeException("Method '$methodName' is not defined");
+        }
+
+        $this->anonymousMethods[$methodName]->call($this, ...$args);
     }
 
     /**
