@@ -617,12 +617,8 @@ class Json implements \ArrayAccess, \Countable
         return $returnValueReference;
     }
 
-    public function __set($methodName, $closure)
+    public function __set(string $methodName, \Closure $closure)
     {
-        if (!($closure instanceof \Closure)) {
-            throw new InvalidArgumentException("The value must be a closure");
-        }
-
         if (method_exists($this, $methodName)) {
             throw new Exception("Method '$methodName' exists, cannot overwrite it");
         }
@@ -635,17 +631,17 @@ class Json implements \ArrayAccess, \Countable
         $this->anonymousMethods[$methodName] = $closure;
     }
 
-    public function __isset($methodName)
+    public function __isset(string $methodName)
     {
         return isset($this->anonymousMethods[$methodName]);
     }
 
-    public function __unset($methodName)
+    public function __unset(string $methodName)
     {
         unset($this->anonymousMethods[$methodName]);
     }
 
-    public function __call($methodName, $args)
+    public function __call(string $methodName, array $args)
     {
         if (!$this->__isset($methodName)) {
             throw new RuntimeException("Method '$methodName' is not defined");
