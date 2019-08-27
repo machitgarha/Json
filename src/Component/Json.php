@@ -647,6 +647,15 @@ class Json implements \ArrayAccess, \Countable
         $this->anonymousMethods[$methodName]->call($this, ...$args);
     }
 
+    public function __callStatic($methodName, $args)
+    {
+        if (!$this->__isset($methodName)) {
+            throw new RuntimeException("Method '$methodName' is not defined");
+        }
+
+        $this->anonymousMethods[$methodName](...$args);
+    }
+
     /**
      * Gets an element inside data.
      *
