@@ -617,6 +617,17 @@ class Json implements \ArrayAccess, \Countable
         return $returnValueReference;
     }
 
+    /**
+     * Define a new anonymous method.
+     *
+     * @param string $methodName
+     * @param \Closure $closure The method as a closure. Note that $this will be bound on this on
+     * every call. You can also access protected (and private) methods from inside of it. It is also
+     * possible to be a generator, but it is not possible to return value by reference.
+     *
+     * @throws Exception If a class method with the same name already exists.
+     * @throws RuntimeException If the anonymous method is already defined.
+     */
     public function __set(string $methodName, \Closure $closure)
     {
         if (method_exists($this, $methodName)) {
@@ -631,16 +642,34 @@ class Json implements \ArrayAccess, \Countable
         $this->anonymousMethods[$methodName] = $closure;
     }
 
+    /**
+     * Checks whether if an anonymous method is defined or not.
+     *
+     * @param string $methodName
+     * @return bool
+     */
     public function __isset(string $methodName)
     {
         return isset($this->anonymousMethods[$methodName]);
     }
 
+    /**
+     * Removes a defined anonymous method.
+     *
+     * @param string $methodName
+     */
     public function __unset(string $methodName)
     {
         unset($this->anonymousMethods[$methodName]);
     }
 
+    /**
+     * Call a defined anonymous method with arguments.
+     *
+     * @param string $methodName
+     * @param array $args Arguments to be passed to the anonymous method.
+     * @return mixed The return value of the anonymous method.
+     */
     public function __call(string $methodName, array $args)
     {
         if (!$this->__isset($methodName)) {
