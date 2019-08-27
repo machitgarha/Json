@@ -732,13 +732,14 @@ class Json implements \ArrayAccess, \Countable
      * Returns an element by-reference.
      *
      * @param ?string|int $index
+     * @param int $indexingType One of Indexing::* constants.
      * @return mixed
      */
-    public function &getByReference($index = null)
+    public function &getByReference($index = null, int $indexingType = Indexing::STRICT)
     {
         return $this->do(function &(&$element) {
             return $element;
-        }, $index);
+        }, $index, false, $indexingType);
     }
 
     /**
