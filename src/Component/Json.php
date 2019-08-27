@@ -37,8 +37,9 @@ class Json implements \ArrayAccess, \Countable
     /**
      * @var \Closure[] Anonymous methods that can be set on-the-fly.
      * @see self::__set()
+     * @see self::__isset()
+     * @see self::__unset()
      * @see self::__call()
-     * @see self::__callStatic()
      */
     protected $anonymousMethods = [];
 
@@ -630,6 +631,7 @@ class Json implements \ArrayAccess, \Countable
             throw new RuntimeException("Anonymous method '$methodName' already defined");
         }
 
+        // Binding must not be done here; read comments inside Json::__call()
         $this->anonymousMethods[$methodName] = $closure;
     }
 
@@ -649,6 +651,11 @@ class Json implements \ArrayAccess, \Countable
             throw new RuntimeException("Method '$methodName' is not defined");
         }
 
+        /*
+         * Binding $this must be done on every call, and this is because of Json::index() method.
+         * If we bind $this in Json::__set() (i.e. anonymous method definition), then $this will
+         * point to the parent class (i.e. Json) instead of the child class (i.e. JsonChild).
+         */
         return $this->anonymousMethods[$methodName]->call($this, ...$args);
     }
 
