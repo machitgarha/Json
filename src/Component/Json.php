@@ -199,6 +199,7 @@ class Json implements \ArrayAccess, \Countable
      * @param mixed $value
      * @return mixed
      */
+    // This
     protected function decodeJsonIfNeeded($value)
     {
         if ($this->jsonDecodeAlways && is_string($value)) {
@@ -219,6 +220,7 @@ class Json implements \ArrayAccess, \Countable
      * @return mixed
      * @see https://stackoverflow.com/a/54131002/4215651 Thanks to this.
      */
+    // This
     protected function normalize($value)
     {
         if (is_object($value) || is_array($value)) {
@@ -237,6 +239,7 @@ class Json implements \ArrayAccess, \Countable
      * @param bool $forceObject Whether to convert indexed arrays to objects or not.
      * @return object|array
      */
+    // This
     protected function toObject($value, bool $forceObject = false)
     {
         return $this->decodeJsonUseProps(
@@ -291,6 +294,7 @@ class Json implements \ArrayAccess, \Countable
      * @return string
      * @throws JsonException
      */
+    // This
     public static function encodeToJson($value, int $options = 0, int $depth = 512): string
     {
         $encodedData = json_encode($value, $options, $depth);
@@ -377,6 +381,7 @@ class Json implements \ArrayAccess, \Countable
      * [1]: The decoded JSON string, or null if either the string is not a valid JSON or an
      * error occurred while decoding it.
      */
+    // This
     protected static function validateStringAsJson(string $value, bool $assoc = false): array
     {
         try {
@@ -405,6 +410,7 @@ class Json implements \ArrayAccess, \Countable
      * @param int $options
      * @return string
      */
+    // This
     protected function encodeToJsonUseProps($value, int $options = 0): string
     {
         return self::encodeToJson($value, $options, $this->jsonRecursionDepth);
@@ -417,6 +423,7 @@ class Json implements \ArrayAccess, \Countable
      * @param bool $asArray
      * @return mixed
      */
+    // This
     protected function decodeJsonUseProps(string $value, bool $asArray = false)
     {
         return self::decodeJson($value, $asArray, $this->jsonRecursionDepth);
@@ -430,6 +437,7 @@ class Json implements \ArrayAccess, \Countable
      * @return array{0:array|mixed,1:array|array[],2:mixed}|array{0:array|array[],1:null,2:null}
      * @see Json::do()
      */
+    // This
     protected function &findElementRecursive(
         array $keys,
         &$data,
@@ -584,6 +592,7 @@ class Json implements \ArrayAccess, \Countable
      * @throws UncountableValueException If data is scalar and $forceCountableValue is set to true.
      * @todo Remove the at sign operator.
      */
+    // This
     public function &do(
         callable $function = null,
         $index = null,
@@ -628,6 +637,7 @@ class Json implements \ArrayAccess, \Countable
      * @throws Exception If a class method with the same name already exists.
      * @throws RuntimeException If the anonymous method is already defined.
      */
+    // This
     public function __set(string $methodName, \Closure $closure)
     {
         if (method_exists($this, $methodName)) {
@@ -670,6 +680,7 @@ class Json implements \ArrayAccess, \Countable
      * @param array $args Arguments to be passed to the anonymous method.
      * @return mixed The return value of the anonymous method.
      */
+    // This
     public function __call(string $methodName, array $args)
     {
         if (!$this->__isset($methodName)) {
@@ -691,12 +702,15 @@ class Json implements \ArrayAccess, \Countable
      * @param int $indexingType One of the Indexing::* constants.
      * @return JsonChild
      */
+    // This
     public function index(string $index, int $indexingType = Indexing::FREE): JsonChild
     {
         return new JsonChild($this->do(function &(&$element) {
             return $element;
         }, $index, false, $indexingType), get_object_vars($this));
     }
+
+    // All of the following methods
 
     /**
      * Returns an element's value. All countable values will be returned as arrays.
