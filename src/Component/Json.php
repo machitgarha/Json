@@ -15,6 +15,7 @@ use MAChitgarha\Json\Exception\InvalidJsonException;
 use MAChitgarha\Json\Exception\UncountableValueException;
 use MAChitgarha\Json\Exception\JsonException;
 use MAChitgarha\Json\Exception\OverflowException;
+use MAChitgarha\Json\Exception\RuntimeException;
 use MAChitgarha\Json\Option\JsonOpt;
 use MAChitgarha\Json\Option\Indexing;
 use MAChitgarha\Json\Option\Merge;
@@ -32,6 +33,15 @@ class Json implements \ArrayAccess, \Countable
      * it may. Setting it to a resource might lead to errors/exceptions.
      */
     protected $data;
+
+    /**
+     * @var \Closure[] Anonymous methods that can be set on-the-fly.
+     * @see self::__set()
+     * @see self::__isset()
+     * @see self::__unset()
+     * @see self::__call()
+     */
+    protected $anonymousMethods = [];
 
     /** @var int Options passed to the constructor. */
     protected $options = 0;
@@ -557,8 +567,9 @@ class Json implements \ArrayAccess, \Countable
      * 2. The parent element (that is an array); might be gotten by-reference.
      * 3. The last key in the index; might be used to access the element (using the parent element).
      * From within the callable, you can yield as many values as you want, and/or return a value.
-     * The return type of the method will be exactly the return type of this callable. Note that if
-     * $index is null, the first argument will be the only passing argument.
+     * The return type of the method will be exactly the return type of this callable. If the
+     * callable is a closure, then $this will be bound to the current instance. Note that if $index
+     * is null, the first argument will be the only passing argument.
      * @param ?string|int $index The index of the element to be found, and it's extracted as keys.
      * Pass null if you want to get the data root inside the callback.
      * @param bool $forceCountableValue Force the value be operated to be a countable one, so, the
@@ -589,6 +600,10 @@ class Json implements \ArrayAccess, \Countable
             throw new UncountableValueException("Cannot use indexing on uncountable");
         }
 
+        if ($function instanceof \Closure) {
+            $function = $function->bindTo($this);
+        }
+
         // Set options
         $keepIndex = $options & (bool)(DoOpt::KEEP_INDEX);
 
@@ -600,6 +615,73 @@ class Json implements \ArrayAccess, \Countable
             $indexingType
         ));
         return $returnValueReference;
+    }
+
+    /**
+     * Define a new anonymous method.
+     *
+     * @param string $methodName
+     * @param \Closure $closure The method as a closure. Note that $this will be bound on this on
+     * every call. You can also access protected (and private) methods from inside of it. It is also
+     * possible to be a generator, but it is not possible to return value by reference.
+     *
+     * @throws Exception If a class method with the same name already exists.
+     * @throws RuntimeException If the anonymous method is already defined.
+     */
+    public function __set(string $methodName, \Closure $closure)
+    {
+        if (method_exists($this, $methodName)) {
+            throw new Exception("Method '$methodName' exists, cannot overwrite it");
+        }
+
+        if ($this->__isset($methodName)) {
+            throw new RuntimeException("Anonymous method '$methodName' already defined");
+        }
+
+        // Binding must not be done here; read comments inside Json::__call()
+        $this->anonymousMethods[$methodName] = $closure;
+    }
+
+    /**
+     * Checks whether if an anonymous method is defined or not.
+     *
+     * @param string $methodName
+     * @return bool
+     */
+    public function __isset(string $methodName)
+    {
+        return isset($this->anonymousMethods[$methodName]);
+    }
+
+    /**
+     * Removes a defined anonymous method.
+     *
+     * @param string $methodName
+     */
+    public function __unset(string $methodName)
+    {
+        unset($this->anonymousMethods[$methodName]);
+    }
+
+    /**
+     * Call a defined anonymous method with arguments.
+     *
+     * @param string $methodName
+     * @param array $args Arguments to be passed to the anonymous method.
+     * @return mixed The return value of the anonymous method.
+     */
+    public function __call(string $methodName, array $args)
+    {
+        if (!$this->__isset($methodName)) {
+            throw new RuntimeException("Method '$methodName' is not defined");
+        }
+
+        /*
+         * Binding $this must be done on every call, and this is because of Json::index() method.
+         * If we bind $this in Json::__set() (i.e. anonymous method definition), then $this will
+         * point to the parent class (i.e. Json) instead of the child class (i.e. JsonChild).
+         */
+        return $this->anonymousMethods[$methodName]->call($this, ...$args);
     }
 
     /**
@@ -673,13 +755,14 @@ class Json implements \ArrayAccess, \Countable
      * Returns an element by-reference.
      *
      * @param ?string|int $index
+     * @param int $indexingType One of Indexing::* constants.
      * @return mixed
      */
-    public function &getByReference($index = null)
+    public function &getByReference($index = null, int $indexingType = Indexing::STRICT)
     {
         return $this->do(function &(&$element) {
             return $element;
-        }, $index);
+        }, $index, false, $indexingType);
     }
 
     /**
@@ -920,7 +1003,7 @@ class Json implements \ArrayAccess, \Countable
     public function push($value, $index = null): self
     {
         $this->do(function (array &$array) use ($value) {
-            array_push($array, $this->decodeJsonIfNeeded($value));
+            $array[] = $this->decodeJsonIfNeeded($value);
         }, $index, true);
         return $this;
     }
