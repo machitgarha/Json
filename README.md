@@ -13,6 +13,8 @@ A component for your JSON data. Huh! Just that? No! Continue reading.
 
 ### Performance
 
+**Note:** Unfortunately, things are slow in the current version of Json (i.e. not only the lack of micro-optimizations, but the general performance is not good). It's recommended to wait for the next version (maybe 2.0.0) to use Json (if you don't care, then use it). See #59 for more details.
+
 Thinking of performance? Json is here. Many methods have been tested to perform as fast as they could. Sometimes, they are faster than internals. Really? Test it yourself!
 
 ### Flexible
