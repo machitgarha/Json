@@ -7,7 +7,7 @@
  * @see https://packagist.org/packages/machitgarha/json
  */
 
-namespace MAChitgarha\Component;
+namespace MAChitgarha\Json\Component;
 
 use MAChitgarha\Json\Exception\Exception;
 use MAChitgarha\Json\Exception\InvalidArgumentException;

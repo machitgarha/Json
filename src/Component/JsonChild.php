@@ -7,7 +7,7 @@
  * @see https://packagist.org/packages/machitgarha/json
  */
 
-namespace MAChitgarha\Component;
+namespace MAChitgarha\Json\Component;
 
 /**
  * Holds an element of the parent data by-reference and make operations on it.

@@ -1,10 +1,10 @@
 <?php
 
-/** @see MAChitgarha\Component\Json */
-namespace MAChitgarha\UnitTest\Json;
+/** @see MAChitgarha\Json\Component\Json */
+namespace MAChitgarha\Json\UnitTest;
 
 use PHPUnit\Framework\TestCase;
-use MAChitgarha\Component\Json;
+use MAChitgarha\Json\Component\Json;
 use MAChitgarha\Json\Exception\InvalidArgumentException;
 use MAChitgarha\Json\Option\JsonOpt;
 
