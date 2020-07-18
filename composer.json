@@ -30,7 +30,6 @@
     },
     "autoload": {
         "psr-4": {
-            "MAChitgarha\\": "src",
             "MAChitgarha\\Json\\": "src"
         }
     },
