@@ -104,6 +104,13 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
+     * Lints the data.
+     */
+    public function lint()
+    {
+    }
+
+    /**
      * Resets all options.
      *
      * @param int $options A combination of JsonOpt::* constants.
