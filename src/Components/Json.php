@@ -32,7 +32,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * @var LinterInteractorInterface
      */
-    private $linter;
+    private $linterInteractor;
 
     /**
      * @var mixed Data parsed in the constructor. It should be everything but a resource type, but
@@ -116,7 +116,7 @@ class Json implements \ArrayAccess, \Countable
      */
     public function lint()
     {
-        return $this->linter->lint();
+        return $this->linterInteractor->lint();
     }
 
     /**
