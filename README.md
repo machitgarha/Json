@@ -47,7 +47,7 @@ function prettify(string $json): string {
 Looks good, but it can be really better:
 
 ```php
-// use MAChitgarha\Component\Json
+// use MAChitgarha\Json\Components\Json
 
 function prettify(string $jsonStr): string {
     return Json::new($jsonStr)->getAsJson(\JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES);

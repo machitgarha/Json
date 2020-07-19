@@ -1,11 +1,11 @@
 <?php
 
-/** @see MAChitgarha\Component\Json */
-namespace MAChitgarha\UnitTest\Json;
+/** @see MAChitgarha\Json\Components\Json */
+namespace MAChitgarha\Json\UnitTest;
 
 use PHPUnit\Framework\TestCase;
-use MAChitgarha\Component\Json;
-use MAChitgarha\Json\Exception\UncountableValueException;
+use MAChitgarha\Json\Components\Json;
+use MAChitgarha\Json\Exceptions\UncountableValueException;
 
 class UncountableValueExceptionTest extends TestCase
 {

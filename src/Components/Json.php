@@ -7,19 +7,20 @@
  * @see https://packagist.org/packages/machitgarha/json
  */
 
-namespace MAChitgarha\Component;
+namespace MAChitgarha\Json\Components;
 
-use MAChitgarha\Json\Exception\Exception;
-use MAChitgarha\Json\Exception\InvalidArgumentException;
-use MAChitgarha\Json\Exception\InvalidJsonException;
-use MAChitgarha\Json\Exception\UncountableValueException;
-use MAChitgarha\Json\Exception\JsonException;
-use MAChitgarha\Json\Exception\OverflowException;
-use MAChitgarha\Json\Exception\RuntimeException;
-use MAChitgarha\Json\Option\JsonOpt;
-use MAChitgarha\Json\Option\Indexing;
-use MAChitgarha\Json\Option\Merge;
-use MAChitgarha\Json\Option\DoOpt;
+use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
+use MAChitgarha\Json\Exceptions\Exception;
+use MAChitgarha\Json\Exceptions\InvalidArgumentException;
+use MAChitgarha\Json\Exceptions\InvalidJsonException;
+use MAChitgarha\Json\Exceptions\UncountableValueException;
+use MAChitgarha\Json\Exceptions\JsonException;
+use MAChitgarha\Json\Exceptions\OverflowException;
+use MAChitgarha\Json\Exceptions\RuntimeException;
+use MAChitgarha\Json\Options\JsonOpt;
+use MAChitgarha\Json\Options\Indexing;
+use MAChitgarha\Json\Options\Merge;
+use MAChitgarha\Json\Options\DoOpt;
 
 /**
  * JSON data handler.
@@ -28,6 +29,11 @@ use MAChitgarha\Json\Option\DoOpt;
  */
 class Json implements \ArrayAccess, \Countable
 {
+    /**
+     * @var LinterInteractorInterface
+     */
+    private $linter;
+
     /**
      * @var mixed Data parsed in the constructor. It should be everything but a resource type, but
      * it may. Setting it to a resource might lead to errors/exceptions.
@@ -104,10 +110,13 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Lints the data.
+     * Lints the current data.
+     *
+     * @todo Specify the return value.
      */
     public function lint()
     {
+        return $this->linter->lint();
     }
 
     /**
