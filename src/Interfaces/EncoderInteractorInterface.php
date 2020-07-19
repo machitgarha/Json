@@ -7,8 +7,8 @@ interface EncoderInteractorInterface
     /**
      * Encodes the current data to JSON.
      *
-     * @todo Add options parameter.
+     * @param integer $options A set of EncodingOption class options.
      * @return string The encoded data as JSON.
      */
-    public function encode(): string;
+    public function encode(int $options): string;
 }

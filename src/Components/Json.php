@@ -148,21 +148,23 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Encodes the current data and returns it.
      *
+     * @param integer $options A set of EncodingOption class options.
      * @return string The encoded data as JSON.
      */
     public function encode(int $options = static::DEFAULT_ENCODING_OPTIONS): string
     {
-        return $this->encoderInteractor->encode();
+        return $this->encoderInteractor->encode($options);
     }
 
     /**
      * Decodes the current data and returns it.
      *
+     * @param integer $options A set of DecodingOption class options.
      * @todo Specify the return value.
      */
     public function decode(int $options = static::DEFAULT_DECODING_OPTIONS)
     {
-        return $this->decoderInteractor->decode();
+        return $this->decoderInteractor->decode($options);
     }
 
     /**
