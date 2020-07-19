@@ -6,7 +6,7 @@ namespace MAChitgarha\Json\UnitTest;
 use PHPUnit\Framework\TestCase;
 use MAChitgarha\Json\Components\Json;
 use MAChitgarha\Json\Exceptions\InvalidJsonException;
-use MAChitgarha\Json\Configurations\JsonOpt;
+use MAChitgarha\Json\Options\JsonOpt;
 
 class InvalidJsonExceptionTest extends TestCase
 {

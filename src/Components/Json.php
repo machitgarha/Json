@@ -17,10 +17,10 @@ use MAChitgarha\Json\Exceptions\UncountableValueException;
 use MAChitgarha\Json\Exceptions\JsonException;
 use MAChitgarha\Json\Exceptions\OverflowException;
 use MAChitgarha\Json\Exceptions\RuntimeException;
-use MAChitgarha\Json\Configurations\JsonOpt;
-use MAChitgarha\Json\Configurations\Indexing;
-use MAChitgarha\Json\Configurations\Merge;
-use MAChitgarha\Json\Configurations\DoOpt;
+use MAChitgarha\Json\Options\JsonOpt;
+use MAChitgarha\Json\Options\Indexing;
+use MAChitgarha\Json\Options\Merge;
+use MAChitgarha\Json\Options\DoOpt;
 
 /**
  * JSON data handler.

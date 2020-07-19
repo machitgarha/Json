@@ -5,7 +5,7 @@
  * @see https://packagist.org/packages/machitgarha/json
  */
 
-namespace MAChitgarha\Json\Configurations;
+namespace MAChitgarha\Json\Options;
 
 class Indexing
 {
