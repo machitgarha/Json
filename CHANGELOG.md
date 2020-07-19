@@ -11,7 +11,8 @@
 -   Add interaction layers as interfaces between feature providers and Json class.
 -   Add new option providers:
     -   `EncodingOption`: For `Json::encode()`, with following new options:
-        -    `PRETTY_PRINT`
+        -   `PRETTY_PRINT`
+    -   `DecodingOption`: For `Json::decode()`, with no options for now.
 
 #### Backward Incompatibility
 
