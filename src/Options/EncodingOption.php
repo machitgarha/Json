@@ -10,7 +10,8 @@ namespace MAChitgarha\Json\Options;
 class EncodingOption
 {
     /**
-     * Make the output more human-readable by indentions and whitespaces.
+     * Make the output more well-formatted and human-readable by adding indentions and
+     * whitespaces.
      * @var int
      */
     const PRETTY_PRINT = 1;
