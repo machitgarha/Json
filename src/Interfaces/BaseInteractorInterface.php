@@ -1,7 +1,7 @@
 <?php
 // TODO: Add a script for adding boilerprait for each file does not have it.
 
-namespace MAChitgarha\Interfaces;
+namespace MAChitgarha\Json\Interfaces;
 
 interface BaseInteractorInterface
 {
@@ -11,7 +11,7 @@ interface BaseInteractorInterface
      * @todo Complete this documentation.
      * @param string $className
      * @param mixed $data
-     * @todo Add options parameter.
+     * @todo Add options parameter, also for all children.
      * @return void
      */
     public function __construct(string $className, $data);
