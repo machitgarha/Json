@@ -6,12 +6,13 @@ namespace MAChitgarha\Interfaces;
 interface BaseInteractorInterface
 {
     /**
-     * Initializes the handler to be used in other interacting methods, and returns it.
+     * Constructs the data needed for interacting with the underlying class.
      *
      * @todo Complete this documentation.
      * @param string $className
      * @param mixed $data
-     * @return string|object The handler.
+     * @todo Add options parameter.
+     * @return void
      */
-    public static function init(string $className, $data);
+    public function __construct(string $className, $data);
 }
