@@ -1,10 +1,10 @@
 <?php
 
-/** @see MAChitgarha\Json\Component\Json */
+/** @see MAChitgarha\Json\Components\Json */
 namespace MAChitgarha\Json\UnitTest;
 
 use PHPUnit\Framework\TestCase;
-use MAChitgarha\Json\Component\Json;
+use MAChitgarha\Json\Components\Json;
 
 class PublicMethodTest extends TestCase
 {

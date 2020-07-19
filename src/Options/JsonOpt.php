@@ -5,7 +5,7 @@
  * @see https://packagist.org/packages/machitgarha/json
  */
 
-namespace MAChitgarha\Json\Option;
+namespace MAChitgarha\Json\Options;
 
 /**
  * Options to be passed to Json::__construct().

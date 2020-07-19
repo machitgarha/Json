@@ -1,12 +1,12 @@
 <?php
 
-/** @see MAChitgarha\Json\Component\Json */
+/** @see MAChitgarha\Json\Components\Json */
 namespace MAChitgarha\Json\UnitTest;
 
 use PHPUnit\Framework\TestCase;
-use MAChitgarha\Json\Component\Json;
-use MAChitgarha\Json\Exception\InvalidJsonException;
-use MAChitgarha\Json\Option\JsonOpt;
+use MAChitgarha\Json\Components\Json;
+use MAChitgarha\Json\Exceptions\InvalidJsonException;
+use MAChitgarha\Json\Options\JsonOpt;
 
 class InvalidJsonExceptionTest extends TestCase
 {
