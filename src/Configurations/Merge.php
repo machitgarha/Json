@@ -5,7 +5,7 @@
  * @see https://packagist.org/packages/machitgarha/json
  */
 
-namespace MAChitgarha\Json\Options;
+namespace MAChitgarha\Json\Configurations;
 
 class Merge
 {
