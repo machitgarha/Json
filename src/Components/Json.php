@@ -349,46 +349,6 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Encodes a value as JSON.
-     * See json_encode() documentation for more details.
-     *
-     * @param mixed $value
-     * @param int $options
-     * @param int $depth
-     * @return string
-     * @throws JsonException
-     */
-    // This
-    public static function encodeToJson($value, int $options = 0, int $depth = 512): string
-    {
-        $encodedData = json_encode($value, $options, $depth);
-        self::handleJsonErrors(json_last_error());
-        return $encodedData;
-    }
-
-    /**
-     * Decodes a JSON string.
-     * See json_decode() documentation for more details.
-     *
-     * @param string $value
-     * @param bool $asArray To return the result as an array or not (i.e. an object).
-     * @param int $depth
-     * @param int $options
-     * @return mixed
-     * @throws JsonException
-     */
-    public static function decodeJson(
-        string $value,
-        bool $asArray = false,
-        int $depth = 512,
-        int $options = 0
-    ) {
-        $decodedData = json_decode($value, $asArray, $depth, $options);
-        self::handleJsonErrors(json_last_error());
-        return $decodedData;
-    }
-
-    /**
      * Handles JSON errors and throw exceptions, if needed.
      *
      * @param integer $jsonErrorStat The return value of json_last_error().

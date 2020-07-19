@@ -9,6 +9,7 @@ namespace MAChitgarha\Json\Options;
 
 /**
  * Options to be passed to Json::__construct().
+ * @todo Move these things as options in EncodingOption and DecodingOption.
  */
 class JsonOpt
 {
