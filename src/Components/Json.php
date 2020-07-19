@@ -32,6 +32,20 @@ use MAChitgarha\Json\Options\DoOpt;
 class Json implements \ArrayAccess, \Countable
 {
     /**
+     * Default set of options for Json::encode().
+     * @see self::encode()
+     * @var integer
+     */
+    protected const DEFAULT_ENCODING_OPTIONS = 0;
+
+    /**
+     * Default set of options for Json::decode().
+     * @see self::decode()
+     * @var integer
+     */
+    protected const DEFAULT_DECODING_OPTIONS = 0;
+
+    /**
      * @var LinterInteractorInterface
      */
     private $linterInteractor;
@@ -136,7 +150,7 @@ class Json implements \ArrayAccess, \Countable
      *
      * @return string The encoded data as JSON.
      */
-    public function encode(): string
+    public function encode(int $options = static::DEFAULT_ENCODING_OPTIONS): string
     {
         return $this->encoderInteractor->encode();
     }
@@ -146,7 +160,7 @@ class Json implements \ArrayAccess, \Countable
      *
      * @todo Specify the return value.
      */
-    public function decode()
+    public function decode(int $options = static::DEFAULT_DECODING_OPTIONS)
     {
         return $this->decoderInteractor->decode();
     }

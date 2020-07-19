@@ -12,7 +12,7 @@ class EncodingOption
     /**
      * Make the output more well-formatted and human-readable by adding indentions and
      * whitespaces.
-     * @var int
+     * @var integer
      */
     const PRETTY_PRINT = 1;
 }
