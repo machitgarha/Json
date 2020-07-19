@@ -6,11 +6,13 @@
 
 ### 2.0.0-alpha.1
 
-#### New features
+#### Added
 
 -   Add interaction layers as interfaces between feature providers and Json class.
 
 #### Backward Incompatibility
+
+##### Changed
 
 -   Change the whole namespace hierarchy. Everything is now under `MAChitgarha\Json` namespace, and all namespaces are now in plural form (e.g., `Component` converted to `Components`).
 
