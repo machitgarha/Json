@@ -9,6 +9,7 @@
 
 namespace MAChitgarha\Json\Components;
 
+use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
 use MAChitgarha\Json\Exceptions\Exception;
 use MAChitgarha\Json\Exceptions\InvalidArgumentException;
 use MAChitgarha\Json\Exceptions\InvalidJsonException;
@@ -28,6 +29,11 @@ use MAChitgarha\Json\Options\DoOpt;
  */
 class Json implements \ArrayAccess, \Countable
 {
+    /**
+     * @var LinterInteractorInterface
+     */
+    private $linter;
+
     /**
      * @var mixed Data parsed in the constructor. It should be everything but a resource type, but
      * it may. Setting it to a resource might lead to errors/exceptions.
@@ -101,6 +107,16 @@ class Json implements \ArrayAccess, \Countable
     public static function new($data = [], int $options = 0)
     {
         return new self($data, $options);
+    }
+
+    /**
+     * Lints the current data.
+     *
+     * @todo Specify the return value.
+     */
+    public function lint()
+    {
+        return $this->linter->lint();
     }
 
     /**
