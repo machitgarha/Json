@@ -437,7 +437,7 @@ class Json implements \ArrayAccess, \Countable
     // This
     protected function encodeToJsonUseProps($value, int $options = 0): string
     {
-        return self::encodeToJson($value, $options, $this->jsonRecursionDepth);
+        return (new Json($value))->encode($options);
     }
 
     /**
@@ -450,7 +450,7 @@ class Json implements \ArrayAccess, \Countable
     // This
     protected function decodeJsonUseProps(string $value, bool $asArray = false)
     {
-        return self::decodeJson($value, $asArray, $this->jsonRecursionDepth);
+        return (new Json($value))->decode();
     }
 
     /**
