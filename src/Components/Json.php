@@ -10,6 +10,7 @@
 namespace MAChitgarha\Json\Components;
 
 use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
+use MAChitgarha\Json\Interfaces\EncoderInteractorInterface;
 use MAChitgarha\Json\Exceptions\Exception;
 use MAChitgarha\Json\Exceptions\InvalidArgumentException;
 use MAChitgarha\Json\Exceptions\InvalidJsonException;
@@ -33,6 +34,11 @@ class Json implements \ArrayAccess, \Countable
      * @var LinterInteractorInterface
      */
     private $linterInteractor;
+
+    /**
+     * @var EncoderInteractorInterface
+     */
+    private $encoderInteractor;
 
     /**
      * @var mixed Data parsed in the constructor. It should be everything but a resource type, but
@@ -117,6 +123,16 @@ class Json implements \ArrayAccess, \Countable
     public function lint()
     {
         return $this->linterInteractor->lint();
+    }
+
+    /**
+     * Encodes current data and returns it.
+     *
+     * @return string The encoded data as JSON.
+     */
+    public function encode(): string
+    {
+        return $this->encoderInteractor->encode();
     }
 
     /**
