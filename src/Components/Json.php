@@ -12,6 +12,7 @@ namespace MAChitgarha\Json\Components;
 use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
 use MAChitgarha\Json\Interfaces\EncoderInteractorInterface;
 use MAChitgarha\Json\Interfaces\DecoderInteractorInterface;
+use MAChitgarha\Json\Providers\ProvidersContainer;
 use MAChitgarha\Json\Exceptions\Exception;
 use MAChitgarha\Json\Exceptions\InvalidArgumentException;
 use MAChitgarha\Json\Exceptions\InvalidJsonException;
@@ -48,19 +49,10 @@ class Json implements \ArrayAccess, \Countable
     protected const DEFAULT_DECODING_OPTIONS = 0;
 
     /**
-     * @var LinterInteractorInterface
+     * Container of all providers and their interactors.
+     * @var ProvidersContainer
      */
-    private $linterInteractor;
-
-    /**
-     * @var EncoderInteractorInterface
-     */
-    private $encoderInteractor;
-
-    /**
-     * @var DecoderInteractorInterface
-     */
-    private $decoderInteractor;
+    protected $providersContainer;
 
     /**
      * Holds container-based options.
@@ -110,8 +102,18 @@ class Json implements \ArrayAccess, \Countable
      * @throws InvalidJsonException Using JsonOpt::AS_JSON option and passing invalid JSON string.
      * @throws InvalidArgumentException If data is a resource.
      */
-    public function __construct($data = [], array $options = [])
-    {
+    public function __construct(
+        $data = [],
+        ProvidersContainer $providersContainer = null,
+        array $options = []
+    ) {
+        // Not passed? Ship with default providers
+        $this->providersContainer = $providersContainer ??
+            new ProviderContainer();
+
+        // Initialize all interactors and providers
+        $this->providersContainer->init($data);
+
         // Set default options not supplied by user
         $options = array_merge([
             EncodingOption::class => static::DEFAULT_ENCODING_OPTIONS,
@@ -151,6 +153,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Creates a new instance of the class.
      *
+     * @todo Use late static binding.
      * @see self::__construct()
      * @return self
      */
@@ -166,7 +169,7 @@ class Json implements \ArrayAccess, \Countable
      */
     public function lint()
     {
-        return $this->linterInteractor->lint();
+        return $this->providersContainer->getLinterInteractor()->lint();
     }
 
     /**
@@ -182,7 +185,7 @@ class Json implements \ArrayAccess, \Countable
             $options = $this->options[EncodingOption::class];
         }
 
-        return $this->encoderInteractor->encode($options);
+        return $this->providersContainer->getEncoderInteractor()->encode($options);
     }
 
     /**
@@ -198,7 +201,7 @@ class Json implements \ArrayAccess, \Countable
             $options = $this->options[DecodingOption::class];
         }
 
-        return $this->decoderInteractor->decode($options);
+        return $this->providersContainer->getDecoderInteractor()->decode($options);
     }
 
     /**
