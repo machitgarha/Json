@@ -169,4 +169,34 @@ class ProvidersContainer
             $interactorRef = $distinctProviders[$interactorName];
         }
     }
+
+    /**
+     * Returns linter interactor.
+     *
+     * @return LinterInteractorInterface
+     */
+    public function getLinterInteractor(): LinterInteractorInterface
+    {
+        return $this->linterInteractor;
+    }
+
+    /**
+     * Returns encoder interactor.
+     *
+     * @return EncoderInteractorInterface
+     */
+    public function getEncoderInteractor(): EncoderInteractorInterface
+    {
+        return $this->encoderInteractor;
+    }
+
+    /**
+     * Returns decoder interactor.
+     *
+     * @return DecoderInteractorInterface
+     */
+    public function getDecoderInteractor(): DecoderInteractorInterface
+    {
+        return $this->decoderInteractorName;
+    }
 }
