@@ -12,13 +12,13 @@
 
 ##### General
 
--   Add interaction layers as interfaces between feature providers and Json class:
+-   Added interaction layers as interfaces between feature providers and Json class:
     -   `BaseInteractorInterface`
         -   `LinterInteractorInterface`
         -   `EncoderInteractorInterface`
         -   `DecoderInteractorInterface`
 
--   Add new option providers:
+-   Added new option providers:
     -   `EncodingOption`: For `Json::encode()`, with following new options:
         -   `PRETTY_PRINT`
     -   `DecodingOption`: For `Json::decode()`, with no options for now.
@@ -33,12 +33,22 @@
 
 ##### Namespaces
 
--   Change the whole namespace hierarchy. Everything is now under `MAChitgarha\Json` namespace, and all namespaces are now in plural form (e.g., `Component` converted to `Components`).
+-   Changed the whole namespace hierarchy. Everything is now under `MAChitgarha\Json` namespace, and all namespaces are now in plural form (e.g., `Component` converted to `Components`).
 
 ##### Methods
 
 -   `Json::__construct()`:
-    -   Change options type from integer to array. The new syntax for providing options is now a mapper of option provider names (i.e. strings) to their set of options (as integers).
+    -   Changed options type from integer to array. The new syntax for providing options is now a mapper of option provider names (i.e. strings) to their set of options (as integers).
+
+-   Add option provider name as first parameter and move option parameter to second for all these methods:
+    -   `Json::setOptions()`
+    -   `Json::addOption()`
+    -   `Json::removeOption()`
+    -   `Json::isOptionSet()`
+
+##### Properties
+
+-   `Json::$options`: Its visibility changed from protected to private. There is no need for the child class to access it, as it should use methods like `Json::setOptions()`. Also, due to changes to whole option system, changed its type from integer to array.
 
 #### Removed (BC Break)
 
