@@ -7,6 +7,6 @@ namespace MAChitgarha\Json\Options;
  *
  * @see Json::decode()
  */
-class DecodingOption
+class DecodingOption extends OptionContainer
 {
 }

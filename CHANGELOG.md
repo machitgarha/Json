@@ -18,7 +18,7 @@
         -   `EncoderInteractorInterface`
         -   `DecoderInteractorInterface`
 
--   Added new option providers:
+-   Added new option containers (based on new `OptionContainer` base class):
     -   `EncodingOption`: For `Json::encode()`, with following new options:
         -   `PRETTY_PRINT`
     -   `DecodingOption`: For `Json::decode()`, with no options for now.

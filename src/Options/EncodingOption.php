@@ -7,7 +7,7 @@ namespace MAChitgarha\Json\Options;
  *
  * @see Json::encode()
  */
-class EncodingOption
+class EncodingOption extends OptionContainer
 {
     /**
      * Make the output more well-formatted and human-readable by adding indentions and
