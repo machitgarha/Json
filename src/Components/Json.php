@@ -111,6 +111,9 @@ class Json implements \ArrayAccess, \Countable
         $this->providersContainer = $providersContainer ??
             new ProviderContainer();
 
+        // Initialize all interactors and providers
+        $this->providersContainer->init($data);
+
         // Set default options not supplied by user
         $options = array_merge([
             EncodingOption::class => static::DEFAULT_ENCODING_OPTIONS,
