@@ -32,7 +32,7 @@ class ProvidersContainer
      * Linter interactor instance.
      * @var LinterInteractorInterface
      */
-    private $linterInteractor;
+    private $linterInteractor = null;
 
     /**
      * Encoder class name, providing encoding functionality.
@@ -129,5 +129,44 @@ class ProvidersContainer
         $this->decoderInteractorName = $decoderInteractorName;
 
         return $this;
+    }
+
+    /**
+     * Initialize providers and interactor so they can be used.
+     *
+     * @param mixed $data
+     * @return void
+     */
+    public function init($data)
+    {
+        $distinctProviders = [];
+
+        foreach ([
+            [
+                $this->linterName,
+                $this->linterInteractorName,
+                $this->linterInteractor
+            ],
+            [
+                $this->encoderName,
+                $this->encoderInteractorName,
+                $this->encoderInteractor
+            ],
+            [
+                $this->decoderName,
+                $this->decoderInteractorName,
+                $this->decoderInteractor
+            ],
+        ] as list(
+            $providerName,
+            $interactorName,
+            &$interactorRef
+        )) {
+            if ($distinctProviders[$providerName] === null) {
+                $distinctProviders[$providerName] =
+                    new $interactorName($providerName, $data);
+            }
+            $interactorRef = $distinctProviders[$interactorName];
+        }
     }
 }
