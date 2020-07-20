@@ -12,6 +12,7 @@ namespace MAChitgarha\Json\Components;
 use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
 use MAChitgarha\Json\Interfaces\EncoderInteractorInterface;
 use MAChitgarha\Json\Interfaces\DecoderInteractorInterface;
+use MAChitgarha\Json\Providers\ProvidersContainer;
 use MAChitgarha\Json\Exceptions\Exception;
 use MAChitgarha\Json\Exceptions\InvalidArgumentException;
 use MAChitgarha\Json\Exceptions\InvalidJsonException;
@@ -63,6 +64,12 @@ class Json implements \ArrayAccess, \Countable
     private $decoderInteractor;
 
     /**
+     * Container of all providers and their interactors.
+     * @var ProvidersContainer
+     */
+    protected $providersContainer;
+
+    /**
      * Holds container-based options.
      *
      * Each option container has its own set of options. This property holds
@@ -110,8 +117,15 @@ class Json implements \ArrayAccess, \Countable
      * @throws InvalidJsonException Using JsonOpt::AS_JSON option and passing invalid JSON string.
      * @throws InvalidArgumentException If data is a resource.
      */
-    public function __construct($data = [], array $options = [])
-    {
+    public function __construct(
+        $data = [],
+        ProvidersContainer $providersContainer = null,
+        array $options = []
+    ) {
+        // Not passed? Ship with default providers
+        $this->providersContainer = $providersContainer ??
+            new ProviderContainer();
+
         // Set default options not supplied by user
         $options = array_merge([
             EncodingOption::class => static::DEFAULT_ENCODING_OPTIONS,

@@ -5,9 +5,9 @@ namespace MAChitgarha\Json\Providers;
 use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
 
 /**
- * Container for feature providers and their interactors.
+ * Container of providers and their interactors.
  */
-class ProviderContainer
+class ProvidersContainer
 {
     /**
      * Auto-detect the interactor of the provider.
