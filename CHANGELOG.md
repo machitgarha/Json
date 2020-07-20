@@ -35,7 +35,14 @@
 
 -   Change the whole namespace hierarchy. Everything is now under `MAChitgarha\Json` namespace, and all namespaces are now in plural form (e.g., `Component` converted to `Components`).
 
+##### Methods
+
+-   `Json::__construct()`:
+    -   Change options type from integer to array. The new syntax for providing options is now a mapper of option provider names (i.e. strings) to their set of options (as integers).
+
 #### Removed (BC Break)
+
+##### Methods
 
 -   `Json::encodeToJson()` (static) (Use `Json::encode()` (non-static) instead)
 -   `Json::decodeJson()` (static) (Use `Json::decode()` (non-static) instead)
