@@ -151,6 +151,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Creates a new instance of the class.
      *
+     * @todo Use late static binding.
      * @see self::__construct()
      * @return self
      */

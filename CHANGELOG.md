@@ -12,13 +12,17 @@
 
 ##### General
 
--   Added interaction layers as interfaces between feature providers and Json class:
+-   Added providers and interactor interfaces. Providers are classes providing functionality for Json methods. Interactors are the layer between, which means, classes interacting between providers and Json class.
+
+-   Added option containers, classes containing options for various functionalities. Every option container _must_ extend from `OptionContainer` base class.
+
+-   New interactor interfaces:
     -   `BaseInteractorInterface`
         -   `LinterInteractorInterface`
         -   `EncoderInteractorInterface`
         -   `DecoderInteractorInterface`
 
--   Added new option containers (based on new `OptionContainer` base class):
+-   New option containers:
     -   `EncodingOption`: For `Json::encode()`, with following new options:
         -   `PRETTY_PRINT`
     -   `DecodingOption`: For `Json::decode()`, with no options for now.
