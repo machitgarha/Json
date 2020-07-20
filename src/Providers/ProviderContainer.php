@@ -2,6 +2,8 @@
 
 namespace MAChitgarha\Json\Providers;
 
+use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
+
 /**
  * Container for feature providers and their interactors.
  */
@@ -25,6 +27,12 @@ class ProviderContainer
      * @var string
      */
     private $linterInteractorName;
+
+    /**
+     * Linter interactor instance.
+     * @var LinterInteractorInterface
+     */
+    private $linterInteractor;
 
     /**
      * Encoder class name, providing encoding functionality.
@@ -64,21 +72,62 @@ class ProviderContainer
         return new static();
     }
 
+    /**
+     * Sets the linter provider and its interactor.
+     *
+     * If the interactor is not specified, it will be auto-detected.
+     *
+     * @param string $linterName
+     * @param string $linterInteractorName
+     * @return self
+     * @todo Add at-throw when auto-detection failed or class not supported for this
+     * method and the methods likewise.
+     */
     public function setLinter(
         string $linterName,
         string $linterInteractorName = self::AUTO_DETECT
     ) {
+        $this->linterName = $linterName;
+        $this->linterInteractorName = $linterInteractorName;
+
+        return $this;
     }
 
+    /**
+     * Sets the encoder provider and its interactor.
+     *
+     * If the interactor is not specified, it will be auto-detected.
+     *
+     * @param string $encoderName
+     * @param string $encoderInteractorName
+     * @return self
+     */
     public function setEncoder(
         string $encoderName,
         string $encoderInteractorName = self::AUTO_DETECT
     ) {
+        $this->encoderName = $encoderName;
+        $this->encoderInteractorName = $encoderInteractorName;
+
+        return $this;
     }
 
+    /**
+     * Sets the decoder provider and its interactor.
+     *
+     * If the interactor is not specified, it will be auto-detected.
+     *
+     * @param string $decoderName
+     * @param string $decoderInteractorName
+     * @return self
+     */
     public function setDecoder(
         string $decoderName,
         string $decoderInteractorName = self::AUTO_DETECT
     ) {
+        $this->decoderName = $decoderName;
+        $this->decoderInteractorName = $decoderInteractorName;
+
+        return $this;
     }
 }
