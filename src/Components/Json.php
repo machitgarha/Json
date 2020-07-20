@@ -108,14 +108,16 @@ class Json implements \ArrayAccess, \Countable
      */
     public function __construct($data = [], array $options = [])
     {
-        // Set default options, if not provided by the user, for each option provider
+        // Set default options, if not provided by the user
         $options = array_merge([
             EncodingOption::class => static::DEFAULT_ENCODING_OPTIONS,
             DecodingOption::class => static::DEFAULT_DECODING_OPTIONS,
         ], $options);
 
         // Setting options
-        // TODO: Implement this
+        foreach ($options as $optionProviderName => $optionVal) {
+            $this->setOptions($optionProviderName, $optionVal);
+        }
 
         $asJson = (bool)($options & JsonOpt::AS_JSON);
 
