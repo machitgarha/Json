@@ -47,6 +47,12 @@ class ProvidersContainer
     private $encoderInteractorName;
 
     /**
+     * Encoder interactor instance.
+     * @var EncoderInteractorInterface
+     */
+    private $encoderInteractor = null;
+
+    /**
      * Decoder class name, providing decoding functionality.
      * @var string
      */
@@ -57,6 +63,12 @@ class ProvidersContainer
      * @var string
      */
     private $decoderInteractorName;
+
+    /**
+     * Decoder interactor instance.
+     * @var DecoderInteractorInterface
+     */
+    private $decoderInteractor = null;
 
     public function __construct()
     {

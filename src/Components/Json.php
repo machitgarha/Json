@@ -49,21 +49,6 @@ class Json implements \ArrayAccess, \Countable
     protected const DEFAULT_DECODING_OPTIONS = 0;
 
     /**
-     * @var LinterInteractorInterface
-     */
-    private $linterInteractor;
-
-    /**
-     * @var EncoderInteractorInterface
-     */
-    private $encoderInteractor;
-
-    /**
-     * @var DecoderInteractorInterface
-     */
-    private $decoderInteractor;
-
-    /**
      * Container of all providers and their interactors.
      * @var ProvidersContainer
      */
@@ -181,7 +166,7 @@ class Json implements \ArrayAccess, \Countable
      */
     public function lint()
     {
-        return $this->linterInteractor->lint();
+        return $this->providersContainer->getLinterInteractor()->lint();
     }
 
     /**
@@ -197,7 +182,7 @@ class Json implements \ArrayAccess, \Countable
             $options = $this->options[EncodingOption::class];
         }
 
-        return $this->encoderInteractor->encode($options);
+        return $this->providersContainer->getEncoderInteractor()->encode($options);
     }
 
     /**
@@ -213,7 +198,7 @@ class Json implements \ArrayAccess, \Countable
             $options = $this->options[DecodingOption::class];
         }
 
-        return $this->decoderInteractor->decode($options);
+        return $this->providersContainer->getDecoderInteractor()->decode($options);
     }
 
     /**
