@@ -32,7 +32,7 @@ use MAChitgarha\Json\Options\DoOpt;
 class Json implements \ArrayAccess, \Countable
 {
     /**
-     * Default set of options for encoding, if user not provided.
+     * Default set of options for encoding, if user not supplied.
      *
      * @see Json::__construct()
      * @var int
@@ -40,7 +40,7 @@ class Json implements \ArrayAccess, \Countable
     protected const DEFAULT_ENCODING_OPTIONS = 0;
 
     /**
-     * Default set of options for decoding, if user not provided.
+     * Default set of options for decoding, if user not supplied.
      *
      * @see Json::__construct()
      * @var int
@@ -63,7 +63,11 @@ class Json implements \ArrayAccess, \Countable
     private $decoderInteractor;
 
     /**
-     * All options set for all providers to the constructor.
+     * Holds container-based options.
+     *
+     * Each option container has its own set of options. This property holds
+     * an array of options based on option containers, in which, the keys are the
+     * container names, and the values are the options.
      *
      * @see Json::setOptions()
      * @see Json::addOption()
@@ -108,15 +112,15 @@ class Json implements \ArrayAccess, \Countable
      */
     public function __construct($data = [], array $options = [])
     {
-        // Set default options, if not provided by the user
+        // Set default options not supplied by user
         $options = array_merge([
             EncodingOption::class => static::DEFAULT_ENCODING_OPTIONS,
             DecodingOption::class => static::DEFAULT_DECODING_OPTIONS,
         ], $options);
 
         // Setting options
-        foreach ($options as $optionProviderName => $optionVal) {
-            $this->setOptions($optionProviderName, $optionVal);
+        foreach ($options as $optionContainerName => $optionVal) {
+            $this->setOptions($optionContainerName, $optionVal);
         }
 
         $asJson = (bool)($options & JsonOpt::AS_JSON);
@@ -200,13 +204,13 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Sets options to the given value.
      *
-     * @param string $optionProviderName
+     * @param string $optionContainerName
      * @param int $options
      * @return self
      */
-    public function setOptions(string $optionProviderName, int $options)
+    public function setOptions(string $optionContainerName, int $options)
     {
-        $this->options[$optionProviderName] = $options;
+        $this->options[$optionContainerName] = $options;
 
         // TODO: Remove this
         $this->jsonDecodeAlways = (bool)($options & JsonOpt::DECODE_ALWAYS);
@@ -217,15 +221,15 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Adds an option, if not exists.
      *
-     * @param string $optionProviderName
+     * @param string $optionContainerName
      * @param int $option
      * @return self
      */
-    public function addOption(string $optionProviderName, int $option)
+    public function addOption(string $optionContainerName, int $option)
     {
         $this->setOptions(
-            $optionProviderName,
-            $this->options[$optionProviderName] | $option
+            $optionContainerName,
+            $this->options[$optionContainerName] | $option
         );
         return $this;
     }
@@ -236,11 +240,11 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return self
      */
-    public function removeOption(string $optionProviderName, int $option)
+    public function removeOption(string $optionContainerName, int $option)
     {
         $this->setOptions(
-            $optionProviderName,
-            $this->options[$optionProviderName] & ~$option
+            $optionContainerName,
+            $this->options[$optionContainerName] & ~$option
         );
         return $this;
     }
@@ -251,9 +255,9 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return bool
      */
-    public function isOptionSet(string $optionProviderName, int $option): bool
+    public function isOptionSet(string $optionContainerName, int $option): bool
     {
-        return ($this->options[$optionProviderName] & $option) === $option;
+        return ($this->options[$optionContainerName] & $option) === $option;
     }
 
     /**

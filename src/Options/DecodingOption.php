@@ -3,7 +3,7 @@
 namespace MAChitgarha\Json\Options;
 
 /**
- * Option provider for Json::decode().
+ * Option container for Json::decode().
  *
  * @see Json::decode()
  */

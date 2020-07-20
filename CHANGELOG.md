@@ -38,9 +38,9 @@
 ##### Methods
 
 -   `Json::__construct()`:
-    -   Changed options type from integer to array. The new syntax for providing options is now a mapper of option provider names (i.e. strings) to their set of options (as integers).
+    -   Changed options type from integer to array. The new syntax for passing options is now a mapper of names of option container classes (i.e. strings) to the set of options related to that container (as integers).
 
--   Add option provider name as first parameter and move option parameter to second for all these methods:
+-   Add option container names as first parameter and move option parameter to second for all these methods:
     -   `Json::setOptions()`
     -   `Json::addOption()`
     -   `Json::removeOption()`
