@@ -6,6 +6,7 @@ use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
 
 /**
  * Container of providers and their interactors.
+ * @todo Decide to move this to Components namespace or not.
  */
 class ProvidersContainer
 {
