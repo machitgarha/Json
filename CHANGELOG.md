@@ -43,6 +43,8 @@
 
 -   `Json::__construct()`:
     -   Changed options type from integer to array. The new syntax for passing options is now a mapper of names of option container classes (i.e. strings) to the set of options related to that container (as integers).
+    -   Move options parameter from second parameter to third.
+    -   The second parameter is now an instance providers container.
 
 -   Add option container names as first parameter and move option parameter to second for all these methods:
     -   `Json::setOptions()`
