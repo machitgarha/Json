@@ -88,15 +88,24 @@ class Json implements \ArrayAccess, \Countable
     protected $randomizationFunction = "mt_rand";
 
     /**
+     * @todo Complete documentation of this and other methods.
      * @param mixed $data The data. It must be either countable or scalar (i.e. it must not be
      * resource).
-     * @param int $options A combination of JsonOpt::* constants.
+     * @param array $options Array of options.
      * @throws InvalidArgumentException Using JsonOpt::AS_JSON option and passing a non-string data.
      * @throws InvalidJsonException Using JsonOpt::AS_JSON option and passing invalid JSON string.
      * @throws InvalidArgumentException If data is a resource.
      */
-    public function __construct($data = [], int $options = 0)
+    public function __construct($data = [], array $options = null)
     {
+        // Default value
+        if ($options === null) {
+            $options = [
+                EncodingOption::class => static::DEFAULT_ENCODING_OPTIONS,
+                DecodingOption::class => static::DEFAULT_DECODING_OPTIONS,
+            ];
+        }
+
         // Setting options
         $this->setOptions($options);
         $asJson = (bool)($options & JsonOpt::AS_JSON);
@@ -151,8 +160,13 @@ class Json implements \ArrayAccess, \Countable
      * @param integer $options A set of EncodingOption class options.
      * @return string The encoded data as JSON.
      */
-    public function encode(int $options = static::DEFAULT_ENCODING_OPTIONS): string
+    public function encode(int $options = null): string
     {
+        // Default value
+        if ($options === null) {
+            $options = static::DEFAULT_ENCODING_OPTIONS;
+        }
+
         return $this->encoderInteractor->encode($options);
     }
 
@@ -162,8 +176,13 @@ class Json implements \ArrayAccess, \Countable
      * @param integer $options A set of DecodingOption class options.
      * @todo Specify the return value.
      */
-    public function decode(int $options = static::DEFAULT_DECODING_OPTIONS)
+    public function decode(int $options = null)
     {
+        // Default value
+        if ($options === null) {
+            $options = static::DEFAULT_DECODING_OPTIONS;
+        }
+
         return $this->decoderInteractor->decode($options);
     }
 
