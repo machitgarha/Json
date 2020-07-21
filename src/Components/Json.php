@@ -127,24 +127,6 @@ class Json implements \ArrayAccess, \Countable
         
         // Initializing data
         $this->data = new Data($data);
-
-        $asJson = (bool)($options & JsonOpt::AS_JSON);
-
-        if (is_string($data)) {
-            list($isJsonValid, $decodedData) = $this->validateStringAsJson($data, true);
-
-            if ($isJsonValid) {
-                $this->data = $decodedData;
-                return;
-            }
-
-            // Data contains invalid JSON
-            if ($asJson) {
-                throw new InvalidJsonException();
-            }
-        } elseif ($asJson) {
-            throw new InvalidArgumentException("Data must be string if using JsonOpt::AS_JSON");
-        }
     }
 
     /**
