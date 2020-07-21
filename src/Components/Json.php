@@ -124,6 +124,9 @@ class Json implements \ArrayAccess, \Countable
         foreach ($options as $optionContainerName => $optionVal) {
             $this->setOptions($optionContainerName, $optionVal);
         }
+        
+        // Initializing data
+        $this->data = new Data($data);
 
         $asJson = (bool)($options & JsonOpt::AS_JSON);
 
@@ -142,12 +145,6 @@ class Json implements \ArrayAccess, \Countable
         } elseif ($asJson) {
             throw new InvalidArgumentException("Data must be string if using JsonOpt::AS_JSON");
         }
-
-        if (is_resource($data)) {
-            throw new InvalidArgumentException("Data must not be a resource");
-        }
-
-        $this->data = $data;
     }
 
     /**

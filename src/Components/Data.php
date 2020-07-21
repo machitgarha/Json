@@ -2,6 +2,8 @@
 
 namespace MAChitgarha\Json\Components;
 
+use MAChitgarha\Json\Exception\InvalidArgumentException;
+
 class Data
 {
     /**
@@ -25,5 +27,8 @@ class Data
      */
     public function __construct($data)
     {
+        if (is_resource($data)) {
+            throw new InvalidArgumentException("Data must not be a resource");
+        }
     }
 }
