@@ -6,12 +6,12 @@ namespace MAChitgarha\Json\Options;
  * One-time options container for Json constructor.
  * @todo Improve documentation.
  */
-class InitOption
+class InitOption extends OptionContainer
 {
     /**
-     * Data is scalar. So, if the data passed is of string type, it's a basic string,
-     * not a JSON string (i.e. must be decoded). This option must only be passed when the
-     * passed data is string, otherwise you will get an exception.
+     * Force a string to be supposed as scalar (i.e. basic string), not as a JSON
+     * string; in other words, it is in the decoded form. This option must only be
+     * passed when the passed data is string, otherwise you will get an exception.
      * @var int
      */
     public const SCALAR_DATA = 1;
