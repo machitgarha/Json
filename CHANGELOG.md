@@ -16,16 +16,22 @@
 
 -   Added option containers, classes containing options for various functionalities. Every option container _must_ extend from `OptionContainer` base class.
 
+##### Interfaces
+
 -   New interactor interfaces:
     -   `BaseInteractorInterface`
         -   `LinterInteractorInterface`
         -   `EncoderInteractorInterface`
         -   `DecoderInteractorInterface`
 
+##### Classes
+
 -   New option containers:
     -   `EncodingOption`: For `Json::encode()`, with following new options:
         -   `PRETTY_PRINT`
     -   `DecodingOption`: For `Json::decode()`, with no options for now.
+
+-   `Data`: New class for handling data between Json and interactors. This has the advantage of not copying the same data over and over. There is only one instance of data saved in Json class, and if needed, it is being passed across the interactors.
 
 ##### Methods
 
