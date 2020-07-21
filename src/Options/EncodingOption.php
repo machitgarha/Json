@@ -12,7 +12,7 @@ class EncodingOption extends OptionContainer
     /**
      * Make the output more well-formatted and human-readable by adding indentions and
      * whitespaces.
-     * @var integer
+     * @var int
      */
-    const PRETTY_PRINT = 1;
+    public const PRETTY_PRINT = 1;
 }

@@ -27,9 +27,11 @@
 ##### Classes
 
 -   New option containers:
-    -   `EncodingOption`: For `Json::encode()`, with following new options:
+    -   `EncodingOption`: For `Json::encode()`:
         -   `PRETTY_PRINT`
-    -   `DecodingOption`: For `Json::decode()`, with no options for now.
+    -   `DecodingOption`: For `Json::decode()`.
+    -   `InitOption`: For `Json::__construct()`:
+        -   `SCALAR_DATA`
 
 -   `Data`: New class for handling data between Json and interactors. This has the advantage of not copying the same data over and over. There is only one instance of data saved in Json class, and if needed, it is being passed across the interactors.
 
