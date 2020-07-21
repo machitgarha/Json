@@ -10,9 +10,9 @@ interface BaseInteractorInterface
      *
      * @todo Complete this documentation.
      * @param string $className
-     * @param mixed $data
+     * @param Data &$data
      * @todo Add options parameter, also for all children.
      * @return void
      */
-    public function __construct(string $className, $data);
+    public function __construct(string $className, Data &$data);
 }
