@@ -171,8 +171,13 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Decodes the current data and returns it.
      *
+     * The decoded value type (and all of its children) is exactly the same as the type
+     * of data passed to constructor, otherwise changed by other methods. If the whole
+     * data or a sub-data was changed since constructor call, its type will remain
+     * unchanged; unless explicitly mentioned in the documentations.
+     *
      * @param int $options A set of DecodingOption class options.
-     * @todo Specify the return value.
+     * @return mixed
      */
     public function decode(int $options = null)
     {
@@ -187,6 +192,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Sets options to the given value.
      *
+     * @todo Validate option container name.
      * @param string $optionContainerName
      * @param int $options
      * @return self

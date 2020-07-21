@@ -43,7 +43,7 @@
 
 #### Changed (BC Break)
 
-##### Namespaces
+##### General
 
 -   Changed the whole namespace hierarchy. Everything is now under `MAChitgarha\Json` namespace, and all namespaces are now in plural form (e.g., `Component` converted to `Components`).
 
