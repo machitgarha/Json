@@ -381,53 +381,6 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Handles JSON errors and throw exceptions, if needed.
-     *
-     * @param int $jsonErrorStat The return value of json_last_error().
-     * @return void
-     */
-    protected static function handleJsonErrors(int $jsonErrorStat)
-    {
-        switch ($jsonErrorStat) {
-            case JSON_ERROR_NONE:
-                return;
-
-            case JSON_ERROR_DEPTH:
-                $message = "Maximum stack depth exceeded";
-                break;
-
-            case JSON_ERROR_STATE_MISMATCH:
-            case JSON_ERROR_SYNTAX:
-                $message = "Invalid or malformed JSON";
-                break;
-
-            case JSON_ERROR_CTRL_CHAR:
-            case JSON_ERROR_UTF8:
-            case JSON_ERROR_UTF16:
-                $message = "Malformed characters, possibly incorrectly encoded JSON";
-                break;
-
-            case JSON_ERROR_INF_OR_NAN:
-                $message = "NAN and INF cannot be encoded";
-                break;
-
-            case JSON_ERROR_INVALID_PROPERTY_NAME:
-                $message = "Found an invalid property name";
-                break;
-
-            case JSON_ERROR_UNSUPPORTED_TYPE:
-                $message = "A value cannot be encoded, possibly a resource";
-                break;
-
-            default:
-                $message = "Unknown JSON error";
-                break;
-        }
-
-        throw new JsonException($message, $jsonErrorStat);
-    }
-
-    /**
      * Validates a string as a JSON string.
      *
      * @param string $value
