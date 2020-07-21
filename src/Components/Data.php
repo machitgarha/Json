@@ -21,8 +21,9 @@ class Data
     protected $encoded = null;
 
     /**
-     * The decoded form of data, in ? form.
-     * @todo Determine the type of this.
+     * The decoded form of data. Non-scalar data (and their sub-data) could be either an
+     * array or object.
+     * @var mixed
      */
     protected $decoded = null;
 
