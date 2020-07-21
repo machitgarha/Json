@@ -28,6 +28,7 @@ use MAChitgarha\Json\Options\DoOpt;
 /**
  * JSON data handler.
  *
+ * @todo Read PHPDoc specs and format all documentation in the same format.
  * @see https://github.com/MAChitgarha/Json/wiki
  */
 class Json implements \ArrayAccess, \Countable

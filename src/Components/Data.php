@@ -26,13 +26,20 @@ class Data
      */
     protected $decoded = null;
 
-    protected $isScalar = false;
+    /**
+     * Determines whether the data is scalar or not. It can be either a bool or null.
+     * Obviously, true means data is scalar (e.g. boolean or integer) and false means
+     * otherwise (i.e. array or object). However, the purpose of null is, to show the
+     * scalar-ness of data is not obvious (and thus it should be detected).
+     * @var ?bool
+     */
+    protected $isScalar = null;
 
     /**
      * Initializes the given data.
      *
-     * @param string|array|object
-     * @todo Add support for options parameter.
+     * @param mixed $data
+     * @param int $options The given options, a combination of InitOption options.
      * @return void
      */
     public function __construct($data, int $options = null)
