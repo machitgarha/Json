@@ -5,6 +5,7 @@ namespace MAChitgarha\Json\Components\Linting;
 /**
  * Represents a linting result.
  * @todo Support for warnings.
+ * @todo Add an interface for this.
  */
 class LintingResult
 {
