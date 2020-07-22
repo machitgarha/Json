@@ -24,8 +24,6 @@
         -   `EncoderInteractorInterface`
         -   `DecoderInteractorInterface`
 
-##### Classes
-
 -   New option containers:
     -   `EncodingOption`: For `Json::encode()`:
         -   `PRETTY_PRINT`: Well-formatted human-readable output.
