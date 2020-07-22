@@ -10,13 +10,6 @@ namespace MAChitgarha\Json\Components\Linting;
 class LintingResult
 {
     /**
-     * The output when linting was successful.
-     * @see self::__toString()
-     * @var string
-     */
-    public const SUCCESSFUL_LINTING_OUTPUT = "Linting was successful";
-
-    /**
      * An array of happened errors.
      * @var LintingError[]
      */
@@ -40,26 +33,6 @@ class LintingResult
         $this->errors[] = $error;
 
         return $this;
-    }
-
-    /**
-     * Tells whether any errors detected during linting or not.
-     *
-     * @return bool
-     */
-    public function hasError(): bool
-    {
-        return count($this->errors) !== 0;
-    }
-
-    /**
-     * Tells whether the linting was completed without any errors or not.
-     *
-     * @return bool
-     */
-    public function isSuccessful(): bool
-    {
-        return count($this->errors) === 0;
     }
 
     /**
@@ -95,11 +68,32 @@ class LintingResult
     }
 
     /**
-     * Represent the error as string.
+     * Returns the count of the happened errors.
      *
-     * @return string If linting is successful, provide a simple message representing it.
+     * @return int
      */
-    public function __toString()
+    public function getErrorCount(): int
     {
+        return count($this->errors);
+    }
+
+    /**
+     * Tells whether any errors detected during linting or not.
+     *
+     * @return bool
+     */
+    public function hasError(): bool
+    {
+        return $this->getErrorCount() !== 0;
+    }
+
+    /**
+     * Tells whether the linting was completed without any errors or not.
+     *
+     * @return bool
+     */
+    public function isSuccessful(): bool
+    {
+        return $this->getErrorCount() === 0;
     }
 }
