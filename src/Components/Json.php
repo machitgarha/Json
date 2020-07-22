@@ -13,6 +13,7 @@ use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
 use MAChitgarha\Json\Interfaces\EncoderInteractorInterface;
 use MAChitgarha\Json\Interfaces\DecoderInteractorInterface;
 use MAChitgarha\Json\Providers\ProvidersContainer;
+use MAChitgarha\Json\Linting\LintingResult;
 use MAChitgarha\Json\Exceptions\Exception;
 use MAChitgarha\Json\Exceptions\InvalidArgumentException;
 use MAChitgarha\Json\Exceptions\InvalidJsonException;
@@ -151,7 +152,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Lints the current data.
      *
-     * @todo Specify the return value.
+     * @return LintingResult
      */
     public function lint()
     {
