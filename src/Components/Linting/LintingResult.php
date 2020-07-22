@@ -25,10 +25,10 @@ class LintingResult
     /**
      * Adds a new error to linting result.
      *
-     * @param Error $error The detected error.
+     * @param LintingError $error The detected error.
      * @return self
      */
-    public function addError(Error $error)
+    public function addError(LintingError $error)
     {
         $this->errors[] = $error;
 
@@ -60,9 +60,9 @@ class LintingResult
     /**
      * Get the first happened error.
      *
-     * @return ?Error If no errors exist, returns null.
+     * @return ?LintingError If no errors exist, returns null.
      */
-    public function getFirstError(): ?Error
+    public function getFirstError(): ?LintingError
     {
         return $this->errors[0] ?? null;
     }
