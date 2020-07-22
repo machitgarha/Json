@@ -2,7 +2,7 @@
 
 namespace MAChitgarha\Json\Interfaces;
 
-interface LinterInteractorInterface
+interface LinterInteractorInterface extends BaseInteractorInterface
 {
     /**
      * Lints the existing data.
