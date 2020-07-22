@@ -12,7 +12,7 @@ class Data
      * @see self::__construct()
      * @var int
      */
-    protected const DEFAULT_OPTIONS = 3;
+    protected const DEFAULT_OPTIONS = 0;
 
     /**
      * The encoded form of data.
