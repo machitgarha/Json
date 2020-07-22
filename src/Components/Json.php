@@ -13,6 +13,7 @@ use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
 use MAChitgarha\Json\Interfaces\EncoderInteractorInterface;
 use MAChitgarha\Json\Interfaces\DecoderInteractorInterface;
 use MAChitgarha\Json\Providers\ProvidersContainer;
+use MAChitgarha\Json\Linting\LintingResult;
 use MAChitgarha\Json\Exceptions\Exception;
 use MAChitgarha\Json\Exceptions\InvalidArgumentException;
 use MAChitgarha\Json\Exceptions\InvalidJsonException;
@@ -28,6 +29,8 @@ use MAChitgarha\Json\Options\DoOpt;
 /**
  * JSON data handler.
  *
+ * @todo Read PHPDoc specs and format all documentation in the same format.
+ * @todo Read related namespace PSR and follow that in the namespaces.
  * @see https://github.com/MAChitgarha/Json/wiki
  */
 class Json implements \ArrayAccess, \Countable
@@ -94,7 +97,12 @@ class Json implements \ArrayAccess, \Countable
     protected $randomizationFunction = "mt_rand";
 
     /**
-     * @todo Complete documentation of this and other methods.
+     * @todo Complete documentation of this and other methods:
+     * The decoded value type (and all of its children) is exactly the same as the type
+     * of data passed to constructor, otherwise changed by other methods. If the whole
+     * data or a sub-data was changed since constructor call, its type will remain
+     * unchanged; unless explicitly mentioned in the documentations.)
+     *
      * @param mixed $data The data. It must be either countable or scalar (i.e. it must not be
      * resource).
      * @param array $options Array of options.
@@ -125,29 +133,8 @@ class Json implements \ArrayAccess, \Countable
             $this->setOptions($optionContainerName, $optionVal);
         }
 
-        $asJson = (bool)($options & JsonOpt::AS_JSON);
-
-        if (is_string($data)) {
-            list($isJsonValid, $decodedData) = $this->validateStringAsJson($data, true);
-
-            if ($isJsonValid) {
-                $this->data = $decodedData;
-                return;
-            }
-
-            // Data contains invalid JSON
-            if ($asJson) {
-                throw new InvalidJsonException();
-            }
-        } elseif ($asJson) {
-            throw new InvalidArgumentException("Data must be string if using JsonOpt::AS_JSON");
-        }
-
-        if (is_resource($data)) {
-            throw new InvalidArgumentException("Data must not be a resource");
-        }
-
-        $this->data = $data;
+        // Initializing data
+        $this->data = new Data($data);
     }
 
     /**
@@ -165,7 +152,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Lints the current data.
      *
-     * @todo Specify the return value.
+     * @return LintingResult
      */
     public function lint()
     {
@@ -192,7 +179,7 @@ class Json implements \ArrayAccess, \Countable
      * Decodes the current data and returns it.
      *
      * @param int $options A set of DecodingOption class options.
-     * @todo Specify the return value.
+     * @return mixed
      */
     public function decode(int $options = null)
     {
@@ -207,6 +194,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Sets options to the given value.
      *
+     * @todo Validate option container name.
      * @param string $optionContainerName
      * @param int $options
      * @return self

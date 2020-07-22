@@ -16,16 +16,24 @@
 
 -   Added option containers, classes containing options for various functionalities. Every option container _must_ extend from `OptionContainer` base class.
 
+##### Interfaces
+
 -   New interactor interfaces:
     -   `BaseInteractorInterface`
         -   `LinterInteractorInterface`
         -   `EncoderInteractorInterface`
         -   `DecoderInteractorInterface`
 
+##### Classes
+
 -   New option containers:
-    -   `EncodingOption`: For `Json::encode()`, with following new options:
-        -   `PRETTY_PRINT`
-    -   `DecodingOption`: For `Json::decode()`, with no options for now.
+    -   `EncodingOption`: For `Json::encode()`:
+        -   `PRETTY_PRINT`: Well-formatted human-readable output.
+    -   `DecodingOption`: For `Json::decode()`.
+    -   `InitOption`: For `Json::__construct()`:
+        -   `SCALAR_DATA`: The default behaviour of Json class should be, if the data passed to constructor is a string, it should be treated as JSON string instead of a basic string. This option determines that the data is not a JSON string.
+
+-   `Data`: New class for handling data between Json and interactors. This has the advantage of not copying the same data over and over. There is only one instance of data saved in Json class, and if needed, it is being passed across the interactors.
 
 ##### Methods
 
@@ -35,7 +43,7 @@
 
 #### Changed (BC Break)
 
-##### Namespaces
+##### General
 
 -   Changed the whole namespace hierarchy. Everything is now under `MAChitgarha\Json` namespace, and all namespaces are now in plural form (e.g., `Component` converted to `Components`).
 
@@ -60,7 +68,11 @@
 
 ##### Methods
 
--   `Json::encodeToJson()` (static) (Use `Json::encode()` (non-static) instead)
--   `Json::decodeJson()` (static) (Use `Json::decode()` (non-static) instead)
+-   `Json::encodeToJson()` (static). Use `Json::encode()` (non-static) instead.
+-   `Json::decodeJson()` (static). Use `Json::decode()` (non-static) instead.
+
+##### Constants
+
+-   `JsonOpt::AS_JSON`: Due to addition of `InitOption::SCALAR_DATA` option.
 
 **Note:** This changelog was added from version 2.0.0. For older changelog, refer to the commit messages or the release notes.

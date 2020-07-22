@@ -2,12 +2,14 @@
 
 namespace MAChitgarha\Json\Interfaces;
 
+use MAChitgarha\Json\Components\Linting\LintingResult;
+
 interface LinterInteractorInterface extends BaseInteractorInterface
 {
     /**
      * Lints the existing data.
      *
-     * @todo Specify the return value.
+     * @return LintingResult
      */
-    public function lint();
+    public function lint(): LintingResult;
 }
