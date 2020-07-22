@@ -2,7 +2,9 @@
 
 namespace MAChitgarha\Json\Providers;
 
-use MAChitgarha\Json\Exception\JsonException;
+use MAChitgarha\Json\Exceptions\JsonException;
+use MAChitgarha\Json\Components\Linting\LintingError;
+use MAChitgarha\Json\Components\Linting\LintingResult;
 
 /**
  * A class providing interface to PHP internal JSON capabilities (e.g. json_encode()).
@@ -22,7 +24,7 @@ class InternalProvider
      * @param int $options See PHP documentation for available options.
      * @return string The encoded JSON string.
      */
-    public static function encode($data, int $options = 0)
+    public static function encode($data, int $options = 0): string
     {
         $encodedData = json_encode($data, $options, static::DEFAULT_DEPTH);
         self::handleJsonErrors(json_last_error());
@@ -34,13 +36,13 @@ class InternalProvider
      *
      * @param string $data The data to be decoded.
      * @param int $options See PHP documentation for available options.
-     * @todo Specify return value.
+     * @return mixed
      */
     public static function decode(string $data, int $options = 0)
     {
-        $decodedData = json_encode($data, $options, static::DEFAULT_DEPTH);
+        $decodedData = json_decode($data, true, static::DEFAULT_DEPTH, $options);
         self::handleJsonErrors(json_last_error());
-        return $decoded;
+        return $decodedData;
     }
 
     /**
@@ -97,12 +99,18 @@ class InternalProvider
      * @param string $data The JSON data to be linted.
      * @todo Specify return value.
      */
-    public static function lint(string $data)
+    public static function lint(string $data): LintingResult
     {
+        $result = new Linting\LintingResult();
+
         try {
             static::encode($data);
-        } catch (\Exception $e) {
-            // TODO: Implement this
+        } catch (JsonException $e) {
+            $result->addError(new LintingError(
+                $e->getMessage()
+            ));
         }
+
+        return $result;
     }
 }
