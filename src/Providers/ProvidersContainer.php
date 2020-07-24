@@ -17,6 +17,8 @@ class ProvidersContainer
      */
     public const AUTO_DETECT = "";
 
+    private
+
     /**
      * Linter class name, providing linting functionality.
      * @var string
@@ -71,6 +73,9 @@ class ProvidersContainer
      */
     private $decoderInteractor = null;
 
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
     }
@@ -83,6 +88,29 @@ class ProvidersContainer
     public static function new()
     {
         return new static();
+    }
+
+    /**
+     * Returns the auto-detected interactor based on provider name and functionality.
+     *
+     * @param string $providerName Provider full class name.
+     * @param string $functionality Functionality to provide (e.g. linting).
+     * @return string The detected interactor name.
+     */
+    protected static function autoDetect(
+        string $providerName,
+        string $functionality
+    ): string {
+        static $autoDetectionData =
+            require __DIR__ . "/../../data/interactor-auto-detection.php";
+
+        $interactorName = $autoDetectionData[$providerName][$functionality] ?? null;
+
+        if ($interactorName === null) {
+            throw new NotSupportedException("Functionality $functionality for provider " .
+                "$providerName cannot be auto-detected");
+        }
+        return $interactorName;
     }
 
     /**

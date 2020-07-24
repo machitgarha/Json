@@ -33,6 +33,10 @@
 
 -   `Data`: New class for handling data between Json and interactors. This has the advantage of not copying the same data over and over. There is only one instance of data saved in Json class, and if needed, it is being passed across the interactors.
 
+##### Exceptions
+
+-   `NotSupportedException`
+
 ##### Methods
 
 -   `Json::lint()`
