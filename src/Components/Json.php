@@ -73,8 +73,8 @@ class Json implements \ArrayAccess, \Countable
     private $options = [];
 
     /**
-     * @var mixed Data parsed in the constructor. It should be everything but a resource type, but
-     * it may. Setting it to a resource might lead to errors/exceptions.
+     * The main data to be worked with.
+     * @var Data
      */
     protected $data;
 
