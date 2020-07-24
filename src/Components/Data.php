@@ -5,6 +5,9 @@ namespace MAChitgarha\Json\Components;
 use MAChitgarha\Json\Exceptions\InvalidArgumentException;
 use MAChitgarha\Json\Options\InitOption;
 
+/**
+ * Data class, providing both encoded and decoded form of data.
+ */
 class Data
 {
     /**
@@ -12,7 +15,7 @@ class Data
      * @see self::__construct()
      * @var int
      */
-    protected const DEFAULT_OPTIONS = 3;
+    protected const DEFAULT_OPTIONS = 0;
 
     /**
      * The encoded form of data.
@@ -22,7 +25,7 @@ class Data
 
     /**
      * The decoded form of data. Non-scalar data (and their sub-data) could be either an
-     * array or object.
+     * array or (standard) object.
      * @var mixed
      */
     protected $decoded = null;
