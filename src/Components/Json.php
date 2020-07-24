@@ -31,6 +31,7 @@ use MAChitgarha\Json\Options\DoOpt;
  *
  * @todo Read PHPDoc specs and format all documentation in the same format.
  * @todo Read related namespace PSR and follow that in the namespaces.
+ * @todo Make Json serializable.
  * @see https://github.com/MAChitgarha/Json/wiki
  */
 class Json implements \ArrayAccess, \Countable

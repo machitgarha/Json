@@ -5,12 +5,11 @@ namespace MAChitgarha\Json\Interfaces;
 interface DecoderInteractorInterface extends BaseInteractorInterface
 {
     /**
-     * Decodes the current data and returns it.
+     * Decodes the given data and returns it.
      *
-     * @param integer A set of DecodingOption class options.
-     * @todo Specify return value: array, object, an instance of a class, or something
-     * else? Note that, being an instance of a class might make things easier. Should here
-     * be an option for selecting the return type or not?
+     * @param string $data The JSON string to be decoded.
+     * @param int $options A set of DecodingOption class options.
+     * @return mixed
      */
-    public function decode(int $options);
+    public function decode(string $data, int $options);
 }

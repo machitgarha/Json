@@ -5,12 +5,13 @@ namespace MAChitgarha\Json\Interfaces;
 interface EncoderInteractorInterface extends BaseInteractorInterface
 {
     /**
-     * Encodes the current data to JSON.
+     * Encodes the given data to JSON string.
      *
      * @todo Provide JSON depth limit support (also for Decoding counterpart).
-     * @param integer $options A set of EncodingOption class options.
+     * @param mixed $data Data to be encoded.
+     * @param int $options A set of EncodingOption class options.
      * @return string The encoded data as JSON.
      * @todo Provide at-throws for this (and for Decoding).
      */
-    public function encode(int $options): string;
+    public function encode($data, int $options): string;
 }
