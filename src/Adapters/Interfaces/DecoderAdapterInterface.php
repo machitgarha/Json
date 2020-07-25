@@ -2,7 +2,7 @@
 
 namespace MAChitgarha\Json\Interfaces;
 
-interface DecoderInteractorInterface extends BaseInteractorInterface
+interface DecoderAdapterInterface extends BaseAdapterInterface
 {
     /**
      * Decodes the given data and returns it.

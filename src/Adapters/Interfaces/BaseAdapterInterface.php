@@ -3,7 +3,7 @@
 
 namespace MAChitgarha\Json\Interfaces;
 
-interface BaseInteractorInterface
+interface BaseAdapterInterface
 {
     /**
      * Constructs the data needed for interacting with the underlying class.

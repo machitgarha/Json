@@ -12,17 +12,17 @@
 
 ##### General
 
--   Added providers and interactor interfaces. Providers are classes providing functionality for Json methods. Interactors are the layer between, which means, classes interacting between providers and Json class.
+-   Added providers and adapters. Providers are classes providing functionality for Json methods. Adapters are the layer between, which means, classes interacting between providers and Json class.
 
 -   Added option containers, classes containing options for various functionalities. Every option container _must_ extend from `OptionContainer` base class.
 
 ##### Interfaces
 
--   New interactor interfaces:
-    -   `BaseInteractorInterface`
-        -   `LinterInteractorInterface`
-        -   `EncoderInteractorInterface`
-        -   `DecoderInteractorInterface`
+-   New adapter interfaces:
+    -   `BaseAdapterInterface`
+        -   `LinterAdapterInterface`
+        -   `EncoderAdapterInterface`
+        -   `DecoderAdapterInterface`
 
 -   New option containers:
     -   `EncodingOption`: For `Json::encode()`:
@@ -31,7 +31,7 @@
     -   `InitOption`: For `Json::__construct()`:
         -   `SCALAR_DATA`: The default behaviour of Json class should be, if the data passed to constructor is a string, it should be treated as JSON string instead of a basic string. This option determines that the data is not a JSON string.
 
--   `Data`: New class for handling data between Json and interactors. This has the advantage of not copying the same data over and over. There is only one instance of data saved in Json class, and if needed, it is being passed across the interactors.
+-   `Data`: New class for handling data between Json and adapters. This has the advantage of not copying the same data over and over. There is only one instance of data saved in Json class, and if needed, it is being passed across the adapters.
 
 ##### Exceptions
 

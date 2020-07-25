@@ -2,7 +2,7 @@
 
 namespace MAChitgarha\Json\Interfaces;
 
-interface EncoderInteractorInterface extends BaseInteractorInterface
+interface EncoderAdapterInterface extends BaseAdapterInterface
 {
     /**
      * Encodes the given data to JSON string.

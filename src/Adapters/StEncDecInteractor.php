@@ -1,18 +1,18 @@
 <?php
 
-namespace MAChitgarha\Json\Interactors;
+namespace MAChitgarha\Json\Adapters;
 
-use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
-use MAChitgarha\Json\Interfaces\DecoderInteractorInterface;
-use MAChitgarha\Json\Interfaces\EncoderInteractorInterface;
+use MAChitgarha\Json\Interfaces\LinterAdapterInterface;
+use MAChitgarha\Json\Interfaces\DecoderAdapterInterface;
+use MAChitgarha\Json\Interfaces\EncoderAdapterInterface;
 use MAChitgarha\Json\Components\Data;
 
 /**
- * Interactor provding encoding and decoding.
+ * Adapter provding encoding and decoding.
  */
-class StEncDecInteractor implements
-    DecoderInteractorInterface,
-    EncoderInteractorInterface
+class StEncDecAdapter implements
+    DecoderAdapterInterface,
+    EncoderAdapterInterface
 {
     /**
      * Provider class name.

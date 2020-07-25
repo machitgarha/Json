@@ -4,7 +4,7 @@ namespace MAChitgarha\Json\Interfaces;
 
 use MAChitgarha\Json\Components\Linting\LintingResult;
 
-interface LinterInteractorInterface extends BaseInteractorInterface
+interface LinterAdapterInterface extends BaseAdapterInterface
 {
     /**
      * Lints a JSON string.

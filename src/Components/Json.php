@@ -9,9 +9,9 @@
 
 namespace MAChitgarha\Json\Components;
 
-use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
-use MAChitgarha\Json\Interfaces\EncoderInteractorInterface;
-use MAChitgarha\Json\Interfaces\DecoderInteractorInterface;
+use MAChitgarha\Json\Interfaces\LinterAdapterInterface;
+use MAChitgarha\Json\Interfaces\EncoderAdapterInterface;
+use MAChitgarha\Json\Interfaces\DecoderAdapterInterface;
 use MAChitgarha\Json\Providers\ProvidersContainer;
 use MAChitgarha\Json\Linting\LintingResult;
 use MAChitgarha\Json\Exceptions\Exception;
@@ -53,7 +53,7 @@ class Json implements \ArrayAccess, \Countable
     protected const DEFAULT_DECODING_OPTIONS = 0;
 
     /**
-     * Container of all providers and their interactors.
+     * Container of all providers and their adapters.
      * @var ProvidersContainer
      */
     protected $providersContainer;
@@ -120,7 +120,7 @@ class Json implements \ArrayAccess, \Countable
         $this->providersContainer = $providersContainer ??
             new ProviderContainer();
 
-        // Initialize all interactors and providers
+        // Initialize all adapters and providers
         $this->providersContainer->init($data);
 
         // Set default options not supplied by user
@@ -157,7 +157,7 @@ class Json implements \ArrayAccess, \Countable
      */
     public function lint()
     {
-        return $this->providersContainer->getLinterInteractor()->lint();
+        return $this->providersContainer->getLinterAdapter()->lint();
     }
 
     /**
@@ -173,7 +173,7 @@ class Json implements \ArrayAccess, \Countable
             $options = $this->options[EncodingOption::class];
         }
 
-        return $this->providersContainer->getEncoderInteractor()->encode($options);
+        return $this->providersContainer->getEncoderAdapter()->encode($options);
     }
 
     /**
@@ -189,7 +189,7 @@ class Json implements \ArrayAccess, \Countable
             $options = $this->options[DecodingOption::class];
         }
 
-        return $this->providersContainer->getDecoderInteractor()->decode($options);
+        return $this->providersContainer->getDecoderAdapter()->decode($options);
     }
 
     /**

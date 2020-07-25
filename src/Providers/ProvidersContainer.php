@@ -2,22 +2,19 @@
 
 namespace MAChitgarha\Json\Providers;
 
-use MAChitgarha\Json\Interfaces\LinterInteractorInterface;
+use MAChitgarha\Json\Interfaces\LinterAdapterInterface;
 
 /**
- * Container of providers and their interactors.
+ * Container of providers and their adapters.
  * @todo Decide to move this to Components namespace or not.
  */
 class ProvidersContainer
 {
     /**
-     * Auto-detect the interactor of the provider.
-     * @todo Implement this.
+     * Auto-detect the adapter.
      * @var string
      */
-    public const AUTO_DETECT = "";
-
-    private
+    public const AUTO_DETECT = null;
 
     /**
      * Linter class name, providing linting functionality.
@@ -29,13 +26,13 @@ class ProvidersContainer
      * Name of the class who interacts with the linter.
      * @var string
      */
-    private $linterInteractorName;
+    private $linterAdapterName;
 
     /**
-     * Linter interactor instance.
-     * @var LinterInteractorInterface
+     * Linter adapter instance.
+     * @var LinterAdapterInterface
      */
-    private $linterInteractor = null;
+    private $linterAdapter = null;
 
     /**
      * Encoder class name, providing encoding functionality.
@@ -47,13 +44,13 @@ class ProvidersContainer
      * Name of the class who interacts with the encoder.
      * @var string
      */
-    private $encoderInteractorName;
+    private $encoderAdapterName;
 
     /**
-     * Encoder interactor instance.
-     * @var EncoderInteractorInterface
+     * Encoder adapter instance.
+     * @var EncoderAdapterInterface
      */
-    private $encoderInteractor = null;
+    private $encoderAdapter = null;
 
     /**
      * Decoder class name, providing decoding functionality.
@@ -65,13 +62,13 @@ class ProvidersContainer
      * Name of the class who interacts with the decoder.
      * @var string
      */
-    private $decoderInteractorName;
+    private $decoderAdapterName;
 
     /**
-     * Decoder interactor instance.
-     * @var DecoderInteractorInterface
+     * Decoder adapter instance.
+     * @var DecoderAdapterInterface
      */
-    private $decoderInteractor = null;
+    private $decoderAdapter = null;
 
     /**
      * Constructor.
@@ -91,89 +88,104 @@ class ProvidersContainer
     }
 
     /**
-     * Returns the auto-detected interactor based on provider name and functionality.
+     * Returns the auto-detected adapter based on provider name and functionality.
      *
-     * @param string $providerName Provider full class name.
      * @param string $functionality Functionality to provide (e.g. linting).
-     * @return string The detected interactor name.
+     * @param string $providerName Provider full class name.
+     * @return string The detected adapter name.
      */
     protected static function autoDetect(
+        string $functionality,
         string $providerName,
-        string $functionality
+        string $adapterName = self::AUTO_DETECT
     ): string {
+        // If adapter name is provided, return that
+        if ($adapterName !== self::AUTO_DETECT) {
+            return $adapterName;
+        }
+        // Otherwise, auto-detect it
+
         static $autoDetectionData =
-            require __DIR__ . "/../../data/interactor-auto-detection.php";
+            require __DIR__ . "/../../data/adapter-auto-detection.php";
 
-        $interactorName = $autoDetectionData[$providerName][$functionality] ?? null;
+        $adapterName = $autoDetectionData[$providerName][$functionality] ?? null;
 
-        if ($interactorName === null) {
+        if ($adapterName === null) {
             throw new NotSupportedException("Functionality $functionality for provider " .
                 "$providerName cannot be auto-detected");
         }
-        return $interactorName;
+        return $adapterName;
     }
 
     /**
-     * Sets the linter provider and its interactor.
+     * Sets the linter provider and its adapter.
      *
-     * If the interactor is not specified, it will be auto-detected.
+     * If the adapter is not specified, it will be auto-detected.
      *
      * @param string $linterName
-     * @param string $linterInteractorName
+     * @param string $linterAdapterName
      * @return self
      * @todo Add at-throw when auto-detection failed or class not supported for this
      * method and the methods likewise.
      */
     public function setLinter(
         string $linterName,
-        string $linterInteractorName = self::AUTO_DETECT
+        string $linterAdapterName = self::AUTO_DETECT
     ) {
         $this->linterName = $linterName;
-        $this->linterInteractorName = $linterInteractorName;
+        $this->linterAdapterName = static::autoDetect(
+            "linting",
+            $linterName,
+            $linterAdapterName
+        );
+
+        if (!$linterAdapterName instanceof LinterAdapterInterface) {
+            throw new Exception();
+        }
 
         return $this;
     }
 
     /**
-     * Sets the encoder provider and its interactor.
+     * Sets the encoder provider and its adapter.
      *
-     * If the interactor is not specified, it will be auto-detected.
+     * If the adapter is not specified, it will be auto-detected.
      *
      * @param string $encoderName
-     * @param string $encoderInteractorName
+     * @param string $encoderAdapterName
      * @return self
      */
     public function setEncoder(
         string $encoderName,
-        string $encoderInteractorName = self::AUTO_DETECT
+        string $encoderAdapterName = self::AUTO_DETECT
     ) {
         $this->encoderName = $encoderName;
-        $this->encoderInteractorName = $encoderInteractorName;
+        $this->encoderAdapterName = $encoderAdapterName;
 
         return $this;
     }
 
     /**
-     * Sets the decoder provider and its interactor.
+     * Sets the decoder provider and its adapter.
      *
-     * If the interactor is not specified, it will be auto-detected.
+     * If the adapter is not specified, it will be auto-detected.
      *
      * @param string $decoderName
-     * @param string $decoderInteractorName
+     * @param string $decoderAdapterName
      * @return self
      */
     public function setDecoder(
         string $decoderName,
-        string $decoderInteractorName = self::AUTO_DETECT
+        string $decoderAdapterName = self::AUTO_DETECT
     ) {
         $this->decoderName = $decoderName;
-        $this->decoderInteractorName = $decoderInteractorName;
+        $this->decoderAdapterName = $decoderAdapterName;
 
         return $this;
     }
 
     /**
-     * Initialize providers and interactor so they can be used.
+     * Initialize providers and adapter so they can be used.
      *
      * @param mixed $data
      * @return void
@@ -185,59 +197,59 @@ class ProvidersContainer
         foreach ([
             [
                 $this->linterName,
-                $this->linterInteractorName,
-                $this->linterInteractor
+                $this->linterAdapterName,
+                $this->linterAdapter
             ],
             [
                 $this->encoderName,
-                $this->encoderInteractorName,
-                $this->encoderInteractor
+                $this->encoderAdapterName,
+                $this->encoderAdapter
             ],
             [
                 $this->decoderName,
-                $this->decoderInteractorName,
-                $this->decoderInteractor
+                $this->decoderAdapterName,
+                $this->decoderAdapter
             ],
         ] as list(
             $providerName,
-            $interactorName,
-            &$interactorRef
+            $adapterName,
+            &$adapterRef
         )) {
             if ($distinctProviders[$providerName] === null) {
                 $distinctProviders[$providerName] =
-                    new $interactorName($providerName, $data);
+                    new $adapterName($providerName, $data);
             }
-            $interactorRef = $distinctProviders[$interactorName];
+            $adapterRef = $distinctProviders[$adapterName];
         }
     }
 
     /**
-     * Returns linter interactor.
+     * Returns linter adapter.
      *
-     * @return LinterInteractorInterface
+     * @return LinterAdapterInterface
      */
-    public function getLinterInteractor(): LinterInteractorInterface
+    public function getLinterAdapter(): LinterAdapterInterface
     {
-        return $this->linterInteractor;
+        return $this->linterAdapter;
     }
 
     /**
-     * Returns encoder interactor.
+     * Returns encoder adapter.
      *
-     * @return EncoderInteractorInterface
+     * @return EncoderAdapterInterface
      */
-    public function getEncoderInteractor(): EncoderInteractorInterface
+    public function getEncoderAdapter(): EncoderAdapterInterface
     {
-        return $this->encoderInteractor;
+        return $this->encoderAdapter;
     }
 
     /**
-     * Returns decoder interactor.
+     * Returns decoder adapter.
      *
-     * @return DecoderInteractorInterface
+     * @return DecoderAdapterInterface
      */
-    public function getDecoderInteractor(): DecoderInteractorInterface
+    public function getDecoderAdapter(): DecoderAdapterInterface
     {
-        return $this->decoderInteractorName;
+        return $this->decoderAdapter;
     }
 }
