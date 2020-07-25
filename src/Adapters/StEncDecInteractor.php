@@ -2,9 +2,9 @@
 
 namespace MAChitgarha\Json\Adapters;
 
-use MAChitgarha\Json\Interfaces\LinterAdapterInterface;
-use MAChitgarha\Json\Interfaces\DecoderAdapterInterface;
-use MAChitgarha\Json\Interfaces\EncoderAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\LinterAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\DecoderAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\EncoderAdapterInterface;
 use MAChitgarha\Json\Components\Data;
 
 /**

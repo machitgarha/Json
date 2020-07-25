@@ -1,6 +1,6 @@
 <?php
 
-namespace MAChitgarha\Json\Interfaces;
+namespace MAChitgarha\Json\Adapters\Interfaces;
 
 interface EncoderAdapterInterface extends BaseAdapterInterface
 {

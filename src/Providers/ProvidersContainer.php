@@ -2,7 +2,7 @@
 
 namespace MAChitgarha\Json\Providers;
 
-use MAChitgarha\Json\Interfaces\LinterAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\LinterAdapterInterface;
 
 /**
  * Container of providers and their adapters.

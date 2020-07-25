@@ -1,7 +1,7 @@
 <?php
 // TODO: Add a script for adding boilerprait for each file does not have it.
 
-namespace MAChitgarha\Json\Interfaces;
+namespace MAChitgarha\Json\Adapters\Interfaces;
 
 interface BaseAdapterInterface
 {

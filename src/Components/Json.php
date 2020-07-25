@@ -9,9 +9,9 @@
 
 namespace MAChitgarha\Json\Components;
 
-use MAChitgarha\Json\Interfaces\LinterAdapterInterface;
-use MAChitgarha\Json\Interfaces\EncoderAdapterInterface;
-use MAChitgarha\Json\Interfaces\DecoderAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\LinterAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\EncoderAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\DecoderAdapterInterface;
 use MAChitgarha\Json\Providers\ProvidersContainer;
 use MAChitgarha\Json\Linting\LintingResult;
 use MAChitgarha\Json\Exceptions\Exception;
