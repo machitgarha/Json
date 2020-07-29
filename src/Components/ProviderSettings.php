@@ -20,6 +20,10 @@ class ProviderSettings
      */
     public const DEFAULT_ADAPTER = null;
 
+    /**
+     * A map of operations to essential interfaces for validating adapters.
+     * @var string[]
+     */
     protected const OPERATION_TO_INTERFACE = [
         OperationContainer::LINTING => LinterAdapterInterface::class,
         OperationContainer::ENCODING => EncoderAdapterInterface::class,
