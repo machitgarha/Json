@@ -154,7 +154,7 @@ class ProviderSettings
         string $providerName
     ): string {
         static $providersToDefaultAdaptersMap =
-            require __DIR__ . "/../../data/adapter-auto-detection.php";
+            require __DIR__ . "/../../data/default-adapters.php";
 
         // TODO: Provider a more detailed exception on what is not supported
         $adapterName = $providersToDefaultAdaptersMap[$providerName][$operationName]
