@@ -12,7 +12,7 @@
 
 ##### General
 
--   Added providers and adapters. Providers are classes providing functionality for Json methods. Adapters are the layer between, which means, classes interacting between providers and Json class.
+-   Added providers and adapters. Providers are classes providing operation for Json methods. Adapters are the layer between, which means, classes interacting between providers and Json class.
 
 -   Added option containers, classes containing options for various functionalities. Every option container _must_ extend from `OptionContainer` base class.
 
@@ -23,6 +23,9 @@
         -   `LinterAdapterInterface`
         -   `EncoderAdapterInterface`
         -   `DecoderAdapterInterface`
+
+-   New interactors:
+    -   `StaticInteractor`
 
 -   New option containers:
     -   `EncodingOption`: For `Json::encode()`:

@@ -15,15 +15,15 @@ interface LinterAdapterInterface extends BaseAdapterInterface
     public function lintJsonString(string $data): LintingResult;
 
     /**
-     * Lints a ordinary PHP data not to contain non-JSON-encodable data inside.
+     * Lints native PHP data not to contain non-JSON-encodable data inside.
      *
-     * As an example, an invalid ordinary PHP type to be encoded is a resource.
+     * As an example, an invalid native PHP type to be encoded is a resource.
      *
      * You should throw exceptions or return true from this method, if the provider don't
-     * support linting plain data.
+     * support linting native data.
      *
-     * @param mixed $data Plain PHP data.
+     * @param mixed $data Native PHP data.
      * @todo Specify the return value type.
      */
-    public function lintOrdinaryData($data);
+    public function lintNativeData($data);
 }
