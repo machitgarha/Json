@@ -21,16 +21,6 @@ class ProviderSettings
     public const DEFAULT_ADAPTER = null;
 
     /**
-     * A map of operations to essential interfaces for validating adapters.
-     * @var string[]
-     */
-    protected const OPERATION_TO_INTERFACE = [
-        OperationContainer::LINTING => LinterAdapterInterface::class,
-        OperationContainer::ENCODING => EncoderAdapterInterface::class,
-        OperationContainer::DECODING => DecoderAdapterInterface::class,
-    ];
-
-    /**
      * Linter class name, providing linting action.
      * @todo Replace operation with action.
      * @var string
@@ -189,6 +179,7 @@ class ProviderSettings
     protected static function getValidAdapter(
         string $operationName,
         string $providerName,
+        string $adapterBaseInterfaceName,
         string $adapterName = self::DEFAULT_ADAPTER
     ): string {
         if ($adapterName === self::DEFAULT_ADAPTER) {
@@ -196,7 +187,7 @@ class ProviderSettings
         }
 
         // TODO: Improve the exception message.
-        if (!$adapterName instanceof static::OPERATION_TO_INTERFACE[$operationName]) {
+        if (!$adapterName instanceof $adapterBaseInterfaceName) {
             throw new InvalidArgumentException();
         }
 
@@ -221,6 +212,7 @@ class ProviderSettings
         $this->linterAdapterName = static::getValidAdapter(
             OperationContainer::LINTING,
             $linterName,
+            LinterAdapterInterface::class,
             $linterAdapterName
         );
 
@@ -244,6 +236,7 @@ class ProviderSettings
         $this->encoderAdapterName = static::getValidAdapter(
             OperationContainer::ENCODING,
             $encoderAdapter,
+            EncoderAdapterInterface::class,
             $encoderAdapterName
         );
 
@@ -267,6 +260,7 @@ class ProviderSettings
         $this->decoderAdapterName = static::getValidAdapter(
             OperationContainer::DECODING,
             $decoderName,
+            DecoderAdapterInterface::class,
             $decoderAdapterName
         );
 
