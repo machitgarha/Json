@@ -1,6 +1,6 @@
 <?php
 
-namespace MAChitgarha\Json\Providers;
+namespace MAChitgarha\Json\Components;
 
 use MAChitgarha\Json\Operations\OperationContainer;
 use MAChitgarha\Json\Adapters\Interfaces\LinterAdapterInterface;
@@ -127,7 +127,7 @@ class ProviderSettings
             $adapterName,
             &$adapterRef
         )) {
-            if ($distinctProviders[$providerName] === null) {
+            if (!\array_key_exists($providerName, $distinctProviders)) {
                 $distinctProviders[$providerName] =
                     new $adapterName($providerName, $data);
             }
@@ -147,7 +147,9 @@ class ProviderSettings
         string $operationName,
         string $providerName
     ): string {
-        static $providersToDefaultAdaptersMap =
+        // Load map data only once
+        static $providersToDefaultAdaptersMap = null;
+        $providersToDefaultAdaptersMap = $providersToDefaultAdaptersMap ??
             require __DIR__ . "/../../data/default-adapters.php";
 
         // TODO: Provider a more detailed exception on what is not supported
