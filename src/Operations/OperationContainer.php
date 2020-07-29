@@ -1,9 +1,9 @@
 <?php
 
-namespace MAChitgarha\Json\Components;
+namespace MAChitgarha\Json\Operations;
 
 /**
- * A class containing all available operations a provider could do.
+ * A class containing all available operations a provider could provide.
  */
 class OperationContainer
 {

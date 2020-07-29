@@ -12,8 +12,8 @@ namespace MAChitgarha\Json\Components;
 use MAChitgarha\Json\Adapters\Interfaces\LinterAdapterInterface;
 use MAChitgarha\Json\Adapters\Interfaces\EncoderAdapterInterface;
 use MAChitgarha\Json\Adapters\Interfaces\DecoderAdapterInterface;
-use MAChitgarha\Json\Providers\ProvidersContainer;
-use MAChitgarha\Json\Linting\LintingResult;
+use MAChitgarha\Json\Components\ProviderSettings;
+use MAChitgarha\Json\Operations\Linting\LintingResult;
 use MAChitgarha\Json\Exceptions\Exception;
 use MAChitgarha\Json\Exceptions\InvalidArgumentException;
 use MAChitgarha\Json\Exceptions\InvalidJsonException;
@@ -54,7 +54,7 @@ class Json implements \ArrayAccess, \Countable
 
     /**
      * Container of all providers and their adapters.
-     * @var ProvidersContainer
+     * @var ProviderSettings
      */
     protected $providersContainer;
 
@@ -113,12 +113,12 @@ class Json implements \ArrayAccess, \Countable
      */
     public function __construct(
         $data = [],
-        ProvidersContainer $providersContainer = null,
+        ProviderSettings $providersContainer = null,
         array $options = []
     ) {
         // Not passed? Ship with default providers
         $this->providersContainer = $providersContainer ??
-            new ProviderContainer();
+            new ProviderSettings();
 
         // Initialize all adapters and providers
         $this->providersContainer->init($data);

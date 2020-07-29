@@ -2,7 +2,7 @@
 
 namespace MAChitgarha\Json\Providers;
 
-use MAChitgarha\Json\Components\OperationContainer;
+use MAChitgarha\Json\Operations\OperationContainer;
 use MAChitgarha\Json\Adapters\Interfaces\LinterAdapterInterface;
 use MAChitgarha\Json\Adapters\Interfaces\DecoderAdapterInterface;
 use MAChitgarha\Json\Adapters\Interfaces\EncoderAdapterInterface;
