@@ -53,10 +53,10 @@ class Json implements \ArrayAccess, \Countable
     protected const DEFAULT_DECODING_OPTIONS = 0;
 
     /**
-     * Container of all providers and their adapters.
+     * @todo Add a description here later.
      * @var ProviderSettings
      */
-    protected $providersContainer;
+    protected $providerSettings;
 
     /**
      * Holds container-based options.
@@ -113,15 +113,14 @@ class Json implements \ArrayAccess, \Countable
      */
     public function __construct(
         $data = [],
-        ProviderSettings $providersContainer = null,
+        ProviderSettings $providerSettings = null,
         array $options = []
     ) {
         // Not passed? Ship with default providers
-        $this->providersContainer = $providersContainer ??
-            new ProviderSettings();
+        $this->providerSettings = $providerSettings ?? new ProviderSettings();
 
         // Initialize all adapters and providers
-        $this->providersContainer->init($data);
+        $this->providerSettings->init($data);
 
         // Set default options not supplied by user
         $options = array_merge([
@@ -157,7 +156,7 @@ class Json implements \ArrayAccess, \Countable
      */
     public function lint()
     {
-        return $this->providersContainer->getLinterAdapter()->lint();
+        return $this->providerSettings->getLinterAdapter()->lint();
     }
 
     /**
@@ -173,7 +172,7 @@ class Json implements \ArrayAccess, \Countable
             $options = $this->options[EncodingOption::class];
         }
 
-        return $this->providersContainer->getEncoderAdapter()->encode($options);
+        return $this->providerSettings->getEncoderAdapter()->encode($options);
     }
 
     /**
@@ -189,7 +188,7 @@ class Json implements \ArrayAccess, \Countable
             $options = $this->options[DecodingOption::class];
         }
 
-        return $this->providersContainer->getDecoderAdapter()->decode($options);
+        return $this->providerSettings->getDecoderAdapter()->decode($options);
     }
 
     /**

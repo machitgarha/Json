@@ -8,7 +8,7 @@ use MAChitgarha\Json\Adapters\Interfaces\DecoderAdapterInterface;
 use MAChitgarha\Json\Adapters\Interfaces\EncoderAdapterInterface;
 
 /**
- * Provider settings for every action, along with adapters.
+ * Provider settings for each operation, along with adapter(s) settings.
  *
  * @todo Sort all operations consistently.
  */
@@ -21,8 +21,7 @@ class ProviderSettings
     public const DEFAULT_ADAPTER = null;
 
     /**
-     * Linter class name, providing linting action.
-     * @todo Replace operation with action.
+     * Linter class name, providing linting operation.
      * @var string
      */
     private $linterName;
