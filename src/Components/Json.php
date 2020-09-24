@@ -129,8 +129,8 @@ class Json implements \ArrayAccess, \Countable
         ], $options);
 
         // Setting options
-        foreach ($options as $optionContainerName => $optionVal) {
-            $this->setOptions($optionContainerName, $optionVal);
+        foreach ($options as $optionContainerClass => $optionVal) {
+            $this->setOptions($optionContainerClass, $optionVal);
         }
 
         // Initializing data
@@ -195,13 +195,13 @@ class Json implements \ArrayAccess, \Countable
      * Sets options to the given value.
      *
      * @todo Validate option container name.
-     * @param string $optionContainerName
+     * @param string $optionContainerClass
      * @param int $options
      * @return self
      */
-    public function setOptions(string $optionContainerName, int $options)
+    public function setOptions(string $optionContainerClass, int $options)
     {
-        $this->options[$optionContainerName] = $options;
+        $this->options[$optionContainerClass] = $options;
 
         // TODO: Remove this
         $this->jsonDecodeAlways = (bool)($options & JsonOpt::DECODE_ALWAYS);
@@ -212,15 +212,15 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Adds an option, if not exists.
      *
-     * @param string $optionContainerName
+     * @param string $optionContainerClass
      * @param int $option
      * @return self
      */
-    public function addOption(string $optionContainerName, int $option)
+    public function addOption(string $optionContainerClass, int $option)
     {
         $this->setOptions(
-            $optionContainerName,
-            $this->options[$optionContainerName] | $option
+            $optionContainerClass,
+            $this->options[$optionContainerClass] | $option
         );
         return $this;
     }
@@ -231,11 +231,11 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return self
      */
-    public function removeOption(string $optionContainerName, int $option)
+    public function removeOption(string $optionContainerClass, int $option)
     {
         $this->setOptions(
-            $optionContainerName,
-            $this->options[$optionContainerName] & ~$option
+            $optionContainerClass,
+            $this->options[$optionContainerClass] & ~$option
         );
         return $this;
     }
@@ -246,9 +246,9 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return bool
      */
-    public function isOptionSet(string $optionContainerName, int $option): bool
+    public function isOptionSet(string $optionContainerClass, int $option): bool
     {
-        return ($this->options[$optionContainerName] & $option) === $option;
+        return ($this->options[$optionContainerClass] & $option) === $option;
     }
 
     /**

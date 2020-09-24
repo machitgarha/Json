@@ -15,17 +15,17 @@ class StEncDecAdapter implements
     EncoderAdapterInterface
 {
     /**
-     * Provider class name.
+     * The provider class name.
      * @var string
      */
-    private $className;
+    private $providerClass;
 
     /**
      * @inheritDoc
      */
-    public function __construct(string $className, Data &$data)
+    public function __construct(string $providerClass, Data &$data)
     {
-        $this->className = $className;
+        $this->providerClass = $providerClass;
     }
 
     /**
@@ -33,7 +33,7 @@ class StEncDecAdapter implements
      */
     public function decode(string $data, int $options)
     {
-        return $this->className::decode($data, $options);
+        return $this->providerClass::decode($data, $options);
     }
 
     /**
@@ -41,6 +41,6 @@ class StEncDecAdapter implements
      */
     public function encode($data, int $options)
     {
-        return $this->className::encode($data, $options);
+        return $this->providerClass::encode($data, $options);
     }
 }

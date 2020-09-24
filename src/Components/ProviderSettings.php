@@ -18,50 +18,56 @@ class _OperationData
      * The provider class name.
      * @var string
      */
-    private $providerName = null;
+    private $providerClass = null;
 
     /**
      * The adapter class name.
      * @var string
      */
-    private $adapterName = null;
+    private $adapterClass = null;
 
     /**
-     * The reference to the adapter instance.
+     * Reference to the adapter instance.
      * @var BaseAdapterInterface
      */
-    private $adapterReference = null;
+    private $adapterRef = null;
 
     /**
      * Constructor.
      *
      * @param string $operationName The operation name.
-     * @param string $providerName The provider class name.
-     * @param string $adapterName The adapter class name.
-     * @param string $adapterInterfaceName The adapter interface base.
+     * @param string $providerClass The provider class name.
+     * @param string $adapterClass The adapter class name.
+     * @param string $adapterInterface The adapter interface.
      */
     public function __construct(
         string $operationName,
-        string $providerName,
-        string $adapterName,
-        string $adapterInterfaceName
+        string $providerClass,
+        string $adapterClass,
+        string $adapterInterface
     ) {
-        $this->providerName = $providerClassName;
+        $this->providerName = $providerClass;
 
         $this->adapterName = AdapterUtils::getValidAdapterName(
             $operationName,
-            $providerName,
-            $adapterInterfaceName,
-            $adapterName
+            $providerClass,
+            $adapterInterface,
+            $adapterClass
         );
     }
 
-    public function setAdapter(BaseAdapterInterface &$adapterInstance)
+    /**
+     * Sets the adapter reference.
+     *
+     * @param BaseAdapterInterface $adapter The adapter instance, passed by reference.
+     * @return void
+     */
+    public function setAdapterRef(BaseAdapterInterface &$adapter)
     {
-        $this->adapterReference = &$adapterInstance;
+        $this->adapterRef = &$adapter;
     }
 
-    public function &getAdapter(): BaseAdapterInterface
+    public function &getAdapterRef(): BaseAdapterInterface
     {
         return $this->adapterReference;
     }
@@ -157,15 +163,15 @@ class ProviderSettings
     /**
      * Returns a distinct string for the pair of an adapter and a provider.
      *
-     * @param string $providerName The provider class name (including its namespace).
-     * @param string $adapterName The adapter class name (including its namespace).
+     * @param string $providerClass The provider class name (including its namespace).
+     * @param string $adapterClass The adapter class name (including its namespace).
      * @return string
      */
     protected static function getProviderAdapterStringPair(
-        string $providerName,
-        string $adapterName
+        string $providerClass,
+        string $adapterClass
     ): string {
-        return $providerName . "," . $adapterName;
+        return $providerClass . "," . $adapterClass;
     }
 
     /**
@@ -181,16 +187,16 @@ class ProviderSettings
     public function init($data)
     {
         foreach ($this->getOperationDataSet() as &$operationData) {
-            $providerName = $operationData->getProviderName();
-            $adapterName = $operationData->getAdapterName();
+            $providerClass = $operationData->getProviderName();
+            $adapterClass = $operationData->getAdapterName();
 
             $adapterIndex = $this->getProviderAdapterStringPair(
-                $providerName,
-                $adapterName
+                $providerClass,
+                $adapterClass
             );
 
             if (!\array_key_exists($adapterIndex, $this->adapters)) {
-                $this->adapters[$adapterIndex] = new $adapterName($providerName, $data);
+                $this->adapters[$adapterIndex] = new $adapterClass($providerClass, $data);
             }
 
             $operationData->setAdapter($this->adapters[$adapterIndex]);
@@ -200,18 +206,18 @@ class ProviderSettings
     /**
      * Sets the linter provider and its adapter.
      *
-     * @param string $providerName The provider class name.
-     * @param string $adapterName The adapter class name.
+     * @param string $providerClass The provider class name.
+     * @param string $adapterClass The adapter class name.
      * @return self
      */
     public function setLinter(
-        string $providerName,
-        string $adapterName = AdapterUtils::DEFAULT_ADAPTER
+        string $providerClass,
+        string $adapterClass = AdapterUtils::DEFAULT_ADAPTER
     ): self {
         $this->lintingData = new _OperationData(
             OperationContainer::LINTING,
-            $providerName,
-            $adapterName,
+            $providerClass,
+            $adapterClass,
             LinterAdapterInterface::class,
         );
 
@@ -221,18 +227,18 @@ class ProviderSettings
     /**
      * Sets the encoder provider and its adapter.
      *
-     * @param string $providerName The provider class name.
-     * @param string $adapterName The adapter class name.
+     * @param string $providerClass The provider class name.
+     * @param string $adapterClass The adapter class name.
      * @return self
      */
     public function setEncoder(
-        string $providerName,
-        string $adapterName = AdapterUtils::DEFAULT_ADAPTER
+        string $providerClass,
+        string $adapterClass = AdapterUtils::DEFAULT_ADAPTER
     ): self {
         $this->encodingData = new _OperationData(
             OperationContainer::ENCODING,
-            $providerName,
-            $adapterName,
+            $providerClass,
+            $adapterClass,
             EncodingAdapterInterface::class,
         );
 
@@ -242,18 +248,18 @@ class ProviderSettings
     /**
      * Sets the decoder provider and its adapter.
      *
-     * @param string $providerName The provider class name.
-     * @param string $adapterName The adapter class name.
+     * @param string $providerClass The provider class name.
+     * @param string $adapterClass The adapter class name.
      * @return self
      */
     public function setDecoder(
-        string $providerName,
-        string $adapterName = AdapterUtils::DEFAULT_ADAPTER
+        string $providerClass,
+        string $adapterClass = AdapterUtils::DEFAULT_ADAPTER
     ): self {
         $this->decodingData = new _OperationData(
             OperationContainer::DECODING,
-            $providerName,
-            $adapterName,
+            $providerClass,
+            $adapterClass,
             DecodingAdapterInterface::class,
         );
 

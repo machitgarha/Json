@@ -45,29 +45,29 @@ class AdapterUtils
      * Returns the default adapter class name, based on the provider and the operation.
      *
      * @param string $operationName The operation name.
-     * @param string $providerName The provider class name.
+     * @param string $providerClass The provider class name.
      * @return string
      * @throws NotSupportedException If no default adapter exist.
      */
     protected static function getDefaultAdapterName(
         string $operationName,
-        string $providerName
+        string $providerClass
     ): string {
         $defaultAdaptersData = static::getDefaultAdaptersData();
 
-        if (isset($defaultAdaptersData[$providerName])) {
+        if (isset($defaultAdaptersData[$providerClass])) {
             throw new NotSupportedException(
-                "No default adapter data exist for '$providerName' provider class"
+                "No default adapter data exist for '$providerClass' provider class"
             );
         }
-        if (isset($defaultAdaptersData[$providerName][$operationName])) {
+        if (isset($defaultAdaptersData[$providerClass][$operationName])) {
             throw new NotSupportedException(
-                "No default adapter set for '$providerName' provider class " .
+                "No default adapter set for '$providerClass' provider class " .
                 "to do $operationName operation"
             );
         }
 
-        return $defaultAdaptersData[$providerName][$operationName];
+        return $defaultAdaptersData[$providerClass][$operationName];
     }
 
     /**
@@ -78,29 +78,29 @@ class AdapterUtils
      * exist, an exception will be thrown.
      *
      * @param string $operationName The operation name.
-     * @param string $providerName The provider class name.
-     * @param string $adapterInterfaceName The base adapter interface name, in which
+     * @param string $providerClass The provider class name.
+     * @param string $providerClass The base adapter interface name, in which
      * the adapter should be an instance of.
-     * @param string $adapterName The adapter name.
+     * @param string $providerClass The adapter name.
      * @return string
      */
     public static function getValidAdapterName(
         string $operationName,
-        string $providerName,
-        string $adapterInterfaceName,
-        string $adapterName = self::DEFAULT_ADAPTER
+        string $providerClass,
+        string $providerClass,
+        string $providerClass = self::DEFAULT_ADAPTER
     ): string {
-        if ($adapterName === self::DEFAULT_ADAPTER) {
-            $adapterName = static::getDefaultAdapterName($operationName, $providerName);
+        if ($providerClass === self::DEFAULT_ADAPTER) {
+            $providerClass = static::getDefaultAdapterName($operationName, $providerClass);
         }
 
-        if (!$adapterName instanceof $adapterBaseInterfaceName) {
+        if (!$providerClass instanceof $providerClass) {
             throw new InvalidArgumentException(
-                "Adapter '$adapterName' must implement '$adapterInterfaceName' " .
+                "Adapter '$providerClass' must implement '$providerClass' " .
                 "to be used as $operationName operation"
             );
         }
 
-        return $adapterName;
+        return $providerClass;
     }
 }
