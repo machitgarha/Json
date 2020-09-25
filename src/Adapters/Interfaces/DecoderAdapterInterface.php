@@ -2,6 +2,9 @@
 
 namespace MAChitgarha\Json\Adapters\Interfaces;
 
+/**
+ * Interface for creating adapters providing decoding operation.
+ */
 interface DecoderAdapterInterface extends BaseAdapterInterface
 {
     /**
