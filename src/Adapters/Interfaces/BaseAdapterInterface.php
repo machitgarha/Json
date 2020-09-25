@@ -22,12 +22,12 @@ interface BaseAdapterInterface
      * should be forward-comptabile to new providers that has the proper interface the
      * adapter supports.
      *
-     * @todo Complete this documentation.
      * @param string $providerClass The provider class name.
-     * @param Data &$data Reference to the data.
-     * @todo Add options parameter, also for all children.
      * @return void
+     *
+     * @todo Complete this documentation.
+     * @todo Add options parameter, also for all children.
      * @todo Specfiy which exceptions should be thrown here and in child classes.
      */
-    public function __construct(string $providerClass, Data &$data);
+    public function __construct(string $providerClass);
 }
