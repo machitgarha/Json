@@ -2,28 +2,12 @@
 
 namespace MAChitgarha\Json\Adapters\Interfaces;
 
-use MAChitgarha\Json\Components\Linting\LintingResult;
-
-interface LinterAdapterInterface extends BaseAdapterInterface
+/**
+ * Interface for creating adapters providing the operation of linting both JSON strings
+ * and built-in PHP data.
+ */
+interface LinterAdapterInterface extends
+    JsonLinterAdapterInterface,
+    PhpDataLinterAdapterInterface
 {
-    /**
-     * Lints a JSON string.
-     *
-     * @param string $data A JSON string.
-     * @return LintingResult
-     */
-    public function lintJsonString(string $data): LintingResult;
-
-    /**
-     * Lints native PHP data not to contain non-JSON-encodable data inside.
-     *
-     * As an example, an invalid native PHP type to be encoded is a resource.
-     *
-     * You should throw exceptions or return true from this method, if the provider don't
-     * support linting native data.
-     *
-     * @param mixed $data Native PHP data.
-     * @todo Specify the return value type.
-     */
-    public function lintNativeData($data);
 }
