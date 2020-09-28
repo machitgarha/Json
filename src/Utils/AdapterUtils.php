@@ -3,6 +3,7 @@
 namespace MAChitgarha\Json\Utils;
 
 use MAChitgarha\Json\Exceptions\NotSupportedException;
+use MAChitgarha\Json\Operations\OperationContainer;
 
 /**
  * Utilities for adapters.
@@ -10,7 +11,7 @@ use MAChitgarha\Json\Exceptions\NotSupportedException;
 class AdapterUtils
 {
     /**
-     * Use the default adapter (for the given input), if supported.
+     * Use the default adapter (for the given provider), if supported.
      * @var null
      */
     public const DEFAULT_ADAPTER = null;
@@ -49,7 +50,7 @@ class AdapterUtils
      * @return string
      * @throws NotSupportedException If no default adapter exist.
      */
-    protected static function getDefaultAdapterName(
+    protected static function getDefaultAdapterClass(
         string $operationName,
         string $providerClass
     ): string {
@@ -84,7 +85,7 @@ class AdapterUtils
      * @param string $providerClass The adapter name.
      * @return string
      */
-    public static function getValidAdapterName(
+    public static function getValidAdapterClass(
         string $operationName,
         string $providerClass,
         string $providerClass,
@@ -102,5 +103,27 @@ class AdapterUtils
         }
 
         return $providerClass;
+    }
+
+    public static function getAdapterInterfaceFromOperation(
+        string $operationName
+    ): string {
+        switch ($operationName) {
+            case OperationContainer::DECODING:
+                return DecoderAdapterInterface::class;
+                // No break
+
+            case OperationContainer::ENCODING:
+                return EncodingAdapterInterface::class;
+                // No break
+
+            case OperationContainer::JSON_LINTING:
+                return JsonLinterAdapterInterface::class;
+                // No break
+
+            default:
+                throw new InvalidArgumentException("Invalid operation '$operationName'");
+                // No break
+        }
     }
 }
