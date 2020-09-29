@@ -10,7 +10,7 @@ use MAChitgarha\Json\Adapters\Interfaces\JsonLinterAdapterInterface;
 use MAChitgarha\Json\Utils\AdapterUtils;
 
 /**
- * Provider (and adapter) settings holder.
+ * Provider (and adapter) settings container.
  *
  * For each operation, you can choose a different provider to be used. Also, for each
  * provider, you can choose an adapter manually, or you can let the class to select the
@@ -22,6 +22,7 @@ use MAChitgarha\Json\Utils\AdapterUtils;
  * better performance), then the default ones are being used.
  *
  * @todo Write what the class do and WHAT NOT.
+ * @todo Improve documentation of the class.
  */
 class ProviderSettings
 {
@@ -30,6 +31,7 @@ class ProviderSettings
      * below for more information.
      */
     // TODO: Add default providers and adapters for each one
+    // TODO: Add tests to make sure these values are not null
     // {
     /** @var _ProviderInfo */
     private $decoderInfo = (object)[
@@ -106,6 +108,9 @@ class ProviderSettings
         string $providerClass,
         string $adapterClass = AdapterUtils::DEFAULT_ADAPTER
     ): _ProviderInfo {
+        // Throws exception if bad things happen
+        self::validateProviderInfo($operationName, $providerClass, $adapterClass);
+
         // Selecting default adapter class, if not provided
         if ($adapterClass === AdapterUtils::DEFAULT_ADAPTER) {
             $adapterClass = AdapterUtils::getDefaultAdapterClass(
@@ -113,9 +118,6 @@ class ProviderSettings
                 $providerClass
             );
         }
-
-        // Throws exception if bad things happen
-        self::validateProviderInfo($operationName, $providerClass, $adapterClass);
 
         // Everything is valid now
         $validProviderInfo = new _ProviderInfo();
@@ -125,17 +127,17 @@ class ProviderSettings
     }
 
     /**
-     * Sets provider for JSON linting operation; and the adapter, if needed.
+     * Sets provider for decoding operation.
      *
      * @param string $providerClass The provider class name.
      * @param string $adapterClass The adapter class name.
      * @return self
      */
-    public function setJsonLinter(
+    public function setDecoder(
         string $providerClass,
         string $adapterClass = AdapterUtils::DEFAULT_ADAPTER
     ): self {
-        $this->jsonLinterInfo = static::getValidProviderInfo(
+        $this->decoderInfo = static::getValidProviderInfo(
             OperationContainer::JSON_LINTING,
             $providerClass,
             $adapterClass
@@ -145,7 +147,7 @@ class ProviderSettings
     }
 
     /**
-     * Sets the encoder provider and its adapter.
+     * Sets provider for encoding operation.
      *
      * @param string $providerClass The provider class name.
      * @param string $adapterClass The adapter class name.
@@ -165,17 +167,17 @@ class ProviderSettings
     }
 
     /**
-     * Sets the decoder provider and its adapter.
+     * Sets provider for JSON linting operation.
      *
      * @param string $providerClass The provider class name.
      * @param string $adapterClass The adapter class name.
      * @return self
      */
-    public function setDecoder(
+    public function setJsonLinter(
         string $providerClass,
         string $adapterClass = AdapterUtils::DEFAULT_ADAPTER
     ): self {
-        $this->decoderInfo = static::getValidProviderInfo(
+        $this->jsonLinterInfo = static::getValidProviderInfo(
             OperationContainer::JSON_LINTING,
             $providerClass,
             $adapterClass
