@@ -7,30 +7,75 @@
  * @see https://packagist.org/packages/machitgarha/json
  */
 
-namespace MAChitgarha\Component;
+namespace MAChitgarha\Json\Components;
 
-use MAChitgarha\Json\Exception\Exception;
-use MAChitgarha\Json\Exception\InvalidArgumentException;
-use MAChitgarha\Json\Exception\InvalidJsonException;
-use MAChitgarha\Json\Exception\UncountableValueException;
-use MAChitgarha\Json\Exception\JsonException;
-use MAChitgarha\Json\Exception\OverflowException;
-use MAChitgarha\Json\Exception\RuntimeException;
-use MAChitgarha\Json\Option\JsonOpt;
-use MAChitgarha\Json\Option\Indexing;
-use MAChitgarha\Json\Option\Merge;
-use MAChitgarha\Json\Option\DoOpt;
+use MAChitgarha\Json\Adapters\Interfaces\LinterAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\EncoderAdapterInterface;
+use MAChitgarha\Json\Adapters\Interfaces\DecoderAdapterInterface;
+use MAChitgarha\Json\Components\ProviderSettings;
+use MAChitgarha\Json\Operations\Linting\LintingResult;
+use MAChitgarha\Json\Exceptions\Exception;
+use MAChitgarha\Json\Exceptions\InvalidArgumentException;
+use MAChitgarha\Json\Exceptions\InvalidJsonException;
+use MAChitgarha\Json\Exceptions\UncountableValueException;
+use MAChitgarha\Json\Exceptions\JsonException;
+use MAChitgarha\Json\Exceptions\OverflowException;
+use MAChitgarha\Json\Exceptions\RuntimeException;
+use MAChitgarha\Json\Options\JsonOpt;
+use MAChitgarha\Json\Options\Indexing;
+use MAChitgarha\Json\Options\Merge;
+use MAChitgarha\Json\Options\DoOpt;
 
 /**
  * JSON data handler.
  *
+ * @todo Read PHPDoc specs and format all documentation in the same format.
+ * @todo Read related namespace PSR and follow that in the namespaces.
+ * @todo Make Json serializable.
  * @see https://github.com/MAChitgarha/Json/wiki
  */
 class Json implements \ArrayAccess, \Countable
 {
     /**
-     * @var mixed Data parsed in the constructor. It should be everything but a resource type, but
-     * it may. Setting it to a resource might lead to errors/exceptions.
+     * Default set of options for encoding, if user not supplied.
+     *
+     * @see Json::__construct()
+     * @var int
+     */
+    protected const DEFAULT_ENCODING_OPTIONS = 0;
+
+    /**
+     * Default set of options for decoding, if user not supplied.
+     *
+     * @see Json::__construct()
+     * @var int
+     */
+    protected const DEFAULT_DECODING_OPTIONS = 0;
+
+    /**
+     * @todo Add a description here later.
+     * @var ProviderSettings
+     */
+    protected $providerSettings;
+
+    /**
+     * Holds container-based options.
+     *
+     * Each option container has its own set of options. This property holds
+     * an array of options based on option containers, in which, the keys are the
+     * container names, and the values are the options.
+     *
+     * @see Json::setOptions()
+     * @see Json::addOption()
+     * @see Json::removeOption()
+     * @see Json::isOptionSet()
+     * @var int[]
+     */
+    private $options = [];
+
+    /**
+     * The main data to be worked with.
+     * @var Data
      */
     protected $data;
 
@@ -43,9 +88,6 @@ class Json implements \ArrayAccess, \Countable
      */
     protected $anonymousMethods = [];
 
-    /** @var int Options passed to the constructor. */
-    protected $options = 0;
-
     /** @var bool {@see JsonOpt::DECODE_ALWAYS} */
     protected $jsonDecodeAlways = false;
 
@@ -56,45 +98,49 @@ class Json implements \ArrayAccess, \Countable
     protected $randomizationFunction = "mt_rand";
 
     /**
+     * @todo Complete documentation of this and other methods:
+     * The decoded value type (and all of its children) is exactly the same as the type
+     * of data passed to constructor, otherwise changed by other methods. If the whole
+     * data or a sub-data was changed since constructor call, its type will remain
+     * unchanged; unless explicitly mentioned in the documentations.)
+     *
      * @param mixed $data The data. It must be either countable or scalar (i.e. it must not be
      * resource).
-     * @param int $options A combination of JsonOpt::* constants.
+     * @param array $options Array of options.
      * @throws InvalidArgumentException Using JsonOpt::AS_JSON option and passing a non-string data.
      * @throws InvalidJsonException Using JsonOpt::AS_JSON option and passing invalid JSON string.
      * @throws InvalidArgumentException If data is a resource.
      */
-    public function __construct($data = [], int $options = 0)
-    {
+    public function __construct(
+        $data = [],
+        ProviderSettings $providerSettings = null,
+        array $options = []
+    ) {
+        // Not passed? Ship with default providers
+        $this->providerSettings = $providerSettings ?? new ProviderSettings();
+
+        // Initialize all adapters and providers
+        $this->providerSettings->init($data);
+
+        // Set default options not supplied by user
+        $options = array_merge([
+            EncodingOption::class => static::DEFAULT_ENCODING_OPTIONS,
+            DecodingOption::class => static::DEFAULT_DECODING_OPTIONS,
+        ], $options);
+
         // Setting options
-        $this->setOptions($options);
-        $asJson = (bool)($options & JsonOpt::AS_JSON);
-
-        if (is_string($data)) {
-            list($isJsonValid, $decodedData) = $this->validateStringAsJson($data, true);
-
-            if ($isJsonValid) {
-                $this->data = $decodedData;
-                return;
-            }
-
-            // Data contains invalid JSON
-            if ($asJson) {
-                throw new InvalidJsonException();
-            }
-        } elseif ($asJson) {
-            throw new InvalidArgumentException("Data must be string if using JsonOpt::AS_JSON");
+        foreach ($options as $optionContainerClass => $optionVal) {
+            $this->setOptions($optionContainerClass, $optionVal);
         }
 
-        if (is_resource($data)) {
-            throw new InvalidArgumentException("Data must not be a resource");
-        }
-
-        $this->data = $data;
+        // Initializing data
+        $this->data = new Data($data);
     }
 
     /**
      * Creates a new instance of the class.
      *
+     * @todo Use late static binding.
      * @see self::__construct()
      * @return self
      */
@@ -104,29 +150,78 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Resets all options.
+     * Lints the current data.
      *
-     * @param int $options A combination of JsonOpt::* constants.
+     * @return LintingResult
+     */
+    public function lint()
+    {
+        return $this->providerSettings->getLinterAdapter()->lint();
+    }
+
+    /**
+     * Encodes the current data and returns it.
+     *
+     * @param int $options A set of EncodingOption class options.
+     * @return string The encoded data as JSON.
+     */
+    public function encode(int $options = null): string
+    {
+        // Default value
+        if ($options === null) {
+            $options = $this->options[EncodingOption::class];
+        }
+
+        return $this->providerSettings->getEncoderAdapter()->encode($options);
+    }
+
+    /**
+     * Decodes the current data and returns it.
+     *
+     * @param int $options A set of DecodingOption class options.
+     * @return mixed
+     */
+    public function decode(int $options = null)
+    {
+        // Default value
+        if ($options === null) {
+            $options = $this->options[DecodingOption::class];
+        }
+
+        return $this->providerSettings->getDecoderAdapter()->decode($options);
+    }
+
+    /**
+     * Sets options to the given value.
+     *
+     * @todo Validate option container name.
+     * @param string $optionContainerClass
+     * @param int $options
      * @return self
      */
-    public function setOptions(int $options = 0)
+    public function setOptions(string $optionContainerClass, int $options)
     {
-        $this->options = $options;
+        $this->options[$optionContainerClass] = $options;
 
+        // TODO: Remove this
         $this->jsonDecodeAlways = (bool)($options & JsonOpt::DECODE_ALWAYS);
 
         return $this;
     }
 
     /**
-     * Sets an option.
+     * Adds an option, if not exists.
      *
+     * @param string $optionContainerClass
      * @param int $option
      * @return self
      */
-    public function addOption(int $option)
+    public function addOption(string $optionContainerClass, int $option)
     {
-        $this->setOptions($this->options | $option);
+        $this->setOptions(
+            $optionContainerClass,
+            $this->options[$optionContainerClass] | $option
+        );
         return $this;
     }
 
@@ -136,9 +231,12 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return self
      */
-    public function removeOption(int $option)
+    public function removeOption(string $optionContainerClass, int $option)
     {
-        $this->setOptions($this->options & ~$option);
+        $this->setOptions(
+            $optionContainerClass,
+            $this->options[$optionContainerClass] & ~$option
+        );
         return $this;
     }
 
@@ -148,9 +246,9 @@ class Json implements \ArrayAccess, \Countable
      * @param int $option
      * @return bool
      */
-    public function isOptionSet(int $option): bool
+    public function isOptionSet(string $optionContainerClass, int $option): bool
     {
-        return ($this->options & $option) === $option;
+        return ($this->options[$optionContainerClass] & $option) === $option;
     }
 
     /**
@@ -199,6 +297,7 @@ class Json implements \ArrayAccess, \Countable
      * @param mixed $value
      * @return mixed
      */
+    // This
     protected function decodeJsonIfNeeded($value)
     {
         if ($this->jsonDecodeAlways && is_string($value)) {
@@ -219,6 +318,7 @@ class Json implements \ArrayAccess, \Countable
      * @return mixed
      * @see https://stackoverflow.com/a/54131002/4215651 Thanks to this.
      */
+    // This
     protected function normalize($value)
     {
         if (is_object($value) || is_array($value)) {
@@ -237,6 +337,7 @@ class Json implements \ArrayAccess, \Countable
      * @param bool $forceObject Whether to convert indexed arrays to objects or not.
      * @return object|array
      */
+    // This
     protected function toObject($value, bool $forceObject = false)
     {
         return $this->decodeJsonUseProps(
@@ -282,92 +383,6 @@ class Json implements \ArrayAccess, \Countable
     }
 
     /**
-     * Encodes a value as JSON.
-     * See json_encode() documentation for more details.
-     *
-     * @param mixed $value
-     * @param int $options
-     * @param int $depth
-     * @return string
-     * @throws JsonException
-     */
-    public static function encodeToJson($value, int $options = 0, int $depth = 512): string
-    {
-        $encodedData = json_encode($value, $options, $depth);
-        self::handleJsonErrors(json_last_error());
-        return $encodedData;
-    }
-
-    /**
-     * Decodes a JSON string.
-     * See json_decode() documentation for more details.
-     *
-     * @param string $value
-     * @param bool $asArray To return the result as an array or not (i.e. an object).
-     * @param int $depth
-     * @param int $options
-     * @return mixed
-     * @throws JsonException
-     */
-    public static function decodeJson(
-        string $value,
-        bool $asArray = false,
-        int $depth = 512,
-        int $options = 0
-    ) {
-        $decodedData = json_decode($value, $asArray, $depth, $options);
-        self::handleJsonErrors(json_last_error());
-        return $decodedData;
-    }
-
-    /**
-     * Handles JSON errors and throw exceptions, if needed.
-     *
-     * @param integer $jsonErrorStat The return value of json_last_error().
-     * @return void
-     */
-    protected static function handleJsonErrors(int $jsonErrorStat)
-    {
-        switch ($jsonErrorStat) {
-            case JSON_ERROR_NONE:
-                return;
-
-            case JSON_ERROR_DEPTH:
-                $message = "Maximum stack depth exceeded";
-                break;
-
-            case JSON_ERROR_STATE_MISMATCH:
-            case JSON_ERROR_SYNTAX:
-                $message = "Invalid or malformed JSON";
-                break;
-
-            case JSON_ERROR_CTRL_CHAR:
-            case JSON_ERROR_UTF8:
-            case JSON_ERROR_UTF16:
-                $message = "Malformed characters, possibly incorrectly encoded JSON";
-                break;
-
-            case JSON_ERROR_INF_OR_NAN:
-                $message = "NAN and INF cannot be encoded";
-                break;
-
-            case JSON_ERROR_INVALID_PROPERTY_NAME:
-                $message = "Found an invalid property name";
-                break;
-
-            case JSON_ERROR_UNSUPPORTED_TYPE:
-                $message = "A value cannot be encoded, possibly a resource";
-                break;
-
-            default:
-                $message = "Unknown JSON error";
-                break;
-        }
-
-        throw new JsonException($message, $jsonErrorStat);
-    }
-
-    /**
      * Validates a string as a JSON string.
      *
      * @param string $value
@@ -377,6 +392,7 @@ class Json implements \ArrayAccess, \Countable
      * [1]: The decoded JSON string, or null if either the string is not a valid JSON or an
      * error occurred while decoding it.
      */
+    // This
     protected static function validateStringAsJson(string $value, bool $assoc = false): array
     {
         try {
@@ -405,9 +421,10 @@ class Json implements \ArrayAccess, \Countable
      * @param int $options
      * @return string
      */
+    // This
     protected function encodeToJsonUseProps($value, int $options = 0): string
     {
-        return self::encodeToJson($value, $options, $this->jsonRecursionDepth);
+        return (new Json($value))->encode($options);
     }
 
     /**
@@ -417,9 +434,10 @@ class Json implements \ArrayAccess, \Countable
      * @param bool $asArray
      * @return mixed
      */
+    // This
     protected function decodeJsonUseProps(string $value, bool $asArray = false)
     {
-        return self::decodeJson($value, $asArray, $this->jsonRecursionDepth);
+        return (new Json($value))->decode();
     }
 
     /**
@@ -430,6 +448,7 @@ class Json implements \ArrayAccess, \Countable
      * @return array{0:array|mixed,1:array|array[],2:mixed}|array{0:array|array[],1:null,2:null}
      * @see Json::do()
      */
+    // This
     protected function &findElementRecursive(
         array $keys,
         &$data,
@@ -584,6 +603,7 @@ class Json implements \ArrayAccess, \Countable
      * @throws UncountableValueException If data is scalar and $forceCountableValue is set to true.
      * @todo Remove the at sign operator.
      */
+    // This
     public function &do(
         callable $function = null,
         $index = null,
@@ -628,6 +648,7 @@ class Json implements \ArrayAccess, \Countable
      * @throws Exception If a class method with the same name already exists.
      * @throws RuntimeException If the anonymous method is already defined.
      */
+    // This
     public function __set(string $methodName, \Closure $closure)
     {
         if (method_exists($this, $methodName)) {
@@ -670,6 +691,7 @@ class Json implements \ArrayAccess, \Countable
      * @param array $args Arguments to be passed to the anonymous method.
      * @return mixed The return value of the anonymous method.
      */
+    // This
     public function __call(string $methodName, array $args)
     {
         if (!$this->__isset($methodName)) {
@@ -691,12 +713,15 @@ class Json implements \ArrayAccess, \Countable
      * @param int $indexingType One of the Indexing::* constants.
      * @return JsonChild
      */
+    // This
     public function index(string $index, int $indexingType = Indexing::FREE): JsonChild
     {
         return new JsonChild($this->do(function &(&$element) {
             return $element;
         }, $index, false, $indexingType), get_object_vars($this));
     }
+
+    // All of the following methods
 
     /**
      * Returns an element's value. All countable values will be returned as arrays.
@@ -1149,7 +1174,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Returns some random keys from a countable.
      *
-     * @param integer $count
+     * @param int $count
      * @param ?string|int $index
      * @return array
      */
@@ -1176,7 +1201,7 @@ class Json implements \ArrayAccess, \Countable
     /**
      * Returns a random subset of a countable.
      *
-     * @param integer $size Subset's length.
+     * @param int $size Subset's length.
      * @param ?string|int $index
      * @return array
      */

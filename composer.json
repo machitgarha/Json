@@ -19,7 +19,7 @@
         "speed",
         "fast"
     ],
-    "license": "MIT",
+    "license": "Apache License 2.0",
     "readme": "README.md",
     "require": {
         "php": "^7.0",
@@ -30,7 +30,6 @@
     },
     "autoload": {
         "psr-4": {
-            "MAChitgarha\\": "src",
             "MAChitgarha\\Json\\": "src"
         }
     },
