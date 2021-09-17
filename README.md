@@ -13,6 +13,8 @@ We don't need yet another Json package, because neither there is a need for it, 
 
 This repository should be considered of a showcase of what I've done. Feel free to switch to the branch `develop`, and guess what version 2.0.0 would look like, and think how it could ever solve a single problem.
 
+An alternative to this library would be [Webmozart Json](https://github.com/webmozart/json).
+
 ## What's it?
 
 A component for your JSON data. Huh! Just that? No! Continue reading.
