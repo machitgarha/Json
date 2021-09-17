@@ -5,6 +5,14 @@
 [![Code Quality](https://img.shields.io/codefactor/grade/github/machitgarha/json/master.svg?label=Code%20Quality&style=flat-square)](https://www.codefactor.io/repository/github/machitgarha/json)
 [![Build](https://img.shields.io/travis/machitgarha/json?style=flat-square)](https://travis-ci.org/MAChitgarha/Json)
 
+## No Longer Maintained
+
+This repository is no longer maintained, and is deprecated. Its use is highly discouraged.
+
+We don't need yet another Json package, because neither there is a need for it, nor it provide a unique or useful feature. Let's focus on something that matters more, or at least on improving existing libraries, projects, etc. If you think it's a wrong decision (e.g. you are an active user of this library and can't find an alternative), please open an issue.
+
+This repository should be considered of a showcase of what I've done. Feel free to switch to the branch `develop`, and guess what version 2.0.0 would look like, and think how it could ever solve a single problem.
+
 ## What's it?
 
 A component for your JSON data. Huh! Just that? No! Continue reading.
@@ -13,9 +21,7 @@ A component for your JSON data. Huh! Just that? No! Continue reading.
 
 ### Performance
 
-**Note:** Unfortunately, things are slow in the current version of Json (i.e. not only the lack of micro-optimizations, but the general performance is not good). It's recommended to wait for the next version (maybe 2.0.0) to use Json (if you don't care, then use it). See [#59](https://github.com/machitgarha/Json/issues/59) for more details.
-
-Thinking of performance? Json is here. Many methods have been tested to perform as fast as they could. Sometimes, they are faster than internals. Really? Test it yourself!
+**Note:** Unfortunately, the library performance seems not to be scalable. A bright result of micro-optimizations. A result of focusing on what matters least. See [#59](https://github.com/machitgarha/Json/issues/59) for more details.
 
 ### Flexible
 
@@ -59,8 +65,8 @@ function prettify(string $jsonStr): string {
 
 Advantages:
 
-- Handling different exceptions is easier. Not just getting "Cannot prettify invalid json". Get exception message based on the error happened. Debugging will be easier.
-- Less code. Looks prettier. One line. Besides, sometimes, you don't even need to define that method, use Json directly without a function overhead.
+-   Handling different exceptions is easier. Not just getting "Cannot prettify invalid json". Get exception message based on the error happened. Debugging will be easier.
+-   Less code. Looks prettier. One line. Besides, sometimes, you don't even need to define that method, use Json directly without a function overhead.
 
 ## Good! What Do I Need?
 
@@ -74,14 +80,14 @@ Composer is there!
 composer require machitgarha/json
 ```
 
-__Note__: You can also clone the project and load the files in your own way. The recommended way is Composer, however.
+**Note**: You can also clone the project and load the files in your own way. The recommended way is Composer, however.
 
 ## Documentation
 
-__Note__: The documentation is currently outdated. Use the code documentation. We try to update it as soon as possible.
+**Note**: The documentation is outdated, wrt to version 1.0.0+.
 
 See [the  GitHub wiki](https://github.com/MAChitgarha/Json/wiki).
 
 ## Contribution?
 
-Excellent! Thank you! More details can be found [here](.github/CONTRIBUTING.md).
+Although the library is no longer maintained, but you can see contribution guidelines [here](.github/CONTRIBUTING.md).
